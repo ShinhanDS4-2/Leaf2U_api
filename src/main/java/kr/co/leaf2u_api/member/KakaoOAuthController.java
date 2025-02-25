@@ -1,6 +1,5 @@
-package kr.co.leaf2u_api.controller;
+package kr.co.leaf2u_api.member;
 
-import kr.co.leaf2u_api.service.KakaoOAuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;

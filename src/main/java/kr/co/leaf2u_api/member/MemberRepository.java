@@ -1,4 +1,4 @@
-package kr.co.leaf2u_api.repository;
+package kr.co.leaf2u_api.member;
 
 import kr.co.leaf2u_api.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
