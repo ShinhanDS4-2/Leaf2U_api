@@ -25,7 +25,7 @@ public class AccountServiceImpl implements AccountService {
         Member member = memberRepository.findById(accountDTO.getMemberId())
                 .orElseThrow(()-> new IllegalArgumentException("회원이 존재하지 않습니다."));
 
-        List <Account> existAccounts=accountRepository.findByMemberId(member.getIdx());
+        List <Account> existAccounts=accountRepository.findByMemberIdx(member.getIdx());
 
         //기본 금리 설정
         BigDecimal baseInterestRate = new BigDecimal("1.0");
