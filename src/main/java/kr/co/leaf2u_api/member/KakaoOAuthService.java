@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.co.leaf2u_api.dto.KakaoUserInfo;
 import kr.co.leaf2u_api.entity.Member;
-import kr.co.leaf2u_api.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.log4j.Log4j2;

@@ -1,4 +1,4 @@
-package kr.co.leaf2u_api.security;
+package kr.co.leaf2u_api.member;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
