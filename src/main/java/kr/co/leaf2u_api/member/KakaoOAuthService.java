@@ -54,7 +54,7 @@ public class KakaoOAuthService {
 
     private Member registerOrGetMember(KakaoUserInfo userInfo) {
 
-        Optional<Member> existingMember=memberRepository.findById(userInfo.getKakaoId());
+        Optional<Member> existingMember=memberRepository.findByEmail(userInfo.getEmail());
 
         if (existingMember.isPresent()) {
             return existingMember.get();
