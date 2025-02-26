@@ -1,9 +1,8 @@
-package kr.co.leaf2u_api.dto;
+package kr.co.leaf2u_api.member;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

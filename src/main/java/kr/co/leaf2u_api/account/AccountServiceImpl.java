@@ -64,6 +64,12 @@ public class AccountServiceImpl implements AccountService {
 
     }
 
+    /**
+     * 사용자의 계좌 가져오기
+     * @author 강현욱
+     * @param memberId
+     * @return
+     */
     @Override
     public List<Account> getAccountsByMember(Long memberId) {
 

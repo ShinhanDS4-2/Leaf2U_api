@@ -2,7 +2,6 @@ package kr.co.leaf2u_api.member;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kr.co.leaf2u_api.dto.KakaoUserInfo;
 import kr.co.leaf2u_api.entity.Member;
 import lombok.RequiredArgsConstructor;
 
