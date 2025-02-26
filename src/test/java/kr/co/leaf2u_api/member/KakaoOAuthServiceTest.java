@@ -1,7 +1,6 @@
-package kr.co.leaf2u_api.service;
+package kr.co.leaf2u_api.member;
 
 import kr.co.leaf2u_api.entity.Member;
-import kr.co.leaf2u_api.member.MemberRepository;
 import kr.co.leaf2u_api.security.JwtTokenProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +31,7 @@ public class KakaoOAuthServiceTest {
                 .birthday("1990-01-01")
                 .gender("male")
                 .savingAccountYn('N')
+                .card_yn('N')
                 .build();
         memberRepository.save(member);
 
@@ -62,7 +62,7 @@ public class KakaoOAuthServiceTest {
         memberRepository.save(newMember);
 
         // Then
-        Optional<Member> retrievedMember = memberRepository.findByEmail(email);
+        Optional<Member> retrievedMember = memberRepository.findById(newMember.getIdx());
         assertThat(retrievedMember).isPresent();
         assertThat(retrievedMember.get().getEmail()).isEqualTo(email);
     }

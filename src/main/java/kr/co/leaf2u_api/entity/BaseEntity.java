@@ -23,7 +23,5 @@ public class BaseEntity {
     @Column(name="update_date")
     private LocalDateTime updateDate;
 
-    @LastModifiedDate
-    @Column(name="password_update_date")
-    private LocalDateTime passwordUpdateDate;
+
 }

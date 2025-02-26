@@ -56,14 +56,13 @@ public class KakaoOAuthService {
 
     private Member registerOrGetMember(KakaoUserInfo userInfo) {
 
-        // 넘어온 이메일을 무조건 사용하되, null이면 kakaoId 기반으로 설정
-        String email = userInfo.getEmail() != null ? userInfo.getEmail() : userInfo.getKakaoId() + "@kakao.com";
-        Optional<Member> existingMember = memberRepository.findByEmail(email);
+        Optional<Member> existingMember=memberRepository.findById(userInfo.getKakaoId());
 
         if (existingMember.isPresent()) {
             return existingMember.get();
         } else {
             String nickname = userInfo.getNickname() != null ? userInfo.getNickname() : "KakaoUser";
+            String email = userInfo.getEmail() != null ? userInfo.getEmail() : "@kakao.com";
             String gender=userInfo.getGender();
             String birthyear= userInfo.getBirthyear();
             String birthday= userInfo.getBirthday();
@@ -77,6 +76,7 @@ public class KakaoOAuthService {
                     .birthday(birthyear+'-'+birthday)
                     .gender(gender)
                     .savingAccountYn('N')
+                    .card_yn('N')
                     .build();
             return memberRepository.save(newMember);
         }

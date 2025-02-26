@@ -15,7 +15,7 @@ import lombok.Setter;
 public class KakaoUserInfo {
 
     @JsonProperty("id")
-    private String kakaoId;
+    private Long kakaoId;
 
     @JsonProperty("kakao_account")
     private KakaoAccount kakaoAccount;
@@ -51,6 +51,8 @@ public class KakaoUserInfo {
     @NoArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class KakaoAccount {
+
+        @JsonProperty("email")
         private String email;
 
         @JsonProperty("gender")

@@ -1,7 +1,6 @@
-package kr.co.leaf2u_api.repository;
+package kr.co.leaf2u_api.member;
 
 import kr.co.leaf2u_api.entity.Member;
-import kr.co.leaf2u_api.member.MemberRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,6 +26,7 @@ public class MemberRepositoryTests {
                     .birthday("1996-09-20")
                     .gender("man")
                     .savingAccountYn('N')
+                    .card_yn('N')
                     .build();
 
             memberRepository.save(member);
