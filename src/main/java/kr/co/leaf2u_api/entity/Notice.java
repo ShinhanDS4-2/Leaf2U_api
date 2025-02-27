@@ -3,7 +3,6 @@ package kr.co.leaf2u_api.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -13,7 +12,7 @@ import java.time.LocalDateTime;
 @ToString(exclude = "member")
 @AllArgsConstructor
 @NoArgsConstructor
-public class NOTICE {
+public class Notice {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
