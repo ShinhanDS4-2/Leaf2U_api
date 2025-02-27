@@ -20,7 +20,7 @@ public class AccountHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
 
-    @Column(nullable=false, precision =6, scale = 0)
+    @Column(nullable=false, precision = 6)
     private BigDecimal paymentAmount;
 
     @Column(nullable=false)

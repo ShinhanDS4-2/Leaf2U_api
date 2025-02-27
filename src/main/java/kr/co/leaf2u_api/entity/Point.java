@@ -22,10 +22,10 @@ public class Point {
     @Column(nullable=false)
     private char earnType;
 
-    @Column(nullable=false, precision =6, scale = 0)
+    @Column(nullable=false, precision =6)
     private BigDecimal earnPoint;
 
-    @Column(nullable=false, precision =6, scale = 0)
+    @Column(nullable=false, precision =6)
     private BigDecimal usePoint;
 
     @Column(nullable=false)

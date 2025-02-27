@@ -19,10 +19,10 @@ public class DonationHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
 
-    @Column(nullable=false, precision = 8, scale = 0)
+    @Column(nullable=false, precision = 8)
     private BigDecimal donationAmount;
 
-    @Column(nullable=false, precision = 3, scale = 0)
+    @Column(nullable=false, precision = 3)
     private BigDecimal ratio;
 
     @Column(nullable=false)
