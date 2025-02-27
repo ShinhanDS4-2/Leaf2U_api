@@ -19,13 +19,19 @@ public class DonationHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
 
-    @Column(nullable=false, precision = 8)
+    @Column(nullable = false, precision = 8)
     private BigDecimal donationAmount;
 
-    @Column(nullable=false, precision = 3)
-    private BigDecimal ratio;
+    @Column(nullable = false, precision = 3)
+    private BigDecimal interest;
 
-    @Column(nullable=false)
+    @Column(nullable = false, precision = 7)
+    private BigDecimal principal;
+
+    @Column(nullable = false, precision = 4)
+    private BigDecimal point;
+
+    @Column(nullable = false)
     private LocalDateTime donationDate;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -22,6 +22,6 @@ public class EcoTips extends BaseEntity {
     @Column(nullable = false)
     private String content;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private char category;
 }

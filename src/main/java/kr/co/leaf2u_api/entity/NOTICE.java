@@ -10,30 +10,28 @@ import java.time.LocalDateTime;
 @Builder
 @Getter
 @Setter
-@ToString(exclude = {"member", "account"})
+@ToString(exclude = "member")
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "saving_account_history")
-public class AccountHistory {
+public class NOTICE {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
 
-    @Column(nullable = false, precision = 6)
-    private BigDecimal paymentAmount;
+    @Column(nullable = false)
+    private String title;
 
     @Column(nullable = false)
-    private char challengeType;
+    private String content;
 
     @Column(nullable = false)
-    private LocalDateTime paymentDate;
+    private char category;
+
+    @Column(nullable = false)
+    private LocalDateTime createDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_idx", nullable = false)
     private Member member;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "saving_account_idx", nullable = false)
-    private Account account;
 }
