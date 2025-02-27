@@ -1,7 +1,6 @@
 package kr.co.leaf2u_api.member;
 
 import kr.co.leaf2u_api.entity.Member;
-import kr.co.leaf2u_api.security.JwtTokenProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
