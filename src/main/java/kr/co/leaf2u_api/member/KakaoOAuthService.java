@@ -68,13 +68,13 @@ public class KakaoOAuthService {
 
             Member newMember = Member.builder()
                     .email(email)  // 무조건 넘어온 값 또는 kakaoId 기반 값 사용
-                    .pattern_password("kakao_default_password")
+                    .patternPassword("kakao_default_password")
                     .name(nickname)
-                    .phone_number(phone)
+                    .phoneNumber(phone)
                     .birthday(birthyear+'-'+birthday)
                     .gender(gender)
                     .savingAccountYn('N')
-                    .card_yn('N')
+                    .cardYn('N')
                     .build();
             return memberRepository.save(newMember);
         }

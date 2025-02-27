@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Builder
@@ -25,28 +26,33 @@ public class Account extends BaseEntity{
     private Member member;
 
     @Column(nullable = false)
-    private char account_status;
+    private char accountStatus;
 
     @Column(nullable = false)
-    private String account_number;
+    private String accountNumber;
 
     @Column(nullable = false)
-    private String account_password;
+    private String accountPassword;
 
-    @Column(nullable = false)
+    @Column(nullable = false,precision = 8)
     private BigDecimal balance;
 
-    @Column(nullable = false)
-    private BigDecimal interest_rate;
+    @Column(nullable = false,precision = 4,scale = 2)
+    private BigDecimal interestRate;
 
-    @Column(nullable = false)
-    private BigDecimal prime_rate;
+    @Column(nullable = false,precision = 4,scale = 2)
+    private BigDecimal primeRate;
 
-    @Column(nullable = false)
-    private char taxation_yn;
+    @Column(nullable = false,name = "taxation_yn")
+    private char taxationYn;
 
-    private LocalDateTime maturity_date;
+    @Column(nullable = false, precision = 5)
+    private BigDecimal paymentAmount;
 
-    private BigDecimal interest_amount;
+    private LocalDateTime maturityDate;
 
+    @Column(precision = 5)
+    private BigDecimal interestAmount;
+
+    private Date endDate;
 }

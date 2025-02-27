@@ -45,15 +45,15 @@ public class AccountServiceImpl implements AccountService {
         Account account=new Account();
 
         account.setMember(member);
-        account.setAccount_status('N');
-        account.setAccount_number(generateAccountNumber());
-        account.setAccount_password(accountDTO.getAccountPassword());
+        account.setAccountStatus('N');
+        account.setAccountNumber(generateAccountNumber());
+        account.setAccountPassword(accountDTO.getAccountPassword());
         account.setBalance(BigDecimal.ZERO);
-        account.setInterest_rate(baseInterestRate);
-        account.setPrime_rate(primeRate);
-        account.setTaxation_yn('N');
-        account.setMaturity_date(LocalDateTime.now().plusMonths(1));
-        account.setInterest_amount(primeRate);
+        account.setInterestRate(baseInterestRate);
+        account.setPrimeRate(primeRate);
+        account.setTaxationYn('N');
+        account.setMaturityDate(LocalDateTime.now().plusMonths(1));
+        account.setInterestAmount(primeRate);
 
         return accountRepository.save(account);
     }
