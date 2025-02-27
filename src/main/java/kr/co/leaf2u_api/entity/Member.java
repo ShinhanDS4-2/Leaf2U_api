@@ -18,25 +18,25 @@ public class Member extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
 
-    @Column(nullable=false,unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String pattern_password;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String name;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String phone_number;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String birthday;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String gender;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private char savingAccountYn;
 
     @Column(nullable = false)

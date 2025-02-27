@@ -14,14 +14,15 @@ public class KakaoOAuthController {
     private final KakaoOAuthService kakaoOAuthService;
 
     @Value("${kakao.client.id}")
-    private String clientId;
+    private String CLIENT_ID;
 
     @Value("${kakao.redirect.uri}")
-    private String redirectUri;
+    private String REDIRECT_URI;
 
     @GetMapping("/auth/kakao/callback")
     public ResponseEntity<String> kakaoCallback(@RequestParam("code") String code) {
         String jwtToken = kakaoOAuthService.kakaoLogin(code);
+
         return ResponseEntity.ok()
                 .header("Authorization", "Bearer " + jwtToken)
                 .body("Kakao login successful");
@@ -32,7 +33,7 @@ public class KakaoOAuthController {
     public ResponseEntity<String> getKakaoLoginUrl() {
         String kakaoAuthUrl = String.format(
                 "https://kauth.kakao.com/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code",
-                clientId, redirectUri);
+                CLIENT_ID, REDIRECT_URI);
         return ResponseEntity.ok(kakaoAuthUrl);
     }
 }

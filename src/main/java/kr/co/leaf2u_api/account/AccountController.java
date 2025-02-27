@@ -14,6 +14,12 @@ public class AccountController {
 
     private final AccountService accountService;
 
+    /**
+     * 적금 가입
+     * 소셜 로그인한 사용자 정보를 accountDTO로 넘겨줌
+     * @param accountDTO
+     * @return
+     */
     @PostMapping("/create")
     public ResponseEntity<Account> createAccount(@RequestBody AccountDTO accountDTO) {
 
