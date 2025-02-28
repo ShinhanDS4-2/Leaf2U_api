@@ -27,7 +27,7 @@ public class CardServiceImpl implements CardService {
         Member member=memberRepository.findById(cardDTO.getMemberIdx())
                 .orElseThrow(()-> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        member.setCardYn('Y');
+        member.setCard_yn('Y');
         
         Card card= Card.builder()
                 .member(member)
