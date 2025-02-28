@@ -43,6 +43,10 @@ public class Account extends BaseEntity{
     @Column(nullable = false,precision = 4,scale = 2)
     private BigDecimal primeRate;
 
+    // 최종금리 컬럼 추가함 - 시온
+    @Column(nullable = false,precision = 4,scale = 2)
+    private BigDecimal finalInterestRate;
+
     @Column(nullable = false,name = "taxation_yn")
     private char taxationYn;
 
