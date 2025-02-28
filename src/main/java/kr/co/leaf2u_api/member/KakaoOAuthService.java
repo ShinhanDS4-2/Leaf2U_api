@@ -27,10 +27,10 @@ public class KakaoOAuthService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${kakao.client.id}")
-    private String clientId;
+    private String CLIENT_ID;
 
     @Value("${kakao.redirect.uri}")
-    private String redirectUri;
+    private String REDIRECT_URI;
 
     public String kakaoLogin(String code) {
         // 1. 액세스 토큰 발급
@@ -68,13 +68,13 @@ public class KakaoOAuthService {
 
             Member newMember = Member.builder()
                     .email(email)  // 무조건 넘어온 값 또는 kakaoId 기반 값 사용
-                    .pattern_password("kakao_default_password")
+                    .patternPassword("kakao_default_password")
                     .name(nickname)
-                    .phone_number(phone)
+                    .phoneNumber(phone)
                     .birthday(birthyear+'-'+birthday)
                     .gender(gender)
                     .savingAccountYn('N')
-                    .card_yn('N')
+                    .cardYn('N')
                     .build();
             return memberRepository.save(newMember);
         }
@@ -84,7 +84,7 @@ public class KakaoOAuthService {
         String tokenUrl = "https://kauth.kakao.com/oauth/token";
         String requestBody = String.format(
                 "grant_type=authorization_code&client_id=%s&redirect_uri=%s&code=%s",
-                clientId, redirectUri, code);
+                CLIENT_ID, REDIRECT_URI, code);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);

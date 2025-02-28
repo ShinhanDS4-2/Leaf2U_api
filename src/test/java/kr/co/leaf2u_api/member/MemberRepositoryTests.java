@@ -20,13 +20,13 @@ public class MemberRepositoryTests {
 
             Member member= Member.builder()
                     .email("xxx"+i+"@kakao.com")
-                    .pattern_password("temporal")
+                    .patternPassword("temporal")
                     .name("user"+i)
-                    .phone_number("010-1234-1234")
+                    .phoneNumber("010-1234-1234")
                     .birthday("1996-09-20")
                     .gender("man")
                     .savingAccountYn('N')
-                    .card_yn('N')
+                    .cardYn('N')
                     .build();
 
             memberRepository.save(member);

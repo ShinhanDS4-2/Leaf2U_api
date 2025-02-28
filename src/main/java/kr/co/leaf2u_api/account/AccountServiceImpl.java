@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +37,7 @@ public class AccountServiceImpl implements AccountService {
             primeRate=primeRate.add(new BigDecimal("1.0"));
         }
 
-        //자체 카드 만들기를 선택한다면 2% 추가
+        //자체 카드 만들기를 선택한다면 2% 추가  -> Card_yn이 N 일 경우 (후에 수정 필요)
         if (accountDTO.getCard_yn()){
             primeRate=primeRate.add(new BigDecimal("2.0"));
         }
@@ -44,28 +45,35 @@ public class AccountServiceImpl implements AccountService {
         Account account=new Account();
 
         account.setMember(member);
-        account.setAccount_status('N');
-        account.setAccount_number(generateAccountNumber());
-        account.setAccount_password(accountDTO.getAccountPassword());
+        account.setAccountStatus('N');
+        account.setAccountNumber(generateAccountNumber());
+        account.setAccountPassword(accountDTO.getAccountPassword());
         account.setBalance(BigDecimal.ZERO);
-        account.setInterest_rate(baseInterestRate);
-        account.setPrime_rate(primeRate);
-        account.setTaxation_yn('N');
-        account.setMaturity_date(LocalDateTime.now().plusMonths(1));
-        account.setInterest_amount(primeRate);
+        account.setInterestRate(baseInterestRate);
+        account.setPrimeRate(primeRate);
+        account.setTaxationYn('N');
+        account.setMaturityDate(LocalDateTime.now().plusMonths(1));
+        account.setInterestAmount(primeRate);
 
         return accountRepository.save(account);
     }
 
+    /**
+     * 계좌 번호 만들기 //앞 세 글자 222로 시작, 중간 세 글자, 뒤에 여섯 글자
+     * @author 강현욱
+     * @return
+     */
     private String generateAccountNumber() {
 
-        //앞 세 글자, 셋, 여섯, 앞에 세 글자는  222-랜덤-랜덤
-        return null;
+        Random random=new Random();
+        int middle=random.nextInt(900)+100;
+        int last=random.nextInt(9000000)+1000000;
 
+        return String.format("222-%03d-%6d",middle,last);
     }
 
     /**
-     * 사용자의 계좌 가져오기
+     * 사용자의 적금 현황 리스트
      * @author 강현욱
      * @param memberId
      * @return
@@ -73,6 +81,9 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public List<Account> getAccountsByMember(Long memberId) {
 
-        return List.of();
+        Member member=memberRepository.findById(memberId)
+                .orElseThrow(()->new IllegalArgumentException("회원이 존재하지 않습니다."));
+
+        return accountRepository.findByMemberIdx(member.getIdx());
     }
 }
