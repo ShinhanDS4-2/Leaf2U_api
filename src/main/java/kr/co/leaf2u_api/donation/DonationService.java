@@ -18,6 +18,6 @@ public interface DonationService {
     Map<String, Object> getDonationHistoryList(Long memberIdx);
 
     // 후원내역 상세정보 조회
-    Optional<DonationHistoryDTO> getDonationHistoryDetail(Long donationHistoryIdx);
+    Map<String, Object> getDonationHistoryDetail(Long donationHistoryIdx);
 
 }

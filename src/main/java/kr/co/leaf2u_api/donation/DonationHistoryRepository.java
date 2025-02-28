@@ -45,7 +45,7 @@ public interface DonationHistoryRepository extends JpaRepository<DonationHistory
 
 
 // (3) donationHistoryIdx 받아서 후원내역 상세정보(기부처, 기부내역) 반환하는 JPQL 쿼리
-    // 기부내역 idx를 기준으로 기부처 정보 조회 (DTO 객체 반환)
+    // 기부내역 idx를 기준으로 기부처 정보 조회 (DTO 객체 반환) => 얘는 기본생성자 사용하는거라 DTO에서 별도 생성자 지정안해도댐
     @Query("SELECT new kr.co.leaf2u_api.donation.DonationOrganizationDTO(" +
             "do.idx, " +  // 기부처 ID
             "do.name, " + // 기부처 이름
@@ -54,14 +54,13 @@ public interface DonationHistoryRepository extends JpaRepository<DonationHistory
             "FROM DonationOrganization do " +
             "JOIN DonationHistory dh ON dh.donationOrganization.idx = do.idx " + // 기부내역과 기부처 조인
             "WHERE dh.idx = :donationHistoryIdx")  // 기부내역 idx 기준으로 조회
-    Optional<DonationOrganizationDTO> getDonationOrganizationByDonationHistoryIdx(@Param("donationHistoryIdx") Long donationHistoryIdx);
+    Optional<DonationOrganizationDTO> getDonationOrganization(@Param("donationHistoryIdx") Long donationHistoryIdx);
 
 
-    // 기부내역 idx를 기준으로 기부내역 상세정보 조회 (DTO 객체 반환)
+    // (4) 기부내역 idx를 기준으로 기부내역 상세정보 조회 (DTO 객체 반환)
     @Query("SELECT new kr.co.leaf2u_api.donation.DonationHistoryDTO(" +
             "dh.idx, dh.donationAmount, dh.interest, dh.principal, dh.point, dh.donationDate, " +  // 후원 내역 Idx, 기부금액, 이자기부금, 원금기부금, 포인트기부금, 기부일
-            "a.accountNumber, a.interestRate, a.primeRate, " +  // 계좌번호, 기본금리, 우대금리
-            "(a.interestRate + a.primeRate) AS finalInterestRate )" +  // finalInterestRate 적용금리
+            "a.accountNumber, a.interestRate, a.primeRate, a.finalInterestRate )" +  // 계좌번호, 기본금리, 우대금리, 최종금리
             "FROM DonationHistory dh " +
             "JOIN dh.account a " +  // DonationHistory와 Account 조인
             "WHERE dh.idx = :donationHistoryIdx")  // 기부내역 idx 기준으로 조회

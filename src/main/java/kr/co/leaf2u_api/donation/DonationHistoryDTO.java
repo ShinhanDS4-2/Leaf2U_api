@@ -27,7 +27,7 @@ public class DonationHistoryDTO {
     private BigDecimal point;  // 포인트기부금
     private BigDecimal interestRate;  // 기본 금리
     private BigDecimal primeRate;  // 우대 금리
-    private BigDecimal finalInterestRate;  // 최종 적용 금리 (interestRate + primeRate)
+    private BigDecimal finalInterestRate;  // 최종 금리
 
     // (1) 후원내역 리스트 반환하는 쿼리에서 사용하는 생성자
     public DonationHistoryDTO(Long donationHistoryIdx, String organizationName, String accountNumber, BigDecimal donationAmount, LocalDateTime donationDate) {
@@ -39,5 +39,20 @@ public class DonationHistoryDTO {
     }
 
     // (3) 후원내역 상세정보(기부내역) 반환하는 쿼리에서 사용하는 생성자
+    public DonationHistoryDTO(Long donationHistoryIdx, BigDecimal donationAmount, BigDecimal interest, BigDecimal principal,
+                              BigDecimal point, LocalDateTime donationDate, String accountNumber, BigDecimal interestRate,
+                              BigDecimal primeRate, BigDecimal finalInterestRate) {
+        this.idx = donationHistoryIdx;
+        this.donationAmount = donationAmount;
+        this.interest = interest;
+        this.principal = principal;
+        this.point = point;
+        this.donationDate = donationDate;
+        this.accountNumber = accountNumber;
+        this.interestRate = interestRate;
+        this.primeRate = primeRate;
+        this.finalInterestRate = finalInterestRate;
+    }
+
 
 }

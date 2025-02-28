@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController  // 이 클래스가 REST API요청을 처리하는 컨트롤러임을 명시
@@ -49,27 +50,24 @@ public class DonationController {
     /** (1)
      * 후원내역 리스트 조회
      * @param MEMBER(사용자테이블) idx
-     * @return
-     후원내역 리스트 반환 => 3개 테이블 조인 DONATION_ORGANIZATION테이블(단체명), DONATION_HISTORY테이블(idx, 기부금액, 기부일), SAVING_ACCOUNT테이블(적금계좌번호)
-     후원내역 COUNT 반환 => 위 쿼리 동일하게 작성 후 COUNT로 조회
+     * @return List, Count
      */
-
-    @GetMapping("historyList/{idx}")  // 사용자 idx값을 경로 변수로 받을 수 있도록 하는게 맞나..?
-    public ResponseEntity<List<DonationHistoryDTO>> getDonationHistoryList(@PathVariable Long memberIdx) {
-        List<DonationHistoryDTO> donationHistoryList = donationService.getDonationHistoryList(memberIdx);
+    @GetMapping("historyList/{memberIdx}")  // 사용자 idx값을 경로 변수로 받을 수 있도록 하는게 맞나..?
+    public ResponseEntity<Map<String, Object>> getDonationHistoryList(@PathVariable Long memberIdx) {
+        Map<String, Object> donationHistoryList = donationService.getDonationHistoryList(memberIdx);
+        return ResponseEntity.ok(donationHistoryList);  // 응답 반환 (상태 코드 200과 함께 Map 반환)
     }
 
 
     /** (2)
      * 후원내역 상세정보 조회
      * @param DONATION_HISTORY(후원내역) idx
-     * @return
-     기부처 조회 => DONATION_ORGANIZATION(name, tel_number, description)
-     기부내역 조회 => SAVING_ACCOUNT(account_number, 적용금리(interest_rate+prime_rate), 원금(balance), 이자(interest_amount)), DONATION_HISTORY(후원금액 donation_amount), INTEREST_RATE_HISTORY(금리내역) 전체추출
+     * @return donationHistoryDetail(기부내역), donationOrganization(기부처)
      */
-    @GetMapping("historyDetail/{idx}")  // 사용자 idx값을 경로 변수로 받을 수 있도록 하는게 맞나..?
-    public ResponseEntity<DonationHistoryDTO> getDonationHistoryDetail(@PathVariable Long donationHistoryIdx) {
-        Optional<DonationHistoryDTO> donationHistoryDetail = donationService.getDonationHistoryDetail(donationHistoryIdx);
+    @GetMapping("historyDetail/{donationHistoryIdx}")  // 사용자 idx값을 경로 변수로 받을 수 있도록 하는게 맞나..?
+    public ResponseEntity<Map<String, Object>> getDonationHistoryDetail(@PathVariable Long donationHistoryIdx) {
+        Map<String, Object> donationHistoryDetail = donationService.getDonationHistoryDetail(donationHistoryIdx);
+        return ResponseEntity.ok(donationHistoryDetail);
     }
 
     /** (3)

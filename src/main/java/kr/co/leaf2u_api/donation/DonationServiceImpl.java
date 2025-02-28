@@ -83,11 +83,11 @@ public class DonationServiceImpl implements DonationService {
         long count = donationHistoryRepository.countByDonationHistoryList(memberIdx);
 
         // 결과를 Map으로 묶어서 반환
-        Map<String, Object> response = new HashMap<>();
-        response.put("List", donationHistoryList);
-        response.put("Count", count);
+        Map<String, Object> result = new HashMap<>();
+        result.put("List", donationHistoryList);
+        result.put("Count", count);
 
-        return response;
+        return result;
 
         /**
          Q. 이 메서드에서는 DTO 변환없이 값을 반환하고 있음. 그게 가능한 이유는 ?
@@ -98,15 +98,25 @@ public class DonationServiceImpl implements DonationService {
 
     /** (2) 후원내역 상세정보 조회
      * @param DONATION_HISTORY(후원내역) idx
-     * @return
-    기부처 조회 => DONATION_ORGANIZATION(name, tel_number, description)
-    기부내역 조회 => SAVING_ACCOUNT(account_number, 적용금리(interest_rate+prime_rate), 원금(balance), 이자(interest_amount)), DONATION_HISTORY(후원금액 donation_amount), INTEREST_RATE_HISTORY(금리내역) 전체추출
+     * @return donationHistoryDetail(기부내역), donationOrganization(기부처)
      */
-
     @Override
-    public Optional<DonationHistoryDTO> getDonationHistoryDetail(Long donationHistoryIdx) {
-        Optional<DonationOrganization> donationOrganization= donationOrganizationRepository.findById(donationHistoryIdx);
-        return Optional.empty();
+    public Map<String, Object> getDonationHistoryDetail(Long donationHistoryIdx) {
+        // 기부처 조회
+        Optional<DonationOrganizationDTO> donationOrganization = donationHistoryRepository.getDonationOrganization(donationHistoryIdx);
+        // 기부내역 조회
+        Optional<DonationHistoryDTO> donationHistoryDetail = donationHistoryRepository.getDonationHistoryDetail(donationHistoryIdx);
+
+        // 결과를 담을 Map 생성
+        Map<String, Object> result = new HashMap<>();
+
+        // 두 객체가 모두 존재할 경우 Map에 담아서 반환
+        if (donationHistoryDetail.isPresent() && donationOrganization.isPresent()) {
+            result.put("donationHistoryDetail", donationHistoryDetail.get());  // .get() 메소드는 Optional 객체에서 실제 값을 꺼낼 때 사용
+            result.put("donationOrganization", donationOrganization.get());
+        }
+        // 결과가 없을 경우 빈 Map 반환
+        return result;
     }
 
 
