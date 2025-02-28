@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -28,8 +29,10 @@ public class OpenAIService {
     @Autowired
     private RestTemplate restTemplate;
 
-    public String sendImageToGPT(byte[] imageBytes, String prompt) {
+    public String sendImageToGPT(MultipartFile file, String prompt) {
         try {
+            byte[] imageBytes = file.getBytes();
+
             // 이미지 크기 줄이기 (가로 300px로 리사이징, JPEG 품질 0.75로 설정)
             byte[] resizedImageBytes = resizeImage(imageBytes, 300, 0.75f);
 
