@@ -9,6 +9,6 @@ public class AccountDTO {
 
     private Long memberId;
     private String accountPassword;
-    private Boolean card_yn;
+    private Boolean cardYn;
 
 }

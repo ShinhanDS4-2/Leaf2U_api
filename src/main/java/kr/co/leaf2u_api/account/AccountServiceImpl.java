@@ -38,7 +38,7 @@ public class AccountServiceImpl implements AccountService {
         }
 
         //자체 카드 만들기를 선택한다면 2% 추가  -> Card_yn이 N 일 경우 (후에 수정 필요)
-        if (accountDTO.getCard_yn()){
+        if (accountDTO.getCardYn()){
             primeRate=primeRate.add(new BigDecimal("2.0"));
         }
 
