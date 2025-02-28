@@ -22,8 +22,9 @@ public class AccountController {
      */
     @PostMapping("/create")
     public ResponseEntity<Account> createAccount(@RequestBody AccountDTO accountDTO) {
-
+                                                // ㄴ HTTP요청의 Body에서 JSON데이터를 가져와 AccountDTO에 매핑
         return ResponseEntity.ok(accountService.createAccount(accountDTO));
+        // ??
     }
 
     @GetMapping("/member/{memberId}")
