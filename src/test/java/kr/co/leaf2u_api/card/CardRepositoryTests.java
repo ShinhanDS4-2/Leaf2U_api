@@ -5,6 +5,7 @@ import kr.co.leaf2u_api.entity.Account;
 import kr.co.leaf2u_api.entity.Card;
 import kr.co.leaf2u_api.entity.Member;
 import kr.co.leaf2u_api.member.MemberRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,20 +35,18 @@ public class CardRepositoryTests {
         IntStream.rangeClosed(1,5).forEach(i -> {
 
             Member member = memberRepository.findById((long)i).orElseThrow(()->new IllegalArgumentException("회원이 없습니다."));
-            Account account = accountRepository.findById((long)i).orElseThrow(()->new IllegalArgumentException("계좌가 존재하지 않습니다."));
 
             Card card = Card.builder()
                     .member(member)
-                    .account(account)
                     .cardType('L')
                     .cardName("리프코드")
                     .cardNumber("#$#%^&%$")
                     .expirationDate("2025")
-                    .accountNumber("222-1114-5432")
                     .balance(BigDecimal.ZERO)
                     .build();
 
             cardRepository.save(card);
         });
     }
+
 }
