@@ -22,6 +22,6 @@ public class DonationOrganization {
     @Column(nullable = false)
     private String telNumber;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String description;
 }

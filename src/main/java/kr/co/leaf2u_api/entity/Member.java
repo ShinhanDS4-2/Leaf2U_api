@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@Setter
 @ToString
 public class Member extends BaseEntity{
 
@@ -23,13 +22,13 @@ public class Member extends BaseEntity{
     private String email;
 
     @Column(nullable=false)
-    private String patternPassword;
+    private String pattern_password;
 
     @Column(nullable=false)
     private String name;
 
     @Column(nullable=false)
-    private String phoneNumber;
+    private String phone_number;
 
     @Column(nullable=false)
     private String birthday;
@@ -40,8 +39,8 @@ public class Member extends BaseEntity{
     @Column(nullable=false)
     private char savingAccountYn;
 
-    @Column(nullable = false,name = "card_yn")
-    private char cardYn;
+    @Column(nullable = false)
+    private char card_yn;
 
     @LastModifiedDate
     @Column(name="password_update_date")

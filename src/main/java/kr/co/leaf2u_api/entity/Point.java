@@ -19,19 +19,19 @@ public class Point {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private char earnType;
 
-    @Column(nullable=false, precision =6)
+    @Column(nullable = false, precision =6)
     private BigDecimal earnPoint;
 
-    @Column(nullable=false, precision =6)
+    @Column(nullable = false, precision =6)
     private BigDecimal usePoint;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private LocalDateTime earnDate;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private LocalDateTime useDate;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -19,13 +19,13 @@ public class InterestRateHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private char rateType;
 
-    @Column(nullable=false, precision = 4, scale = 2)
+    @Column(nullable = false, precision = 4, scale = 2)
     private BigDecimal rate;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private LocalDateTime createDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
