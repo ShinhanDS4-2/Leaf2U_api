@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/card")
+@RequestMapping("/api/card")
 @RequiredArgsConstructor
 public class CardController {
 

@@ -23,9 +23,6 @@ public class Member extends BaseEntity{
     private String email;
 
     @Column(nullable=false)
-    private String patternPassword;
-
-    @Column(nullable=false)
     private String name;
 
     @Column(nullable=false)

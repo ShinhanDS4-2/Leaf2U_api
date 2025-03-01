@@ -7,8 +7,10 @@ import lombok.Setter;
 @Setter
 public class AccountDTO {
 
-    private Long memberId;
+    private Long memberIdx;
     private String accountPassword;
-    private Boolean card_yn;
+    private Boolean cardYn;
+
+
 
 }
