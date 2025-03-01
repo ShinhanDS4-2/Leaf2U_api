@@ -20,7 +20,6 @@ public class MemberRepositoryTests {
 
             Member member= Member.builder()
                     .email("xxx"+i+"@kakao.com")
-                    .patternPassword("temporal")
                     .name("user"+i)
                     .phoneNumber("010-1234-1234")
                     .birthday("1996-09-20")

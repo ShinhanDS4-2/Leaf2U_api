@@ -15,4 +15,5 @@ public class CardDTO {
     private String expirationDate;
     private String accountNumber;
     private BigDecimal balance;
+    private String cardPassword;
 }

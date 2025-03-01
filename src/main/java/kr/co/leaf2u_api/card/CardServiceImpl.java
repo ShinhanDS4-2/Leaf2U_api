@@ -27,18 +27,18 @@ public class CardServiceImpl implements CardService {
         Member member=memberRepository.findById(cardDTO.getMemberIdx())
                 .orElseThrow(()-> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        member.setCardYn('Y');
-        
         Card card= Card.builder()
                 .member(member)
                 .cardType(cardDTO.getCardType())
                 .cardName(cardDTO.getCardName())
                 .cardNumber(generateCardNumber())
+                .cardPassword(cardDTO.getCardPassword())
                 .expirationDate(String.valueOf(LocalDateTime.now().plusYears(3)))
                 .balance(BigDecimal.ZERO)
                 .build();
         
         cardRepository.save(card);
+
         Map<String,Object> response=new HashMap<>();
         response.put("message","Leaf 카드 발급 완료");
         response.put("cardId",card.getIdx());
@@ -79,7 +79,7 @@ public class CardServiceImpl implements CardService {
         cardRepository.save(card);
 
         Map<String,Object> response=new HashMap<>();
-        response.put("message","사용자 카드 등록 완료");
+        response.put("message","사용자 기존 카드 등록 완료");
         response.put("cardId",card.getIdx());
         return response;
     }
