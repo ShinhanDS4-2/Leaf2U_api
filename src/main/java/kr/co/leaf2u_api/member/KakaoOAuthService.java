@@ -68,7 +68,6 @@ public class KakaoOAuthService {
 
             Member newMember = Member.builder()
                     .email(email)  // 무조건 넘어온 값 또는 kakaoId 기반 값 사용
-                    .patternPassword("kakao_default_password")
                     .name(nickname)
                     .phoneNumber(phone)
                     .birthday(birthyear+'-'+birthday)

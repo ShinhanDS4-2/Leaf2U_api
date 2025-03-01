@@ -1,6 +1,8 @@
 package kr.co.leaf2u_api.account;
 
 import jakarta.transaction.Transactional;
+import kr.co.leaf2u_api.card.CardRepository;
+import kr.co.leaf2u_api.entity.Card;
 import kr.co.leaf2u_api.entity.Member;
 import kr.co.leaf2u_api.entity.Account;
 import kr.co.leaf2u_api.member.MemberRepository;
@@ -18,13 +20,17 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
     private final MemberRepository memberRepository;
+    private final CardRepository cardRepository;
 
     @Transactional
     @Override
     public Account createAccount(AccountDTO accountDTO) {
 
-        Member member = memberRepository.findById(accountDTO.getMemberId())
+        Member member = memberRepository.findById(accountDTO.getMemberIdx())
                 .orElseThrow(()-> new IllegalArgumentException("회원이 존재하지 않습니다."));
+
+        Card card=cardRepository.findById(accountDTO.getMemberIdx())
+                .orElseThrow(() -> new IllegalArgumentException("카드가 존재하지 않습니다."));
 
         List <Account> existAccounts=accountRepository.findByMemberIdx(member.getIdx());
 
@@ -37,8 +43,17 @@ public class AccountServiceImpl implements AccountService {
             primeRate=primeRate.add(new BigDecimal("1.0"));
         }
 
-        //자체 카드 만들기를 선택한다면 2% 추가  -> Card_yn이 N 일 경우 (후에 수정 필요)
-        if (accountDTO.getCard_yn()){
+        //최초로 리프 카드 만들기를 선택한다면 2% 추가
+        if (member.getCardYn()=='N' && card.getCardType()=='L'){
+
+            primeRate=primeRate.add(new BigDecimal("2.0"));
+            member.setCardYn('Y');
+            memberRepository.save(member);                                  //발급받았으므로 'Y' 로 변경
+        }
+
+        //처음에 기존 사용자로 만들었고 두 번째 만들 때 리프카드를 만드는 경우
+        if(member.getCardYn()=='Y' && card.getCardType()=='L'){
+
             primeRate=primeRate.add(new BigDecimal("2.0"));
         }
 
@@ -51,7 +66,7 @@ public class AccountServiceImpl implements AccountService {
         account.setBalance(BigDecimal.ZERO);
         account.setInterestRate(baseInterestRate);
         account.setPrimeRate(primeRate);
-        account.setTaxationYn('N');
+        account.setTaxationYn('Y');
         account.setMaturityDate(LocalDateTime.now().plusMonths(1));
         account.setInterestAmount(primeRate);
 

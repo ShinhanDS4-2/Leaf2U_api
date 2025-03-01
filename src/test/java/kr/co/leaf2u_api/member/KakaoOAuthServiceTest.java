@@ -24,7 +24,6 @@ public class KakaoOAuthServiceTest {
         // Given
         Member member = Member.builder()
                 .email("test@kakao.com")
-                .patternPassword("test_password")
                 .name("Test User")
                 .phoneNumber("010-1234-5678")
                 .birthday("1990-01-01")
@@ -51,7 +50,6 @@ public class KakaoOAuthServiceTest {
         // When
         Member newMember = Member.builder()
                 .email(email)
-                .patternPassword("default_password")
                 .name("New Kakao User")
                 .phoneNumber("010-5555-8888")
                 .birthday("2000-12-31")
