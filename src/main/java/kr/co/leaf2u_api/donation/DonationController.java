@@ -15,7 +15,7 @@ public class DonationController {
 
     private final DonationService donationService;  // DonationService 객체를 생성자 주입 방식으로 자동 주입해줌
 
-// 사용자 인증 매번해야함. api 호출시마다 MEMBER(사용자테이블) email 받아야함
+// 사용자 인증 매번해야함. api 호출시마다 MEMBER(사용자테이블) idx 받아야함
 // 1. 후원단체 리스트 페이지 관련
     /** (1)
      * 후원단체 리스트 조회
