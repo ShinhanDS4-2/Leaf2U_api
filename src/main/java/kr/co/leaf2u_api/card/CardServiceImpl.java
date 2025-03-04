@@ -94,6 +94,10 @@ public class CardServiceImpl implements CardService {
     @Override
     public Optional<CardDTO> getCardInfo(Long memberIdx) {
         Optional<Card> cardInfo = cardRepository.getCardInfo(memberIdx);  // 카드 엔티티
-        return cardInfo.map(card -> new CardDTO(card.getCardNumber(), card.getExpirationDate(), card.getCardName()));
+        return cardInfo.map(card -> CardDTO.builder()
+                .cardNumber(card.getCardNumber())
+                .expirationDate(card.getExpirationDate())
+                .cardName(card.getCardName())
+                .build());
     }
 }

@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -82,24 +81,7 @@ public class AccountController {
     }
 
 
-    /** (3-2) 예상이자조회 - 오늘해지
-     * @param 적금계좌 idx, endDate(이자 계산기간 종료일 - 선택일자 해지에 필요)
-     * @return Account(적금계좌), InterestRateHistory(금리내역)
-     */
-    @GetMapping("/interest/today")  // 단밀 필드만 수정되는 경우에는 Patch 사용
-    public ResponseEntity<Map<String, Object>> getTodayInterest(@RequestBody AccountDTO accountDTO) {
-        return ResponseEntity.ok(accountService.getInterestInquiry(accountDTO));
-    }
 
-
-    /** (3-3) 예상이자조회 - 선택일자 해지
-     * @param 적금계좌 idx, endDate(이자 계산기간 종료일 - 선택일자 해지에 필요)
-     * @return Account(적금계좌), InterestRateHistory(금리내역)
-     */
-    @GetMapping("/interest/customDate")  // 단밀 필드만 수정되는 경우에는 Patch 사용
-    public ResponseEntity<Map<String, Object>> getCustomDateInterest(@RequestBody AccountDTO accountDTO) {
-        return ResponseEntity.ok(accountService.getInterestInquiry(accountDTO));
-    }
 
     // 컨트롤러 다 분리해야함
 

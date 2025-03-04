@@ -1,9 +1,6 @@
 package kr.co.leaf2u_api.donation;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -13,6 +10,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor // 모든 필드를 인자로 받는 생성자를 자동으로 생성
 @NoArgsConstructor  // 기본 생성자
+@Builder
 public class DonationHistoryDTO {
 
     private Long idx;  // 기부내역 ID

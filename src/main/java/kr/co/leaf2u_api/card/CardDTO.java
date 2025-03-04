@@ -1,7 +1,7 @@
 package kr.co.leaf2u_api.card;
 
-import kr.co.leaf2u_api.entity.Card;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class CardDTO {
 
     private Long memberIdx;
@@ -22,10 +23,5 @@ public class CardDTO {
     private BigDecimal balance;
     private String cardPassword;
 
-    // 자동이체 카드정보 조회 CardDTO 생성자
-    public CardDTO(String cardName, String cardNumber, String expirationDate) {
-        this.cardNumber = cardNumber;
-        this.expirationDate = expirationDate;
-        this.cardName = cardName;
-    }
+
 }
