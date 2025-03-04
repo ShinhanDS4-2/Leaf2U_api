@@ -19,6 +19,10 @@ public class InterestRateHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "saving_account_idx", nullable = false)
+    private Account account;
+
     @Column(nullable = false)
     private char rateType;
 
@@ -27,8 +31,4 @@ public class InterestRateHistory {
 
     @Column(nullable = false)
     private LocalDateTime createDate;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "saving_account_idx", nullable = false)
-    private Account account;
 }
