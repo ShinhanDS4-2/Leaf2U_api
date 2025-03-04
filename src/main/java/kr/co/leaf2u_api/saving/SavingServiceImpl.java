@@ -85,6 +85,11 @@ public class SavingServiceImpl implements SavingService {
         );
     }
 
+    /**
+     * 적금 계좌 엔티티 -> DTO
+     * @param account
+     * @return
+     */
     private Optional<AccountDTO> entityToDTOByAccount(Optional<Account> account) {
         return account.map(entity -> new AccountDTO(
                 entity.getBalance(),

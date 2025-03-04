@@ -19,7 +19,7 @@ public class SavingController {
 
     /**
      * 납입내역 리스트
-     * @param param
+     * @param param (memberIdx, accountIdx)
      * @return
      */
     @PostMapping("/history/list")
@@ -29,6 +29,7 @@ public class SavingController {
 
         return ResponseEntity.ok(result);
     }
+
 
 
 }
