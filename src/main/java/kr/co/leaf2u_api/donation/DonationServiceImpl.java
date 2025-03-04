@@ -34,7 +34,6 @@ public class DonationServiceImpl implements DonationService {
 
 // 1. 후원단체 리스트 페이지 관련
     /** (1)후원단체 리스트 조회
-     * @param X
      * @return List<DonationOrganizationDTO>
      */
     @Override
@@ -47,15 +46,10 @@ public class DonationServiceImpl implements DonationService {
         return donationOrganizationList.stream()  // Stream을 이용하여 변환
                 .map(this::entityToDTO)  // 각 엔티티를 DTO로 변환
                 .collect(Collectors.toList());  // 변환된 DTO 목록을 리스트로 모아 반환
-
-        /**
-         Q. 왜 DTO로 변환 후 반환해야하는지?
-         A. .findAll() 메서드가 엔티티 객체를 반환하기 때문에 DTO로 변환하는 과정이 필요함
-         * */
     }
 
     /** (2)후원단체 상세정보 조회
-     * @param DONATION_ORGANIZATION(후원단체테이블) idx
+     * @param
      * @return idx에 값에 해당하는 DonationOrganizationDTO
      */
     @Override
@@ -72,7 +66,7 @@ public class DonationServiceImpl implements DonationService {
 
 // 2. 후원내역 페이지 관련
     /** (1) 후원내역 리스트 조회
-     * @param MEMBER(사용자) idx
+     * @param
      * @return List, Count
      */
     @Override
@@ -97,7 +91,7 @@ public class DonationServiceImpl implements DonationService {
 
 
     /** (2) 후원내역 상세정보 조회
-     * @param DONATION_HISTORY(후원내역) idx
+     * @param
      * @return donationHistoryDetail(기부내역), donationOrganization(기부처)
      */
     @Override

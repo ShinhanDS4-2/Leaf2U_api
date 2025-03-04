@@ -2,7 +2,6 @@ package kr.co.leaf2u_api.saving;
 
 import jakarta.transaction.Transactional;
 import kr.co.leaf2u_api.account.AccountRepository;
-import kr.co.leaf2u_api.card.CardRepository;
 import kr.co.leaf2u_api.entity.*;
 import kr.co.leaf2u_api.member.MemberRepository;
 import org.junit.jupiter.api.Test;
@@ -26,10 +25,10 @@ public class SavingRepositoryTest {
     private AccountRepository accountRepository;
 
     @Autowired
-    private SavingRepository savingRepository;
+    private AccountHistoryRepository accountHistoryRepository;
 
     @Autowired
-    private InterestRateRepository interestRateRepository;
+    private InterestRateHistoryRepository interestRateRepository;
 
     // 납입내역, 금리내역 insert
     @Test
@@ -39,8 +38,8 @@ public class SavingRepositoryTest {
 
         IntStream.rangeClosed(1,12).forEach(i -> {
 
-            Optional<Member> memberOptional = memberRepository.findById(1L);
-            Optional<Account> accountOptional = accountRepository.findByMemberIdx(1L).stream().findFirst();
+            Optional<Member> memberOptional = memberRepository.findById(23L);
+            Optional<Account> accountOptional = accountRepository.findByMemberIdx(23L).stream().findFirst();
 
             Member member = memberOptional.get();
             Account account = accountOptional.get();
@@ -53,7 +52,7 @@ public class SavingRepositoryTest {
                     .paymentDate(LocalDateTime.now())
                     .build();
 
-            AccountHistory savedHistory =  savingRepository.save(history);
+            AccountHistory savedHistory =  accountHistoryRepository.save(history);
 
             InterestRateHistory interestRateHistory = InterestRateHistory.builder()
                     .account(account)
@@ -82,7 +81,7 @@ public class SavingRepositoryTest {
     @Test
     public void getSavingHistoryList() {
 
-        List<AccountHistory> list = savingRepository.findAccountHistoryListByAccountIdx(2L);
+        List<AccountHistory> list = accountHistoryRepository.findAccountHistoryListByAccountIdx(2L);
 
         for (AccountHistory accountHistory : list) {
             System.out.println(accountHistory);

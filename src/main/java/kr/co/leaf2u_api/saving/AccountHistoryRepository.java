@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface SavingRepository extends JpaRepository<AccountHistory, Long> {
+public interface AccountHistoryRepository extends JpaRepository<AccountHistory, Long> {
 
     /**
      * 적금계좌 idx로 납입내역 리스트 가져오기

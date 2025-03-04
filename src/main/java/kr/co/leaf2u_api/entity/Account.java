@@ -23,7 +23,7 @@ public class Account extends BaseEntity{
     private Long idx;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="member_idx",nullable = false)
+    @JoinColumn(name="member_idx", nullable = false)
     private Member member;
 
     @Column(nullable = false)
@@ -38,21 +38,24 @@ public class Account extends BaseEntity{
     @Column(nullable = false, precision = 5)
     private BigDecimal paymentAmount;
 
-    @Column(nullable = false,precision = 8)
+    @Column(nullable = false, precision = 8)
     private BigDecimal balance;
 
-    @Column(nullable = false,precision = 4,scale = 2)
+    @Column(nullable = false, precision = 4,scale = 2)
     private BigDecimal interestRate;
 
-    @Column(nullable = false,precision = 4,scale = 2)
+    @Column(nullable = false, precision = 4,scale = 2)
     private BigDecimal primeRate;
 
     // 최종금리 컬럼 추가함 - 시온
-    @Column(nullable = false,precision = 4,scale = 2)
+    @Column(nullable = false, precision = 4,scale = 2)
     private BigDecimal finalInterestRate;
 
-    @Column(nullable = false,name = "taxation_yn")
+    @Column(nullable = false, name = "taxation_yn")
     private char taxationYn;
+
+    @Column(nullable = false, precision = 3,scale = 1)
+    private BigDecimal dutyRate;
 
     @Column(precision = 5)
     private BigDecimal interestAmount;
