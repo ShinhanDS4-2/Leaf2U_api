@@ -15,7 +15,7 @@ import java.util.Map;
 @RequestMapping("/api/topic")
 @RequiredArgsConstructor
 public class TopicController {
-
+    //
     private final TopicService topicService;
 
     // 카테고리별 Tip 가져오기
