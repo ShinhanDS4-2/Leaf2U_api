@@ -1,8 +1,6 @@
 package kr.co.leaf2u_api.card;
 
 import jakarta.transaction.Transactional;
-import kr.co.leaf2u_api.donation.DonationHistoryDTO;
-import kr.co.leaf2u_api.donation.DonationOrganizationDTO;
 import kr.co.leaf2u_api.entity.Card;
 import kr.co.leaf2u_api.entity.Member;
 import kr.co.leaf2u_api.member.MemberRepository;
@@ -88,7 +86,7 @@ public class CardServiceImpl implements CardService {
     }
 
     /** 자동이체 카드정보 조회
-     * @param MEMBER(사용자) idx
+     * @param
      * @return CardDTO
      */
     @Override

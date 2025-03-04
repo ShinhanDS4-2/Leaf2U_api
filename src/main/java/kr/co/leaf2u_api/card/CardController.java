@@ -30,7 +30,7 @@ public class CardController {
     }
 
     /** 자동이체 카드정보 조회
-     * @param MEMBER(사용자) idx
+     * @param
      * @return CardDTO
      */
     @GetMapping("/info")
