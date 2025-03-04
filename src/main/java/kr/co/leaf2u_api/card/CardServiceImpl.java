@@ -25,7 +25,7 @@ public class CardServiceImpl implements CardService {
 
     @Transactional
     @Override
-    public Map<String, Object> createLeafCard(CardDTO cardDTO) {
+    public CardDTO createLeafCard(CardDTO cardDTO) {
 
         Member member=memberRepository.findById(cardDTO.getMemberIdx())
                 .orElseThrow(()-> new IllegalArgumentException("존재하지 않는 회원입니다."));
@@ -41,11 +41,7 @@ public class CardServiceImpl implements CardService {
                 .build();
         
         cardRepository.save(card);
-
-        Map<String,Object> response=new HashMap<>();
-        response.put("message","Leaf 카드 발급 완료");
-        response.put("cardId",card.getIdx());
-        return response;
+        return entityToDTO(card);
     }
 
     private String generateCardNumber() {
@@ -65,10 +61,11 @@ public class CardServiceImpl implements CardService {
 
     @Transactional
     @Override
-    public Map<String, Object> registerExistingCard(CardDTO cardDTO) {
+    public CardDTO registerExistingCard(CardDTO cardDTO) {
 
         Member member=memberRepository.findById(cardDTO.getMemberIdx())
                 .orElseThrow(()-> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
 
         Card card=Card.builder()
                 .member(member)
@@ -80,20 +77,20 @@ public class CardServiceImpl implements CardService {
                 .build();
 
         cardRepository.save(card);
-
-        Map<String,Object> response=new HashMap<>();
-        response.put("message","사용자 기존 카드 등록 완료");
-        response.put("cardId",card.getIdx());
-        return response;
+        return entityToDTO(card);
     }
 
-    /** 자동이체 카드정보 조회
-     * @param MEMBER(사용자) idx
-     * @return CardDTO
-     */
-    @Override
-    public Optional<CardDTO> getCardInfo(Long memberIdx) {
-        Optional<Card> cardInfo = cardRepository.getCardInfo(memberIdx);  // 카드 엔티티
-        return cardInfo.map(card -> new CardDTO(card.getCardNumber(), card.getExpirationDate(), card.getCardName()));
+    private CardDTO entityToDTO(Card card) {
+
+        CardDTO dto=new CardDTO();
+        dto.setMemberIdx(card.getMember().getIdx());
+        dto.setCardType(card.getCardType());
+        dto.setCardName(card.getCardName());
+        dto.setCardNumber(card.getCardNumber());
+        dto.setExpirationDate(card.getExpirationDate());
+        dto.setBalance(card.getBalance());
+
+        return dto;
     }
+
 }

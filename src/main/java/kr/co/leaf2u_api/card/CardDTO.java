@@ -4,10 +4,12 @@ import kr.co.leaf2u_api.entity.Card;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class CardDTO {
@@ -22,10 +24,4 @@ public class CardDTO {
     private BigDecimal balance;
     private String cardPassword;
 
-    // 자동이체 카드정보 조회 CardDTO 생성자
-    public CardDTO(String cardName, String cardNumber, String expirationDate) {
-        this.cardNumber = cardNumber;
-        this.expirationDate = expirationDate;
-        this.cardName = cardName;
-    }
 }

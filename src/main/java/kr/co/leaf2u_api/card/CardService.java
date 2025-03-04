@@ -5,8 +5,7 @@ import java.util.Optional;
 
 public interface CardService {
 
-    Map<String,Object> createLeafCard(CardDTO cardDTO);
-    Map<String,Object> registerExistingCard(CardDTO cardDTO);
+    CardDTO createLeafCard(CardDTO cardDTO);
+    CardDTO registerExistingCard(CardDTO cardDTO);
 
-    Optional<CardDTO> getCardInfo(Long memberIdx);
 }

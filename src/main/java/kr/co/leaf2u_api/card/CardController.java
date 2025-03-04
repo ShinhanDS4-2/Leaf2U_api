@@ -18,24 +18,19 @@ public class CardController {
     private final CardService cardService;
 
     @PostMapping("/new")
-    public ResponseEntity<Map<String,Object>> createLeafCard(@RequestBody CardDTO cardDTO) {
+    public ResponseEntity<CardDTO> createLeafCard(@RequestBody CardDTO cardDTO) {
 
-        Map<String ,Object> response=cardService.createLeafCard(cardDTO);
-        return ResponseEntity.ok(response);
+        CardDTO createdCard=cardService.createLeafCard(cardDTO);
+        return ResponseEntity.ok(createdCard);
     }
 
     @PostMapping("/exist")
-    public ResponseEntity<Map<String,Object>> existCard(@RequestBody CardDTO cardDTO) {
+    public ResponseEntity<CardDTO> existCard(@RequestBody CardDTO cardDTO) {
 
-        Map<String,Object> response=cardService.registerExistingCard(cardDTO);
-        return ResponseEntity.ok(response);
-
-    }
-    @PostMapping("/info")
-    public ResponseEntity<Optional<CardDTO>> getCardInfo(@RequestBody Long memberIdx) {
-        Optional<CardDTO> cardInfo = cardService.getCardInfo(memberIdx);
-        return ResponseEntity.ok(cardInfo);
+        CardDTO existingCard=cardService.registerExistingCard(cardDTO);
+        return ResponseEntity.ok(existingCard);
 
     }
+
 
 }

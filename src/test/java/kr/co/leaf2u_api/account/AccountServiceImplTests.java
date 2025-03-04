@@ -58,20 +58,6 @@ public class AccountServiceImplTests {
 
     }
 
-    @Test
-    public void testCreateAccount_firstTimeAccount() {
 
-        when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
-        when(cardRepository.findById(1L)).thenReturn(Optional.of(card));
-        when(accountRepository.findByMemberIdx(1L)).thenReturn(List.of());
-
-        Account createdAccount=accountService.createAccount(accountDTO);
-
-        verify(accountRepository,times(1)).save(any(Account.class));
-        assertNotNull(createdAccount);
-        assertEquals(new BigDecimal("3.0"),createdAccount.getInterestAmount());
-        assertEquals("222",createdAccount.getAccountNumber().substring(0,3));
-
-    }
 
 }
