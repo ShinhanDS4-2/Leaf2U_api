@@ -1,6 +1,8 @@
 package kr.co.leaf2u_api.card;
 
 import jakarta.transaction.Transactional;
+import kr.co.leaf2u_api.donation.DonationHistoryDTO;
+import kr.co.leaf2u_api.donation.DonationOrganizationDTO;
 import kr.co.leaf2u_api.entity.Card;
 import kr.co.leaf2u_api.entity.Member;
 import kr.co.leaf2u_api.member.MemberRepository;
@@ -11,6 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -82,5 +85,15 @@ public class CardServiceImpl implements CardService {
         response.put("message","사용자 기존 카드 등록 완료");
         response.put("cardId",card.getIdx());
         return response;
+    }
+
+    /** 자동이체 카드정보 조회
+     * @param MEMBER(사용자) idx
+     * @return CardDTO
+     */
+    @Override
+    public Optional<CardDTO> getCardInfo(Long memberIdx) {
+        Optional<Card> cardInfo = cardRepository.getCardInfo(memberIdx);  // 카드 엔티티
+        return cardInfo.map(card -> new CardDTO(card.getCardNumber(), card.getExpirationDate(), card.getCardName()));
     }
 }
