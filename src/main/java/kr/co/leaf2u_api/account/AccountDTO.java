@@ -27,5 +27,4 @@ public class AccountDTO {
     private LocalDateTime updateDate;  // 수정일
     private LocalDateTime maturityDate;  // 만기일
 
-    private Boolean cardYn;
 }
