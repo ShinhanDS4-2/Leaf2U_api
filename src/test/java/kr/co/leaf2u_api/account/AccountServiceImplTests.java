@@ -7,23 +7,21 @@ import kr.co.leaf2u_api.entity.Member;
 import kr.co.leaf2u_api.member.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
-@ExtendWith(SpringExtension.class)
 public class AccountServiceImplTests {
 
     @Mock
@@ -38,26 +36,54 @@ public class AccountServiceImplTests {
     @InjectMocks
     private AccountServiceImpl accountService;
 
-    private Member member;
-    private Card card;
-    private AccountDTO accountDTO;
+    private Member testMember;
+    private Card testCard;
+    private Account testAccount;
 
     @BeforeEach
-    public void setUp() {
-        member = new Member();
-        member.setIdx(1L);
-        member.setCardYn('N');
-        member.setName("John Doe");
+    void setUp() {
+        testMember = new Member();
+        testMember.setIdx(1L);
 
-        card=new Card();
-        card.setCardType('L');
+        testCard = new Card();
+        testCard.setCardType('L'); // 'L' 리프 카드
 
-        accountDTO=new AccountDTO();
-        accountDTO.setMemberIdx(1L);
-        accountDTO.setAccountPassword("password123");
-
+        testAccount = new Account();
+        testAccount.setMember(testMember);
+        testAccount.setAccountNumber("222-123-456789");
+        testAccount.setBalance(BigDecimal.ZERO);
+        testAccount.setInterestRate(new BigDecimal("1.0"));
+        testAccount.setPrimeRate(new BigDecimal("2.0"));
     }
 
+    @Test
+    void createAccount_Success() {
+        AccountDTO accountDTO = new AccountDTO();
+        accountDTO.setMemberIdx(1L);
+        accountDTO.setAccountPassword("1234");
 
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(testMember));
+        when(cardRepository.findById(1L)).thenReturn(Optional.of(testCard));
+        when(accountRepository.findByMemberIdx(1L)).thenReturn(Collections.emptyList()); // 최초 가입
+        when(accountRepository.save(any(Account.class))).thenReturn(testAccount);
 
+        AccountDTO createdAccount = accountService.createAccount(accountDTO);
+
+        assertNotNull(createdAccount);
+        assertEquals("222-123-456789", createdAccount.getAccountNumber());
+        assertEquals(new BigDecimal("1.0"), createdAccount.getInterestRate());
+        assertEquals(new BigDecimal("2.0"), createdAccount.getPrimeRate());
+    }
+
+    @Test
+    void getAccountsByMember_Success() {
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(testMember));
+        when(accountRepository.findByMemberIdx(1L)).thenReturn(List.of(testAccount));
+
+        List<AccountDTO> accounts = accountService.getAccountsByMember(1L);
+
+        assertFalse(accounts.isEmpty());
+        assertEquals(1, accounts.size());
+        assertEquals("222-123-456789", accounts.get(0).getAccountNumber());
+    }
 }

@@ -1,14 +1,9 @@
 package kr.co.leaf2u_api.account;
 
 import kr.co.leaf2u_api.entity.Account;
-import kr.co.leaf2u_api.entity.InterestRateHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
