@@ -28,15 +28,14 @@ public class AccountDTO {
     private LocalDateTime updateDate;  // 수정일
     private LocalDateTime maturityDate;  // 만기일
 
-    // 현재 잔액, 금리 조회용 생성자
-    public AccountDTO(BigDecimal balance, BigDecimal finalInterestRate) {
-        this.balance = balance;
-        this.finalInterestRate = finalInterestRate;
-    }
-
     // 이자 관련 추가 컬럼
     private BigDecimal preTaxInterestAmount;  // (세전)이자
     private BigDecimal taxAmount;  // 세금액
     private BigDecimal interestAmount;  // (세후)이자
 
+    // 현재 잔액, 금리 조회용 생성자
+    public AccountDTO(BigDecimal balance, BigDecimal finalInterestRate) {
+        this.balance = balance;
+        this.finalInterestRate = finalInterestRate;
+    }
 }
