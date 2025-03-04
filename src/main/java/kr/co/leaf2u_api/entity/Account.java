@@ -61,17 +61,9 @@ public class Account extends BaseEntity{
     private BigDecimal interestAmount;
 
     @Column(nullable = false)
-    private LocalDateTime createDate;  // 가입일
-
-    @Column(nullable = false)
     private LocalDateTime endDate;  // 종료일
-
-    @LastModifiedDate  // 엔티티가 수정될 때마다 자동으로 LocalDateTime 값 업데이트
-    @Column
-    private LocalDateTime updateDate;  // 수정일
 
     @Column(nullable = false)
     private LocalDateTime maturityDate;  // 만기일
-
 
 }
