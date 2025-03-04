@@ -239,7 +239,7 @@ public class AccountServiceImpl implements AccountService {
 
     }
 
-    /** (3-3) 예상이자조회 - 선택일자 해지
+    /** (3-3) 예상이자조회 - 선택일자 해지 (우대금리X)
      * @param accountDTO idx, endDate(이자 계산기간 종료일 - 선택일자 해지에 필요)
      * @return accountDTO(적금계좌)
      */
@@ -266,7 +266,53 @@ public class AccountServiceImpl implements AccountService {
         return result;
     }
 
+    /** (4) 계좌 해지 (중도해지이므로 우대금리 X)
+     * @param accountDTO idx, accountPassword(계좌 비밀번호)
+     * @return 1(성공), 0(실패), 401(비밀번호 불일치)
+     */
+    // 클라이언트로부터 인증 비밀번호6자리 입력받음. (비밀번호 일치 시에만 로직 수행되도록)
+    @Override
+    public int terminateAccount(AccountDTO accountDTO) {
+        Long idx = accountDTO.getIdx();  // 계좌 idx
+        String inputPwd = accountDTO.getAccountPassword();  // 사용자가 입력한 계좌 비밀번호
 
+        Account account = accountRepository.findByIdx(idx).orElse(null);  // 계좌 idx 기준으로 Account 엔티티 조회
+        BigDecimal interestRate = account.getInterestRate();  // 기본금리
+        LocalDateTime endDate = LocalDateTime.now();  // 종료일 (=해지일)
+
+        // 비밀번호 일치하는지 확인
+        if(!passwordEncoder.matches(inputPwd, account.getAccountPassword())){  // 해당 적금계좌의 현재 비밀번호를 DB에서 조회
+            // ㄴ 사용자가 입력한 비밀번호가 DB에 저장된 비밀번호와 일치하는지 확인
+            return 401;  // 비밀번호 불일치시 401반환
+        }
+        // 비밀번호가 일치하면 적금계좌 해지 ↓
+
+        /* [적금계좌 해지 프로세스]
+        *  1. accountStatus(계좌상태) 컬럼 값 C(해지)로 업데이트
+        *  2. interestAmount(세후이자) 컬럼 값 계산 후 업데이트
+        *  3. endDate(종료일=해지일) 컬럼 값 업데이트
+        * */
+
+        // 2. 세후이자 계산 => 이자계산하는 공통 메서드 사용 calculateInterest(계좌idx, 적용금리(=기본금리), 해지일(=오늘))
+        AccountDTO dto = calculateInterest(idx, interestRate, endDate);
+        BigDecimal interestAmount = dto.getInterestAmount();  // 세후이자
+
+        account.setAccountStatus('C');  // 1
+        account.setInterestAmount(interestAmount);  // 2
+        account.setEndDate(endDate);  // 3
+
+        Account updatedAccount = accountRepository.save(account);  // 업데이트 된 account엔티티를 DB에 저장
+        // DB 업데이트 되면서 수정일 컬럼도 자동으로 업데이트 됨. 따로 설정 필요없음
+
+        // save() 메서드는 반환 값으로 저장된(업데이트된) 엔티티를 반환함 => 반환된 엔티티가 null이 아니면 업데이트 성공
+        if(updatedAccount != null){
+            return 1;  // 성공 시 1 반환
+        } else {
+            return 0;  // 실패 시 0 반환
+        }
+    }
+
+/** ★★★★★★★★★★★     아래는 공통으로 쓰이는 메서드 분리     ★★★★★★★★★★★ */
 
     /** [account 엔티티 -> DTO 변환 공통 메서드]
      * account 엔티티 컬럼 17개 전체에 대해 DTO 객체에 기본값을 설정하는 공통 메서드 => 가져다 쓸 때 필요한 값 덮어써서 사용 */

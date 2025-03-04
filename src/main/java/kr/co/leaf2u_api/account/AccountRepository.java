@@ -24,8 +24,9 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     @Query("SELECT a FROM Account a WHERE a.member.idx =: memberIdx AND a.accountStatus='N'")  // 계좌 상태가 정상N인 것만 조회
     Optional<Account> getAccountInfoByIdx(@Param("memberIdx") Long memberIdx);
 
-    // (2) 납입금액 변경 (param 계좌idx), (3)에도 쓰임
-    Optional<Account> findByIdx(Long idx);  // Account idx를 기준으로 조회 Account엔티티 조회
+    Optional<Account> findByIdx(Long idx);  // 계좌idx를 기준으로 Account엔티티 조회
+
+    // (2) 납입금액 변경 (findByIdx사용)
 
     // (3) 예상 이자 조회
     // 적금계좌 조회 (findByIdx사용)
@@ -33,13 +34,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     @Query("SELECT i FROM InterestRateHistory i WHERE i.account.idx =: savingAccountIdx")
     List<InterestRateHistory> getInterestRateHistory(@Param("savingAccountIdx") Long savingAccountIdx);
 
-
-
-
-    // 계좌 관리 - (3) 예상 이자 조회 - 1만기일해지,2오늘해지,3선택일자 해지
-
-
-    // 계좌 관리 - (4) 계좌 해지
+    // (4) 계좌 해지 (findByIdx사용)
 
 
 
