@@ -21,6 +21,7 @@ public class SavingHistoryDTO {
     private Long savingAccountIdx;
 
     private BigDecimal paymentAmount;
+    private BigDecimal cumulativeAmount;
     private char challengeType;
 
     private LocalDateTime paymentDate;

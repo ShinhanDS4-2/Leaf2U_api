@@ -6,9 +6,11 @@ import kr.co.leaf2u_api.util.CommonUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,6 +55,7 @@ public class SavingServiceImpl implements SavingService {
                 entity.getMember().getIdx(),
                 entity.getAccount().getIdx(),
                 entity.getPaymentAmount(),
+                entity.getCumulativeAmount(),
                 entity.getChallengeType(),
                 entity.getPaymentDate(),
                 CommonUtil.formatDate(entity.getPaymentDate(), "MM.dd"),
