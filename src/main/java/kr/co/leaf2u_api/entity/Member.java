@@ -23,9 +23,6 @@ public class Member extends BaseEntity{
     private String email;
 
     @Column(nullable=false)
-    private String patternPassword;
-
-    @Column(nullable=false)
     private String name;
 
     @Column(nullable=false)
@@ -43,7 +40,7 @@ public class Member extends BaseEntity{
     @Column(nullable = false)
     private char cardYn;
 
-    @LastModifiedDate
+    @LastModifiedDate  // JPA에서 엔티티가 수정될 때 자동으로 날짜/시간을 기록하는 어노테이션
     @Column(name="password_update_date")
     private LocalDateTime passwordUpdateDate;
 }

@@ -24,4 +24,10 @@ public class EcoTips extends BaseEntity {
 
     @Column(nullable = false)
     private char category;
+
+    public EcoTips(char category, String title, String content) {
+        this.category = category;
+        this.title = title;
+        this.content = content;
+    }
 }

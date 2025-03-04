@@ -1,10 +1,7 @@
 package kr.co.leaf2u_api.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 
@@ -13,6 +10,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 @Getter
+@Setter
 public class Card extends BaseEntity {
 
     @Id
@@ -44,5 +42,8 @@ public class Card extends BaseEntity {
 
     @Column(nullable = false, precision = 10)
     private BigDecimal balance;
+
+    @Column(nullable = false)
+    private String cardPassword;
 
 }

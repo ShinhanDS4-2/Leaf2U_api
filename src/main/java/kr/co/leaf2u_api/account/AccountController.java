@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/account")
+@RequestMapping("/api/account")
 @RequiredArgsConstructor
 public class AccountController {
 
@@ -21,15 +21,22 @@ public class AccountController {
      * @return
      */
     @PostMapping("/create")
-    public ResponseEntity<Account> createAccount(@RequestBody AccountDTO accountDTO) {
+    public ResponseEntity<AccountDTO> createAccount(@RequestBody AccountDTO accountDTO) {
 
-        return ResponseEntity.ok(accountService.createAccount(accountDTO));
+        AccountDTO createdAccount=accountService.createAccount(accountDTO);
+        return ResponseEntity.ok(createdAccount);
     }
 
+    /**
+     * 가입한 적금 조회
+     * @param memberId
+     * @return
+     */
     @GetMapping("/member/{memberId}")
-    public ResponseEntity <List<Account>> getAccounts(@PathVariable Long memberId) {
+    public ResponseEntity <List<AccountDTO>> getAccounts(@PathVariable Long memberId) {
 
-        return ResponseEntity.ok(accountService.getAccountsByMember(memberId));
+        List<AccountDTO> accounts=accountService.getAccountsByMember(memberId);
+        return ResponseEntity.ok(accounts);
     }
 
 

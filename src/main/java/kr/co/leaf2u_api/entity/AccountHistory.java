@@ -23,6 +23,9 @@ public class AccountHistory {
     @Column(nullable = false, precision = 6)
     private BigDecimal paymentAmount;
 
+    @Column(nullable = false, precision = 6)
+    private BigDecimal cumulativeAmount;
+
     @Column(nullable = false)
     private char challengeType;
 
