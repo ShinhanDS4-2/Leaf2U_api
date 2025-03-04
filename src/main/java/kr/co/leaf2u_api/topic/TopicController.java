@@ -1,15 +1,8 @@
 package kr.co.leaf2u_api.topic;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import kr.co.leaf2u_api.entity.EcoTips;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/topic")
@@ -26,8 +19,8 @@ public class TopicController {
 
     // 새로운 Tip 추가하기
     @PostMapping
-    public EcoTips createTip(@RequestBody EcoTips tip) {
-        return topicService.saveEcoTips(tip);
+    public EcoTips createEcoTips(@RequestBody EcoTips ecoTips) {
+        return topicService.saveEcoTips(ecoTips);
     }
 
     @GetMapping("/news")
