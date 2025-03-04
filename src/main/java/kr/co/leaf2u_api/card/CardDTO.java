@@ -1,6 +1,5 @@
 package kr.co.leaf2u_api.card;
 
-import kr.co.leaf2u_api.entity.Card;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
