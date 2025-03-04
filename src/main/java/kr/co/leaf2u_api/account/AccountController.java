@@ -2,12 +2,10 @@ package kr.co.leaf2u_api.account;
 
 import kr.co.leaf2u_api.entity.Account;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/account")
@@ -23,10 +21,10 @@ public class AccountController {
      * @return
      */
     @PostMapping("/create")
-    public ResponseEntity<Account> createAccount(@RequestBody AccountDTO accountDTO) {
-                                                // ㄴ HTTP요청의 Body에서 JSON데이터를 가져와 AccountDTO에 매핑
-        return ResponseEntity.ok(accountService.createAccount(accountDTO));
-        // ??
+    public ResponseEntity<AccountDTO> createAccount(@RequestBody AccountDTO accountDTO) {
+
+        AccountDTO createdAccount=accountService.createAccount(accountDTO);
+        return ResponseEntity.ok(createdAccount);
     }
 
     /**
@@ -35,9 +33,10 @@ public class AccountController {
      * @return
      */
     @GetMapping("/member/{memberId}")
-    public ResponseEntity <List<Account>> getAccounts(@PathVariable Long memberId) {
+    public ResponseEntity <List<AccountDTO>> getAccounts(@PathVariable Long memberId) {
 
-        return ResponseEntity.ok(accountService.getAccountsByMember(memberId));
+        List<AccountDTO> accounts=accountService.getAccountsByMember(memberId);
+        return ResponseEntity.ok(accounts);
     }
 
 

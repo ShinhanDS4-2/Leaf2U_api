@@ -2,7 +2,10 @@ package kr.co.leaf2u_api.card;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 import java.util.Optional;
@@ -15,29 +18,19 @@ public class CardController {
     private final CardService cardService;
 
     @PostMapping("/new")
-    public ResponseEntity<Map<String,Object>> createLeafCard(@RequestBody CardDTO cardDTO) {
+    public ResponseEntity<CardDTO> createLeafCard(@RequestBody CardDTO cardDTO) {
 
-        Map<String ,Object> response=cardService.createLeafCard(cardDTO);
-        return ResponseEntity.ok(response);
+        CardDTO createdCard=cardService.createLeafCard(cardDTO);
+        return ResponseEntity.ok(createdCard);
     }
 
     @PostMapping("/exist")
-    public ResponseEntity<Map<String,Object>> existCard(@RequestBody CardDTO cardDTO) {
+    public ResponseEntity<CardDTO> existCard(@RequestBody CardDTO cardDTO) {
 
-        Map<String,Object> response=cardService.registerExistingCard(cardDTO);
-        return ResponseEntity.ok(response);
-
-    }
-
-    /** 자동이체 카드정보 조회
-     * @param
-     * @return CardDTO
-     */
-    @GetMapping("/info")
-    public ResponseEntity<Optional<CardDTO>> getCardInfo(@RequestBody Long memberIdx) {
-        Optional<CardDTO> cardInfo = cardService.getCardInfo(memberIdx);
-        return ResponseEntity.ok(cardInfo);
+        CardDTO existingCard=cardService.registerExistingCard(cardDTO);
+        return ResponseEntity.ok(existingCard);
 
     }
+
 
 }

@@ -8,7 +8,8 @@ import java.util.Map;
 
 public interface AccountService {
 
-    Account createAccount(AccountDTO accountDTO);                                  //적금 생성
-    List<Account> getAccountsByMember(Long memberId);                              //적금 조회
+    AccountDTO createAccount(AccountDTO accountDTO);                                  //적금 생성
+    List<AccountDTO> getAccountsByMember(Long memberId);                              //적금 조회
+
 
 }

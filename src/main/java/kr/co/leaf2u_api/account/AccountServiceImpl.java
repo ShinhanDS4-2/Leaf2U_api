@@ -7,13 +7,13 @@ import kr.co.leaf2u_api.entity.Member;
 import kr.co.leaf2u_api.entity.Account;
 import kr.co.leaf2u_api.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,11 +22,10 @@ public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
     private final MemberRepository memberRepository;
     private final CardRepository cardRepository;
-    private final PasswordEncoder passwordEncoder; // 비밀번호 암호화 및 검증을 위한 인코더
 
     @Transactional
     @Override
-    public Account createAccount(AccountDTO accountDTO) {
+    public AccountDTO createAccount(AccountDTO accountDTO) {
 
         Member member = memberRepository.findById(accountDTO.getMemberIdx())
                 .orElseThrow(()-> new IllegalArgumentException("회원이 존재하지 않습니다."));
@@ -72,7 +71,19 @@ public class AccountServiceImpl implements AccountService {
         account.setMaturityDate(LocalDateTime.now().plusMonths(1));
         account.setInterestAmount(primeRate);
 
-        return accountRepository.save(account);
+        Account savedAccount=accountRepository.save(account);
+        return EntityToDTO(savedAccount);
+    }
+
+    private AccountDTO EntityToDTO(Account account) {
+
+        AccountDTO dto=new AccountDTO();
+        dto.setMemberIdx(account.getMember().getIdx());
+        dto.setAccountNumber(account.getAccountNumber());
+        dto.setBalance(account.getBalance());
+        dto.setInterestRate(account.getInterestRate());
+        dto.setPrimeRate(account.getPrimeRate());
+        return dto;
     }
 
     /**
@@ -96,12 +107,12 @@ public class AccountServiceImpl implements AccountService {
      * @return
      */
     @Override
-    public List<Account> getAccountsByMember(Long memberId) {
+    public List<AccountDTO> getAccountsByMember(Long memberId) {
 
         Member member=memberRepository.findById(memberId)
                 .orElseThrow(()->new IllegalArgumentException("회원이 존재하지 않습니다."));
 
-        return accountRepository.findByMemberIdx(member.getIdx());
+        List<Account> accounts=accountRepository.findByMemberIdx(member.getIdx());
+        return accounts.stream().map(this::EntityToDTO).collect(Collectors.toList());
     }
-
 }

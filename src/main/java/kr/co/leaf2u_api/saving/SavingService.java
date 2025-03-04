@@ -5,5 +5,5 @@ import java.util.Map;
 
 public interface SavingService {
 
-    List<SavingHistoryDTO> getSavingHistoryList(Map<String, Object> param);
+    Map<String, Object> getSavingHistoryList(Map<String, Object> param);
 }

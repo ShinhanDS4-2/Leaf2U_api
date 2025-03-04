@@ -1,16 +1,17 @@
 package kr.co.leaf2u_api.card;
 
+import kr.co.leaf2u_api.entity.Card;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class CardDTO {
 
     private Long memberIdx;
@@ -22,6 +23,5 @@ public class CardDTO {
     private String accountNumber;
     private BigDecimal balance;
     private String cardPassword;
-
 
 }

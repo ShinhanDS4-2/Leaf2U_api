@@ -23,10 +23,12 @@ public class SavingController {
      * @return
      */
     @PostMapping("/history/list")
-    public ResponseEntity<List<SavingHistoryDTO>> getSavingHistoryList(@RequestBody Map<String, Object> param) {
+    public ResponseEntity<Map<String, Object>> getSavingHistoryList(@RequestBody Map<String, Object> param) {
 
-        List<SavingHistoryDTO> result = savingService.getSavingHistoryList(param);
+        Map<String, Object> result = savingService.getSavingHistoryList(param);
 
         return ResponseEntity.ok(result);
     }
+
+
 }
