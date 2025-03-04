@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface InterestRateRepository extends JpaRepository<InterestRateHistory, Long> {
+public interface InterestRateHistoryRepository extends JpaRepository<InterestRateHistory, Long> {
 
     /**
      * 납입내역 별 누적 금리 리스트 가져오기

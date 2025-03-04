@@ -15,16 +15,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SavingServiceImpl implements SavingService {
 
-    private final SavingRepository savingRepository;
+    private final AccountHistoryRepository accountHistoryRepository;
 
-    private final InterestRateRepository interestRateRepository;
+    private final InterestRateHistoryRepository interestRateRepository;
 
     @Override
     public List<SavingHistoryDTO> getSavingHistoryList(Map<String, Object> param) {
 
         // 납입내역
         Long accountIdx = Long.parseLong(String.valueOf(param.get("accountIdx")));
-        List<AccountHistory> list = savingRepository.findAccountHistoryListByAccountIdx(accountIdx);
+        List<AccountHistory> list = accountHistoryRepository.findAccountHistoryListByAccountIdx(accountIdx);
 
         AtomicInteger rowNum = new AtomicInteger(1);
 
