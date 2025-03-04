@@ -34,7 +34,6 @@ public class DonationServiceImpl implements DonationService {
 
 // 1. 후원단체 리스트 페이지 관련
     /** (1)후원단체 리스트 조회
-     * @param X
      * @return List<DonationOrganizationDTO>
      */
     @Override
@@ -50,7 +49,7 @@ public class DonationServiceImpl implements DonationService {
     }
 
     /** (2)후원단체 상세정보 조회
-     * @param DONATION_ORGANIZATION(후원단체테이블) idx
+     * @param
      * @return idx에 값에 해당하는 DonationOrganizationDTO
      */
     @Override
@@ -67,7 +66,7 @@ public class DonationServiceImpl implements DonationService {
 
 // 2. 후원내역 페이지 관련
     /** (1) 후원내역 리스트 조회
-     * @param MEMBER(사용자) idx
+     * @param
      * @return List, Count
      */
     @Override
@@ -92,7 +91,7 @@ public class DonationServiceImpl implements DonationService {
 
 
     /** (2) 후원내역 상세정보 조회
-     * @param DONATION_HISTORY(후원내역) idx
+     * @param
      * @return donationHistoryDetail(기부내역), donationOrganization(기부처)
      */
     @Override

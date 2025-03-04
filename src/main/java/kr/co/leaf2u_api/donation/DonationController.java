@@ -19,7 +19,7 @@ public class DonationController {
 // 1. 후원단체 리스트 페이지 관련
     /** (1)
      * 후원단체 리스트 조회
-     * @param X
+     * @param
      * @return List<DonationOrganizationDTO>
      */
     @GetMapping("/organizationList")
@@ -34,7 +34,7 @@ public class DonationController {
 
     /** (2)
      * 후원단체 상세정보 조회
-     * @param DONATION_ORGANIZATION(후원단체테이블) idx
+     * @param
      * @return idx에 값에 해당하는 DonationOrganizationDTO
      */
     @GetMapping("organizationDetail/{idx}")  // idx값을 경로 변수로 받을 수 있도록
@@ -49,7 +49,7 @@ public class DonationController {
 // 2. 후원내역 페이지 관련
     /** (1)
      * 후원내역 리스트 조회
-     * @param MEMBER(사용자테이블) idx
+     * @param
      * @return List, Count
      */
     @GetMapping("historyList/{memberIdx}")  // 사용자 idx값을 경로 변수로 받을 수 있도록 하는게 맞나..?
@@ -61,7 +61,7 @@ public class DonationController {
 
     /** (2)
      * 후원내역 상세정보 조회
-     * @param DONATION_HISTORY(후원내역) idx
+     * @param
      * @return donationHistoryDetail(기부내역), donationOrganization(기부처)
      */
     @GetMapping("historyDetail/{donationHistoryIdx}")  // 사용자 idx값을 경로 변수로 받을 수 있도록 하는게 맞나..?
