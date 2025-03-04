@@ -20,7 +20,7 @@ public class TopicController {
 
     // 새로운 Tip 추가하기
     @PostMapping
-    public EcoTips createTip(@RequestBody EcoTips tip) {
+    public EcoTips createEcoTips(@RequestBody EcoTips tip) {
         return topicService.saveEcoTips(tip);
     }
 
