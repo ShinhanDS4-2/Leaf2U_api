@@ -21,4 +21,7 @@ public interface AccountService {
     Map<String, Object> getCustomDateInterest(AccountDTO accountDTO);  // (3) 예상 이자 조회 - 선택일자 해지 getCustomDateInterest
     int terminateAccount(AccountDTO accountDTO);  // (4) 계좌 해지
 
+    /* 메인화면에 필요한 api - 문경미 */
+    Map<String, Object> getSavingInfo(Map<String, Object> param);    // 적금 계좌의 잔액, 총금리 정보
+
 }

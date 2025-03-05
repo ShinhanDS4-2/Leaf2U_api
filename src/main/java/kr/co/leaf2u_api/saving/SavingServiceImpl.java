@@ -2,6 +2,7 @@ package kr.co.leaf2u_api.saving;
 
 import kr.co.leaf2u_api.account.AccountDTO;
 import kr.co.leaf2u_api.account.AccountRepository;
+import kr.co.leaf2u_api.account.AccountService;
 import kr.co.leaf2u_api.entity.Account;
 import kr.co.leaf2u_api.entity.AccountHistory;
 import kr.co.leaf2u_api.entity.InterestRateHistory;
@@ -23,6 +24,8 @@ public class SavingServiceImpl implements SavingService {
     private final InterestRateHistoryRepository interestRateRepository;
 
     private final AccountRepository accountRepository;
+
+    private final AccountService accountService;
 
     /**
      * 납입 내역 리스트
@@ -58,9 +61,8 @@ public class SavingServiceImpl implements SavingService {
         result.put("list", dtoList);
 
         // 계좌 정보
-        Long memberIdx = Long.parseLong(String.valueOf(param.get("memberIdx")));
-        Optional<AccountDTO> accountDTO = entityToDTOByAccount(accountRepository.findAccountByMember(memberIdx));
-        result.put("info", accountDTO);
+        Map<String, Object> info = accountService.getSavingInfo(param);
+        result.put("info", info);
 
         return result;
     }
@@ -85,15 +87,4 @@ public class SavingServiceImpl implements SavingService {
         );
     }
 
-    /**
-     * 적금 계좌 엔티티 -> DTO
-     * @param account
-     * @return
-     */
-    private Optional<AccountDTO> entityToDTOByAccount(Optional<Account> account) {
-        return account.map(entity -> new AccountDTO(
-                entity.getBalance(),
-                entity.getFinalInterestRate()
-        ));
-    }
 }

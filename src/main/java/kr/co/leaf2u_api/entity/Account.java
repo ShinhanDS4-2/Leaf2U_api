@@ -66,4 +66,7 @@ public class Account extends BaseEntity{
     @Column(nullable = false)
     private LocalDateTime maturityDate;  // 만기일
 
+    @Column(nullable = false)
+    private Long savingCnt;
+
 }

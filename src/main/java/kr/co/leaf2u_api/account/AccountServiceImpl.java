@@ -7,12 +7,14 @@ import kr.co.leaf2u_api.entity.InterestRateHistory;
 import kr.co.leaf2u_api.entity.Member;
 import kr.co.leaf2u_api.entity.Account;
 import kr.co.leaf2u_api.member.MemberRepository;
+import kr.co.leaf2u_api.util.CommonUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -312,6 +314,36 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
+    /**
+     * 적금 계좌의 잔액, 총금리 정보
+     * @param param (memberIdx)
+     * @return balanse, final_interest_rate 포함 DTO
+     */
+    @Override
+    public Map<String, Object> getSavingInfo(Map<String, Object> param) {
+
+        Map<String, Object> result = new HashMap<>();
+
+        Long memberIdx = Long.parseLong(String.valueOf(param.get("memberIdx")));
+        Optional<AccountDTO> accountDTO = entityToDTOWithSaving(accountRepository.findAccountByMember(memberIdx));
+
+        if (accountDTO.isPresent()) {
+            AccountDTO dto = accountDTO.get();
+
+            result.put("accountDTO", dto);
+
+            // 만기까지 남은 일수
+            LocalDate today = LocalDate.now();
+            LocalDate maturityDate = dto.getMaturityDate().toLocalDate();
+            long diff = ChronoUnit.DAYS.between(today, maturityDate);
+
+            result.put("diff", diff);
+        }
+
+        return result;
+    }
+
+
 /** ★★★★★★★★★★★     아래는 공통으로 쓰이는 메서드 분리     ★★★★★★★★★★★ */
 
     /** [account 엔티티 -> DTO 변환 공통 메서드]
@@ -337,6 +369,19 @@ public class AccountServiceImpl implements AccountService {
         dto.setMaturityDate(account.getMaturityDate());  // 만기일
         dto.setInterestAmount(account.getInterestAmount());  // 세후 이자
         return dto;
+    }
+
+    /**
+     * 적금 계좌 납입 정보 엔티티 -> DTO
+     * @param account
+     * @return
+     */
+    private Optional<AccountDTO> entityToDTOWithSaving(Optional<Account> account) {
+        return account.map(entity -> new AccountDTO(
+                entity.getBalance(),
+                entity.getFinalInterestRate(),
+                entity.getMaturityDate()
+        ));
     }
 
     /** [이자 계산 공통 메서드]

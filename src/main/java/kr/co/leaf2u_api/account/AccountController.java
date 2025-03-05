@@ -113,4 +113,19 @@ public class AccountController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("적금 해지가 실패하였습니다. 다시 시도해주세요.");
         }
     }
+
+    /* 메인화면에 필요한 api - 문경미 */
+    /**
+     * 적금 계좌의 잔액, 총금리 정보
+     * @param param (memberIdx)
+     * @return balance, final_interest_rate
+     */
+    @PostMapping("/saving/info")
+    public ResponseEntity<Map<String, Object>> getSavingInfo(@RequestBody Map<String, Object> param) {
+
+        Map<String, Object> result = accountService.getSavingInfo(param);
+
+        return ResponseEntity.ok(result);
+    }
+
 }
