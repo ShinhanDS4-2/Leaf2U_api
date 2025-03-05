@@ -67,4 +67,18 @@ public class DonationController {
      */
 
 
+    /* 후원 기여도 api */
+
+    /**
+     * 후원 기여도
+     * @param param
+     * @return
+     */
+    @PostMapping("/statistics")
+    public ResponseEntity<Map<String, Object>> getDonationStatistics(@RequestBody Map<String, Object> param) {
+
+        Map<String, Object> result = donationService.getDonationStatistics(param);
+
+        return ResponseEntity.ok(result);
+    }
 }

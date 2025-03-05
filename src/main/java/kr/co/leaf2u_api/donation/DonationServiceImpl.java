@@ -1,11 +1,12 @@
 package kr.co.leaf2u_api.donation;
+
 import kr.co.leaf2u_api.entity.DonationOrganization;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
-
 
 @Service
 @RequiredArgsConstructor
@@ -99,12 +100,44 @@ public class DonationServiceImpl implements DonationService {
         return result;
     }
 
-
-
     /** (3)
      * 후원증서는 어디로 들어가야하지 ??
      * @param
      * @return
      */
 
+
+    /* 후원 기여도 api */
+
+    /**
+     * 후원 기여도
+     * @param param
+     * @return
+     */
+    @Override
+    public Map<String, Object> getDonationStatistics(Map<String, Object> param) {
+
+        Map<String, Object> result = new HashMap<>();
+
+        // 랭킹
+        List<Map<String, Object>> ranking = donationHistoryRepository.findDonationRanking();
+        result.put("ranking", ranking);
+
+        // 후원 퍼센테이지
+        Long memberIdx = Long.parseLong(String.valueOf(param.get("memberIdx")));
+        Map<String, Object> map = donationHistoryRepository.findDonationSums(memberIdx);
+        result.putAll(map);
+
+        int myTotal = ((BigDecimal) map.get("my_total")).intValue();
+        int ageTotal = ((BigDecimal) map.get("age_total")).intValue();
+        int allTotal = ((BigDecimal) map.get("all_total")).intValue();
+
+        int myRatio = (int) ((myTotal / (double) allTotal) * 100);
+        int ageRatio = (int) ((ageTotal / (double) allTotal) * 100);
+
+        result.put("my_ratio", myRatio);
+        result.put("age_ratio", ageRatio);
+
+        return result;
+    }
 }

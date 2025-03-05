@@ -44,7 +44,7 @@ public class DonationHistory {
     @Column(nullable = false, precision = 8)
     private BigDecimal donationAmount;
 
-    @Column(nullable = false, precision = 3)
+    @Column(nullable = false, precision = 4)
     private BigDecimal interest;
 
     @Column(nullable = false, precision = 7)
