@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController  // 이 클래스가 REST API요청을 처리하는 컨트롤러임을 명시
 @RequestMapping("/api/donation")  // 기본 URL 경로 설정
@@ -32,7 +31,7 @@ public class DonationController {
      * @param donationOrganizationIdx
      * @return DonationOrganizationDTO
      */
-    @GetMapping("organizationDetail/{idx}")
+    @GetMapping("organizationDetail/{donationOrganizationIdx}")
     public ResponseEntity<DonationOrganizationDTO> getDonationOrganizationDetail(@PathVariable Long donationOrganizationIdx) {
         DonationOrganizationDTO donationOrganizationDetail = donationService.getDonationOrganizationDetail(donationOrganizationIdx);
         return ResponseEntity.ok(donationOrganizationDetail);

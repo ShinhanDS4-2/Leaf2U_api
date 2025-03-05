@@ -141,6 +141,8 @@ public class AccountServiceImpl implements AccountService {
     public Map<String, Object> getAccountInfoById(Long memberIdx) {
         Account account = accountRepository.getAccountInfoByIdx(memberIdx).orElse(null);
 
+        System.out.println(account);
+
         /** (엔티티 -> DTO 변환) 공통 메서드 사용 */
         AccountDTO dto = entityToDTO(account);
 
@@ -166,7 +168,8 @@ public class AccountServiceImpl implements AccountService {
 
         // 비밀번호 일치하는지 확인
         // PasswordEncoder : 비밀번호의 암호와 및 검증을 담당하는 Spring Security 컴포넌트
-        if(!passwordEncoder.matches(inputPwd, account.getAccountPassword())){
+//      if(!passwordEncoder.matches(inputPwd, account.getAccountPassword())){
+        if(!inputPwd.equals(account.getAccountPassword())){  // API테스트용 임시 코드(위에거로 변경해야함)
             // ㄴ 사용자가 입력한 비밀번호가 DB에 저장된 비밀번호와 일치하는지 확인
             return 401;  // 비밀번호 불일치시 401반환
         }
@@ -186,23 +189,22 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-    /** (3) 예상 이자 조회 - 1만기일해지
-     * @param accountDTO
+    /** (3-1) 예상이자조회 - 만기일해지
+     * @param accountIdx
      * @return accountDTO(적금계좌), interestRateHistory(금리내역)
      */
     @Override
-    public Map<String, Object> getMaturityInterest(AccountDTO accountDTO) {
-        Long idx = accountDTO.getIdx();  // 계좌 Idx
+    public Map<String, Object> getMaturityInterest(Long accountIdx) {
         // 계좌 idx 기준으로 List<InterestRateHistory금리내역> 엔티티 반환
-        List<InterestRateHistory> interestRateHistory= accountRepository.getInterestRateHistory(accountDTO.getIdx());  // 금리내역
-        Account account = accountRepository.findByIdx(idx).orElse(null);
+        List<InterestRateHistory> interestRateHistory= accountRepository.getInterestRateHistory(accountIdx);  // 금리내역
+        Account account = accountRepository.findByIdx(accountIdx).orElse(null);
 
         LocalDateTime maturityDate = account.getMaturityDate();  // account엔티티에서 적금만기일 가져오기
         BigDecimal finalInterestRate = account.getFinalInterestRate();  // 최종금리
 
         /** 이자 계산(만기일 해지) START */
         // 이자 계산 공통 메서드(idx, 적용금리:최종금리, 해지일:만기일)
-        AccountDTO dto = calculateInterest(idx, finalInterestRate, maturityDate);
+        AccountDTO dto = calculateInterest(accountIdx, finalInterestRate, maturityDate);
         /** 이자 계산(만기일 해지) END */
 
         Map<String, Object> result = new HashMap<>();
@@ -213,26 +215,28 @@ public class AccountServiceImpl implements AccountService {
     }
 
     /** (3-2) 예상이자조회 - 오늘해지 (우대금리X)
-     * @param accountDTO (idx)
+     * @param accountIdx
      * @return accountDTO(적금계좌)
      */
     @Override
-    public Map<String, Object> getTodayInterest(AccountDTO accountDTO) {
-        Long idx = accountDTO.getIdx();  // 계좌 Idx
-        Account account = accountRepository.findByIdx(idx).orElse(null);
+    public Map<String, Object> getTodayInterest(Long accountIdx) {
+        Account account = accountRepository.findByIdx(accountIdx).orElse(null);
 
         LocalDateTime today = LocalDateTime.now();  // 오늘날짜
         LocalDateTime maturityDate = account.getMaturityDate();  // 적금만기일
         BigDecimal interestRate = account.getInterestRate();  // 기본금리
 
+        System.out.println("적금만기일" + maturityDate);  // 날짜형식 확인위한 코드
+        System.out.println("오늘날짜" + today);  // 날짜형식 확인위한 코드
+
         if(today.toLocalDate().equals(maturityDate.toLocalDate())) {  // 오늘날짜가 적금만기일이면 getMaturityInterest() -> 만기일이자조회 메서드 실행
             // .toLocalDate() 이용해서 날짜만 비교(시간X)
-            return getMaturityInterest(accountDTO);
+            return getMaturityInterest(accountIdx);
         }
 
         /** 이자 계산(만기일 해지) START */
         // 이자 계산 공통 메서드(idx, 적용금리:기본금리, 해지일:오늘)
-        AccountDTO dto = calculateInterest(idx, interestRate, today);
+        AccountDTO dto = calculateInterest(accountIdx, interestRate, today);
         /** 이자 계산(만기일 해지) END */
 
         Map<String, Object> result = new HashMap<>();
@@ -247,20 +251,21 @@ public class AccountServiceImpl implements AccountService {
      */
     @Override
     public Map<String, Object> getCustomDateInterest(AccountDTO accountDTO) {
-        Long idx = accountDTO.getIdx();  // 계좌 Idx
+        Long accountIdx = accountDTO.getIdx();  // 계좌 Idx
         LocalDateTime endDate = accountDTO.getEndDate();  // 종료일(사용자로부터 입력받은)
+        // ㄴ endData 사용자한테 입력받아서 DB에 "2025-03-05T15:45:10.385338200" 이런 형태로 들어가야함
 
-        Account account = accountRepository.findByIdx(idx).orElse(null);
+        Account account = accountRepository.findByIdx(accountIdx).orElse(null);
         LocalDateTime maturityDate = account.getMaturityDate();  // account엔티티 적금만기일
         BigDecimal interestRate = account.getInterestRate();  // account엔티티 기본금리
 
         if(endDate.toLocalDate().equals(maturityDate.toLocalDate())) {  // 사용자로부터 입력받은 날짜가 적금만기일이면 getMaturityInterest() -> 만기일이자조회 메서드 실행
-            return getMaturityInterest(accountDTO);
+            return getMaturityInterest(accountIdx);
         }
 
         /** 이자 계산(만기일 해지) START */
         // 이자 계산 공통 메서드(idx, 적용금리:기본금리, 해지일:선택일자)
-        AccountDTO dto = calculateInterest(idx, interestRate, endDate);
+        AccountDTO dto = calculateInterest(accountIdx, interestRate, endDate);
         /** 이자 계산(만기일 해지) END */
 
         Map<String, Object> result = new HashMap<>();
@@ -268,7 +273,7 @@ public class AccountServiceImpl implements AccountService {
         return result;
     }
 
-    /** (4) 계좌 해지 (중도해지이므로 우대금리 X)
+    /** (4) 계좌 해지 (중도해지이므로 우대금리 X)  =>  만약 해지하는 날짜가 만기일이라면? 만기 해지 화면으로 이동시켜야하나? ? ? ?
      * @param accountDTO idx, accountPassword(계좌 비밀번호)
      * @return 1(성공), 0(실패), 401(비밀번호 불일치)
      */
@@ -283,8 +288,10 @@ public class AccountServiceImpl implements AccountService {
         LocalDateTime endDate = LocalDateTime.now();  // 종료일 (=해지일)
 
         // 비밀번호 일치하는지 확인
-        if(!passwordEncoder.matches(inputPwd, account.getAccountPassword())){  // 해당 적금계좌의 현재 비밀번호를 DB에서 조회
-            // ㄴ 사용자가 입력한 비밀번호가 DB에 저장된 비밀번호와 일치하는지 확인
+//      if(!passwordEncoder.matches(inputPwd, account.getAccountPassword())){  // 해당 적금계좌의 현재 비밀번호를 DB에서 조회
+        if(!inputPwd.equals(account.getAccountPassword())){  // API테스트용 임시 코드(위에거로 변경해야함)
+
+                // ㄴ 사용자가 입력한 비밀번호가 DB에 저장된 비밀번호와 일치하는지 확인
             return 401;  // 비밀번호 불일치시 401반환
         }
         // 비밀번호가 일치하면 적금계좌 해지 ↓

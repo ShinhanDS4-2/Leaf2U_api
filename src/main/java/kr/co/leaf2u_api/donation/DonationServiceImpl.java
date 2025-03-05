@@ -23,6 +23,8 @@ public class DonationServiceImpl implements DonationService {
     public List<DonationOrganizationDTO> getDonationOrganizationList() {
         List<DonationOrganization> donationOrganizationList = donationOrganizationRepository.findAll();  // 레파지토리에서 후원 단체 목록 전체 가져옴 (실제 엔티티값)
 
+        System.out.println(donationOrganizationList); // 출력하여 데이터 확인
+
         // 엔티티를 DTO로 변환 후 반환
         return donationOrganizationList.stream()  // Stream을 이용하여 변환
                 .map(donationOrganization -> DonationOrganizationDTO.builder()  // builder 사용

@@ -43,7 +43,7 @@ public class AccountController {
 
     /** 적금 계좌 관리 - 시온 */
 
-    /** (1) 계좌 기본 정보 조회
+    /** (1) 계좌 기본정보 조회
      * @param memberIdx
      * @return AccountDTO
      */
@@ -72,21 +72,21 @@ public class AccountController {
 // ResponseEntity는 컨트롤러 계층에서 사용하는 것이 좋다 (서비스계층은 비즈니스 로직에 집중하고, HTTP 관련 로직은 컨트롤러에서 처리하도록)
 
     /** (3-1) 예상이자조회 - 만기일해지
-     * @param accountDTO (idx)
+     * @param accountIdx
      * @return account(적금계좌), interestRateHistory(금리내역)
      */
-    @GetMapping("/interest/maturity")
-    public ResponseEntity<Map<String, Object>> getMaturityInterest(@RequestBody AccountDTO accountDTO) {
-        return ResponseEntity.ok(accountService.getMaturityInterest(accountDTO));
+    @GetMapping("/interest/maturity/{accountIdx}")
+    public ResponseEntity<Map<String, Object>> getMaturityInterest(@PathVariable Long accountIdx) {
+        return ResponseEntity.ok(accountService.getMaturityInterest(accountIdx));
     }
 
     /** (3-2) 예상이자조회 - 오늘해지
-     * @param accountDTO (idx)
+     * @param accountIdx
      * @return Account(적금계좌)
      */
-    @GetMapping("/interest/today")  // 단밀 필드만 수정되는 경우에는 Patch 사용
-    public ResponseEntity<Map<String, Object>> getTodayInterest(@RequestBody AccountDTO accountDTO) {
-        return ResponseEntity.ok(accountService.getTodayInterest(accountDTO));
+    @GetMapping("/interest/today/{accountIdx}")  // 단밀 필드만 수정되는 경우에는 Patch 사용
+    public ResponseEntity<Map<String, Object>> getTodayInterest(@PathVariable Long accountIdx) {
+        return ResponseEntity.ok(accountService.getTodayInterest(accountIdx));
     }
 
     /** (3-3) 예상이자조회 - 선택일자 해지

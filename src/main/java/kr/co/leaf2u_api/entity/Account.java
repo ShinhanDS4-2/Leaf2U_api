@@ -60,7 +60,7 @@ public class Account extends BaseEntity{
     @Column(precision = 5)
     private BigDecimal interestAmount;
 
-    @Column(nullable = false)
+    @Column
     private LocalDateTime endDate;  // 종료일
 
     @Column(nullable = false)
