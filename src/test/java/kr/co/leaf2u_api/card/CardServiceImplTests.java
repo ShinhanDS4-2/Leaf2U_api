@@ -43,6 +43,9 @@ public class CardServiceImplTests {
         testCard.setBalance(BigDecimal.ZERO);
     }
 
+    /**
+     * 리프 카드 생성 테스트
+     */
     @Test
     void testCreateLeafCard() {
         when(memberRepository.findById(1L)).thenReturn(Optional.of(testMember));
@@ -61,6 +64,9 @@ public class CardServiceImplTests {
         verify(cardRepository, times(1)).save(any(Card.class));
     }
 
+    /**
+     * 사용자 본인 카드 등록 테스트
+     */
     @Test
     void testRegisterExistingCard() {
         when(memberRepository.findById(1L)).thenReturn(Optional.of(testMember));
@@ -68,8 +74,8 @@ public class CardServiceImplTests {
 
         CardDTO cardDTO = new CardDTO();
         cardDTO.setMemberIdx(1L);
-        cardDTO.setCardType('L');
-        cardDTO.setCardName("Leaf Card");
+        cardDTO.setCardType('C');
+        cardDTO.setCardName("Member Card");
         cardDTO.setCardNumber("1234-5678-9101-1121");
         cardDTO.setExpirationDate("2028-12-31");
         cardDTO.setBalance(BigDecimal.ZERO);
