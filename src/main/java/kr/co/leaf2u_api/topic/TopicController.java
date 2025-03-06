@@ -76,11 +76,14 @@ public class TopicController {
         }
     }
     @GetMapping("/fine-dust")
-    public ResponseEntity<Map<String, Object>> getFineDust(@RequestParam("location") String location) {
-        Map<String, Object> response = topicService.getFineDustInfo(location);
-        if (response.containsKey("error")) {
-            return ResponseEntity.status(404).body(response);
+    public ResponseEntity<Map<String, Object>> getFineDust() {
+        Map<String, Object> dustInfo = topicService.getFineDustInfo();
+
+        if (dustInfo.containsKey("error")) {
+            return ResponseEntity.status(500).body(dustInfo);
         }
-        return ResponseEntity.ok(response);
+
+        return ResponseEntity.ok(dustInfo);
     }
+
 }
