@@ -41,8 +41,7 @@ public class AccountController {
     }
 
 
-    /** 적금 계좌 관리 - 시온 */
-
+    /* 적금 계좌 관리 API - 시온 */
     /** (1) 계좌 기본정보 조회
      * @param memberIdx
      * @return AccountDTO
@@ -124,6 +123,19 @@ public class AccountController {
     public ResponseEntity<Map<String, Object>> getSavingInfo(@RequestBody Map<String, Object> param) {
 
         Map<String, Object> result = accountService.getSavingInfo(param);
+
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 적금 계좌 현재 상태 (단계 및 만기 확인)
+     * @param param (memberIdx)
+     * @return
+     */
+    @PostMapping("/current")
+    public ResponseEntity<Map<String, Object>> getAccountCurrent(@RequestBody Map<String, Object> param) {
+
+        Map<String, Object> result = accountService.getAccountCurrent(param);
 
         return ResponseEntity.ok(result);
     }

@@ -33,10 +33,19 @@ public class AccountDTO {
     private BigDecimal taxAmount;  // 세금액
     private BigDecimal interestAmount;  // (세후)이자
 
+    // 단계 확인 관련 추가 컬럼
+    private Long savingCnt;
+
     // 현재 잔액, 금리, 만기일 조회용 생성자
     public AccountDTO(BigDecimal balance, BigDecimal finalInterestRate, LocalDateTime maturityDate) {
         this.balance = balance;
         this.finalInterestRate = finalInterestRate;
+        this.maturityDate = maturityDate;
+    }
+
+    // 단계 및 만기 조회용 생성자
+    public AccountDTO(Long savingCnt, LocalDateTime maturityDate) {
+        this.savingCnt = savingCnt;
         this.maturityDate = maturityDate;
     }
 }
