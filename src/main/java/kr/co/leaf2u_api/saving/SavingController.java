@@ -42,6 +42,15 @@ public class SavingController {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * 적금 prime_rate
+     */
+    @PostMapping("/deposit")
+    public ResponseEntity<Map<String, Object>> processSavingDeposit(@RequestBody Map<String, Object> param) {
+        Map<String, Object> result = savingService.processSavingDeposit(param);
+        return ResponseEntity.ok(result);
+    }
+
 
 
 }

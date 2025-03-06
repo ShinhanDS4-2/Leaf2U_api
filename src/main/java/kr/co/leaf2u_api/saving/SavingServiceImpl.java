@@ -7,6 +7,7 @@ import kr.co.leaf2u_api.entity.InterestRateHistory;
 import kr.co.leaf2u_api.util.CommonUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,6 +24,8 @@ public class SavingServiceImpl implements SavingService {
     private final AccountRepository accountRepository;
 
     private final AccountService accountService;
+
+    private final SavingRepository savingRepository;
 
     /**
      * 납입 내역 리스트
@@ -104,6 +107,35 @@ public class SavingServiceImpl implements SavingService {
                 null,
                 null
         );
+    }
+
+
+    @Transactional
+    public Map<String, Object> processSavingDeposit(Map<String, Object> param) {
+        Map<String, Object> result = new HashMap<>();
+
+        Long accountIdx = Long.parseLong(String.valueOf(param.get("accountIdx")));
+
+        // 🔹 1️⃣ 카드 잔액 차감
+        savingRepository.updateCardBalance(accountIdx);
+
+        // 🔹 2️⃣ 적금 납입 내역 추가
+        savingRepository.insertSavingHistory(accountIdx);
+
+        // 🔹 3️⃣ 매일 금리 (D) 추가
+        savingRepository.insertDailyInterest(accountIdx);
+
+        // 🔹 4️⃣ 7번째 납입 시 연속 금리 (W) 추가
+        savingRepository.insertWeeklyInterest(accountIdx);
+
+        // 🔹 5️⃣ prime_rate 업데이트
+        savingRepository.updatePrimeRate(accountIdx);
+
+        // 🔹 6️⃣ 최종 금리 업데이트
+        savingRepository.updateFinalInterestRate(accountIdx);
+
+        result.put("message", "적금 납입이 완료되었습니다.");
+        return result;
     }
 
 }
