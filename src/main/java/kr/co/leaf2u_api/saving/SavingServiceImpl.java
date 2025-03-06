@@ -1,15 +1,13 @@
 package kr.co.leaf2u_api.saving;
 
-import kr.co.leaf2u_api.account.AccountDTO;
 import kr.co.leaf2u_api.account.AccountRepository;
-import kr.co.leaf2u_api.entity.Account;
+import kr.co.leaf2u_api.account.AccountService;
 import kr.co.leaf2u_api.entity.AccountHistory;
 import kr.co.leaf2u_api.entity.InterestRateHistory;
 import kr.co.leaf2u_api.util.CommonUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -23,6 +21,8 @@ public class SavingServiceImpl implements SavingService {
     private final InterestRateHistoryRepository interestRateRepository;
 
     private final AccountRepository accountRepository;
+
+    private final AccountService accountService;
 
     /**
      * 납입 내역 리스트
@@ -58,9 +58,30 @@ public class SavingServiceImpl implements SavingService {
         result.put("list", dtoList);
 
         // 계좌 정보
-        Long memberIdx = Long.parseLong(String.valueOf(param.get("memberIdx")));
-        Optional<AccountDTO> accountDTO = entityToDTOByAccount(accountRepository.findAccountByMember(memberIdx));
-        result.put("info", accountDTO);
+        Map<String, Object> info = accountService.getSavingInfo(param);
+        result.put("info", info);
+
+        return result;
+    }
+
+    /**
+     * 챌린지 현황
+     * @param param
+     * @return
+     */
+    @Override
+    public Map<String, Object> getChallengeList(Map<String, Object> param) {
+
+        Map<String, Object> result = new HashMap<>();
+
+        // 납입일 리스트
+        Long accountIdx = Long.parseLong(String.valueOf(param.get("accountIdx")));
+        List<String> paymentDateList = accountHistoryRepository.getFormatPaymentDate(accountIdx);
+        result.put("paymentDateList", paymentDateList);
+
+        // 챌린지 별 count
+        Map<String, Object> cnt = accountHistoryRepository.getChallengeCnt(accountIdx);
+        result.put("challengeCnt", cnt);
 
         return result;
     }
@@ -85,15 +106,4 @@ public class SavingServiceImpl implements SavingService {
         );
     }
 
-    /**
-     * 적금 계좌 엔티티 -> DTO
-     * @param account
-     * @return
-     */
-    private Optional<AccountDTO> entityToDTOByAccount(Optional<Account> account) {
-        return account.map(entity -> new AccountDTO(
-                entity.getBalance(),
-                entity.getFinalInterestRate()
-        ));
-    }
 }

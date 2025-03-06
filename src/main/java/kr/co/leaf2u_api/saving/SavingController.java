@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -26,6 +25,19 @@ public class SavingController {
     public ResponseEntity<Map<String, Object>> getSavingHistoryList(@RequestBody Map<String, Object> param) {
 
         Map<String, Object> result = savingService.getSavingHistoryList(param);
+
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 챌린지 현황
+     * @param param (memberIdx, accountIdx)
+     * @return
+     */
+    @PostMapping("/challenge/list")
+    public ResponseEntity<Map<String, Object>> getChallengeList(@RequestBody Map<String, Object> param) {
+
+        Map<String, Object> result = savingService.getChallengeList(param);
 
         return ResponseEntity.ok(result);
     }

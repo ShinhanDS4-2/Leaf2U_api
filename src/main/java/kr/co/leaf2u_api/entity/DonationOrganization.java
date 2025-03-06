@@ -5,7 +5,7 @@ import kr.co.leaf2u_api.donation.DonationOrganizationDTO;
 import lombok.*;
 
 @Entity  // DB테이블과 매핑되는 엔티티 클래스
-@Table(name="DONATION_ORGANIZATION")  // 실제 DB 테이블명 지정
+@Table(name="donation_organization")  // 실제 DB 테이블명 지정
 @Getter
 @Setter
 @ToString
