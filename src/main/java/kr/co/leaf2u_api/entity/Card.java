@@ -21,10 +21,6 @@ public class Card extends BaseEntity {
     @JoinColumn(nullable = false,name="member_idx")
     private Member member;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(nullable = false,name = "saving_account_idx")
-    private Account account;
-
     @Column(nullable = false)
     private char cardType;
 

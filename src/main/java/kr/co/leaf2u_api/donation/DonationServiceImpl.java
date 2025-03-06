@@ -1,6 +1,7 @@
 package kr.co.leaf2u_api.donation;
 
 import kr.co.leaf2u_api.entity.DonationOrganization;
+import kr.co.leaf2u_api.saving.AccountHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,12 @@ public class DonationServiceImpl implements DonationService {
 
     private final DonationOrganizationRepository donationOrganizationRepository;  // 후원단체 레파지토리 주입
     private final DonationHistoryRepository donationHistoryRepository;  // 후원내역 레파지토리 주입
+    private final AccountHistoryRepository accountHistoryRepository; // 납입 내역 레파지토리
+
+    /* 각 항목 별 탄소발자국 */
+    private final double TUMBLER_CARBON = 45.84;
+    private final double RECEIPT_CARBON = 3;
+    private final double BICYCLE_CARBON = 2278;
 
 // 1. 후원단체 리스트 페이지 관련
     /** (1)후원단체 리스트 조회 (완료)
@@ -137,6 +144,18 @@ public class DonationServiceImpl implements DonationService {
 
         result.put("my_ratio", myRatio);
         result.put("age_ratio", ageRatio);
+
+        // 탄소발자국 계산
+        Long accountIdx = Long.parseLong(String.valueOf(param.get("accountIdx")));
+        Map<String, Object> challengeCnt = accountHistoryRepository.getChallengeCnt(accountIdx);
+
+        long tumbler = (long) challengeCnt.get("countT");
+        long receipt = (long) challengeCnt.get("countR");
+        long bicycle = (long) challengeCnt.get("countC");
+
+        double carbon = (tumbler * TUMBLER_CARBON) + (receipt * RECEIPT_CARBON) + (bicycle * BICYCLE_CARBON);
+        carbon = Math.round(carbon * 100) / 100.0;
+        result.put("carbon", carbon);
 
         return result;
     }
