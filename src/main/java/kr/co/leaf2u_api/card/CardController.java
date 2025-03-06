@@ -14,6 +14,11 @@ public class CardController {
 
     private final CardService cardService;
 
+    /**
+     * 리프 카드 등록
+     * @param cardDTO
+     * @return
+     */
     @PostMapping("/new")
     public ResponseEntity<CardDTO> createLeafCard(@RequestBody CardDTO cardDTO) {
 
@@ -21,6 +26,11 @@ public class CardController {
         return ResponseEntity.ok(createdCard);
     }
 
+    /**
+     * 사용자 본인 카드 등록
+     * @param cardDTO
+     * @return
+     */
     @PostMapping("/exist")
     public ResponseEntity<CardDTO> existCard(@RequestBody CardDTO cardDTO) {
 

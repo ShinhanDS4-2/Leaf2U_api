@@ -32,6 +32,11 @@ public class AccountServiceImpl implements AccountService {
     private final CardRepository cardRepository;
     private final PasswordEncoder passwordEncoder; // 비밀번호 암호화 및 검증을 위한 인코더
 
+    /**
+     * 적금 계좌 생성
+     * @param accountDTO
+     * @return
+     */
     @Transactional
     @Override
     public AccountDTO createAccount(AccountDTO accountDTO) {
