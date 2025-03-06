@@ -12,4 +12,6 @@ public interface TopicService {
 
     Map<String, Object> getNews(String keyword);
     String createQuiz(String title, String content);
+
+    Map<String, Object> getFineDustInfo(String location);
 }

@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +22,9 @@ public class TopicServiceImpl implements TopicService {
 
     @Value("${newsapi.api.key}")
     private String NEWS_API_KEY;
+
+    @Value("${finedust.api.key}")
+    private String FINE_DUST_API_KEY;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -66,5 +71,47 @@ public class TopicServiceImpl implements TopicService {
     // OpenAIService를 활용하여 퀴즈 생성
     public String createQuiz(String title, String content) {
         return openaiService.createQuiz(title, content);
+    }
+    //미세먼지api 가져오기
+    public Map<String, Object> getFineDustInfo(String location) {
+        String url = "http://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty"
+                + "?stationName=" + location
+                + "&dataTerm=daily"
+                + "&ver=1.3"
+                + "&serviceKey=" + FINE_DUST_API_KEY
+                + "&returnType=json";
+
+        Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+        List<Map<String, Object>> items = (List<Map<String, Object>>) ((Map<String, Object>) response.get("response")).get("body");
+
+        if (items == null || items.isEmpty()) {
+            return Map.of("error", "No data found for location: " + location);
+        }
+
+        Map<String, Object> latestData = items.get(0);
+        int pm10 = Integer.parseInt((String) latestData.get("pm10Value"));
+        int pm25 = Integer.parseInt((String) latestData.get("pm25Value"));
+
+        String pm10Status = getFineDustStatus(pm10, true);
+        String pm25Status = getFineDustStatus(pm25, false);
+
+        String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+        return Map.of(
+                "location", location,
+                "timestamp", currentTime,
+                "pm10", pm10,
+                "pm10Status", pm10Status,
+                "pm25", pm25,
+                "pm25Status", pm25Status
+        );
+    }
+
+    private String getFineDustStatus(int value, boolean isPm10) {
+        if (isPm10) {
+            return (value <= 80) ? "좋음" : (value <= 150) ? "보통" : "나쁨";
+        } else {
+            return (value <= 35) ? "좋음" : (value <= 75) ? "보통" : "나쁨";
+        }
     }
 }
