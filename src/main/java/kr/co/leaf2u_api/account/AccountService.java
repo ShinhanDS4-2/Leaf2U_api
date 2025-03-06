@@ -21,6 +21,6 @@ public interface AccountService {
     int terminateAccount(AccountDTO accountDTO);  // (4) 계좌 해지
 
     /* 메인화면에 필요한 api - 문경미 */
-    Map<String, Object> getSavingInfo(Map<String, Object> param);    // 적금 계좌의 잔액, 총금리 정보
-
+    Map<String, Object> getSavingInfo(Map<String, Object> param);       // 적금 계좌의 잔액, 총금리 정보
+    Map<String, Object> getAccountCurrent(Map<String, Object> param);   // 적금 계좌 현재 상태 (단계 및 만기 확인)
 }

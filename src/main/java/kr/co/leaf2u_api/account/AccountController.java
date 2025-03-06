@@ -128,4 +128,17 @@ public class AccountController {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * 적금 계좌 현재 상태 (단계 및 만기 확인)
+     * @param param (memberIdx)
+     * @return
+     */
+    @PostMapping("/current")
+    public ResponseEntity<Map<String, Object>> getAccountCurrent(@RequestBody Map<String, Object> param) {
+
+        Map<String, Object> result = accountService.getAccountCurrent(param);
+
+        return ResponseEntity.ok(result);
+    }
+
 }

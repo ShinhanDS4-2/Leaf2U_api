@@ -321,6 +321,7 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
+    /* 메인화면에 필요한 api - 문경미 */
     /**
      * 적금 계좌의 잔액, 총금리 정보
      * @param param (memberIdx)
@@ -350,6 +351,49 @@ public class AccountServiceImpl implements AccountService {
         return result;
     }
 
+    /**
+     * 적금 계좌 현재 상태 (단계 및 만기 확인)
+     * @param param (memberIdx)
+     * @return
+     */
+    @Override
+    public Map<String, Object> getAccountCurrent(Map<String, Object> param) {
+
+        Map<String, Object> result = new HashMap<>();
+
+        Long memberIdx = Long.parseLong(String.valueOf(param.get("memberIdx")));
+        Optional<AccountDTO> accountDTO = entityToDTOWithCurrent(accountRepository.findAccountByMember(memberIdx));
+
+        if (accountDTO.isPresent()) {
+            AccountDTO dto = accountDTO.get();
+
+            // 만기일 확인
+            LocalDate today = LocalDate.now();
+            LocalDate maturityDate = dto.getMaturityDate().toLocalDate();
+
+            if (maturityDate.isEqual(today)) {
+                result.put("maturity_yn", "Y");
+            } else {
+                result.put("maturity_yn", "N");
+            }
+
+            // 단계
+            int step = 1;
+            Long savingCnt = dto.getSavingCnt();
+
+            if (savingCnt >= 21) {
+                step = 4;
+            } else if (savingCnt < 21 && savingCnt >= 14) {
+                step = 3;
+            } else if (savingCnt < 14 && savingCnt >= 7) {
+                step = 2;
+            }
+            result.put("account_step", step);
+        }
+
+        return result;
+    }
+
 
 /** ★★★★★★★★★★★     아래는 공통으로 쓰이는 메서드 분리     ★★★★★★★★★★★ */
 
@@ -357,6 +401,7 @@ public class AccountServiceImpl implements AccountService {
      * account 엔티티 컬럼 17개 전체에 대해 DTO 객체에 기본값을 설정하는 공통 메서드 => 가져다 쓸 때 필요한 값 덮어써서 사용 */
     public AccountDTO entityToDTO(Account account) {
         AccountDTO dto = new AccountDTO();
+
         // 엔티티의 값을 DTO의 필드에 설정
         dto.setIdx(account.getIdx());  // 계좌 Idx
         dto.setMemberIdx(account.getMember().getIdx());  // 사용자 Idx
@@ -375,6 +420,7 @@ public class AccountServiceImpl implements AccountService {
         dto.setUpdateDate(account.getUpdateDate());  // 수정일
         dto.setMaturityDate(account.getMaturityDate());  // 만기일
         dto.setInterestAmount(account.getInterestAmount());  // 세후 이자
+
         return dto;
     }
 
@@ -387,6 +433,18 @@ public class AccountServiceImpl implements AccountService {
         return account.map(entity -> new AccountDTO(
                 entity.getBalance(),
                 entity.getFinalInterestRate(),
+                entity.getMaturityDate()
+        ));
+    }
+
+    /**
+     * 적금 단계, 만기일 엔티티 -> DTO
+     * @param account
+     * @return
+     */
+    private Optional<AccountDTO> entityToDTOWithCurrent(Optional<Account> account) {
+        return account.map(entity -> new AccountDTO(
+                entity.getSavingCnt(),
                 entity.getMaturityDate()
         ));
     }
