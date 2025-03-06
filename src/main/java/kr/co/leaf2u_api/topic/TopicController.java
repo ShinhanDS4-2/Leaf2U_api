@@ -15,7 +15,7 @@ import java.util.Map;
 @RequestMapping("/api/topic")
 @RequiredArgsConstructor
 public class TopicController {
-    //
+
     private final TopicService topicService;
 
     // 카테고리별 Tip 가져오기
@@ -30,9 +30,6 @@ public class TopicController {
         return topicService.saveEcoTips(ecoTips);
     }
 
-    /**
-     * 뉴스 기사 가져오기
-     */
     @GetMapping("/news")
     public ResponseEntity<Map<String, Object>> getNews(@RequestParam("q") String keyword) {
 
@@ -44,9 +41,6 @@ public class TopicController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * 가져온 뉴스 기사로 OpenAI를 활용해 퀴즈 생성
-     */
     @GetMapping("/news/quiz")
     public ResponseEntity<Map<String, Object>> getQuiz(@RequestParam("q") String keyword) {
         Map<String, Object> newsData = topicService.getNews(keyword);
@@ -67,7 +61,7 @@ public class TopicController {
             Map<String, Object> quizData = objectMapper.readValue(quizJson, new TypeReference<Map<String, Object>>() {
             });
 
-            // 순서를 유지하는 LinkedHashMap 사용 (title, quiz, answer 순으로 출력)
+            // 순서를 유지하는 LinkedHashMap 사용
             Map<String, Object> orderedResponse = new LinkedHashMap<>();
             orderedResponse.put("title", newsData.get("title"));
             orderedResponse.put("quiz", quizData.get("quiz"));

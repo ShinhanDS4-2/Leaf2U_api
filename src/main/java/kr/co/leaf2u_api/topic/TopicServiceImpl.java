@@ -11,7 +11,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
-//
+
 @Service
 @RequiredArgsConstructor
 public class TopicServiceImpl implements TopicService {
@@ -35,9 +35,6 @@ public class TopicServiceImpl implements TopicService {
         return topicRepository.save(ecoTips);
     }
 
-    /**
-     * 뉴스 기사 가져오기
-     */
     public Map<String, Object> getNews(String keyword) {
         String url = "https://newsapi.org/v2/everything?q=" + keyword + "+&language=ko&sortBy=relevancy&apiKey=" + NEWS_API_KEY;
 
@@ -57,7 +54,7 @@ public class TopicServiceImpl implements TopicService {
         String publishedAt = (String) article.get("publishedAt");
         String formattedDate = (publishedAt != null && publishedAt.length() >= 10) ? publishedAt.substring(0, 10) : "N/A";
 
-        // title, description, url, date 뽑아냄 (content는 추가 결제 필요하다해서 description으로 대체)
+
         return Map.of(
                 "title", (String) article.get("title"),
                 "description", (String) article.get("description"),
