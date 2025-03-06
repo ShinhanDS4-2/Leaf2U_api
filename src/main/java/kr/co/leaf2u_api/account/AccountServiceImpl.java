@@ -2,6 +2,7 @@ package kr.co.leaf2u_api.account;
 
 import jakarta.transaction.Transactional;
 import kr.co.leaf2u_api.card.CardRepository;
+import kr.co.leaf2u_api.donation.DonationHistoryRepository;
 import kr.co.leaf2u_api.entity.*;
 import kr.co.leaf2u_api.member.MemberRepository;
 import kr.co.leaf2u_api.notice.NoticeService;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.resizers.BicubicResizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +33,7 @@ public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
     private final MemberRepository memberRepository;
     private final CardRepository cardRepository;
+    private final DonationHistoryRepository donationHistoryRepository;
     private final PasswordEncoder passwordEncoder; // 비밀번호 암호화 및 검증을 위한 인코더
 
     private final NoticeService noticeService;
@@ -414,6 +417,50 @@ public class AccountServiceImpl implements AccountService {
                 step = 2;
             }
             result.put("account_step", step);
+        }
+
+        return result;
+    }
+
+    /**
+     * 만기 해지 프로세스
+     * @param param
+     * @return
+     */
+    @Override
+    @Transactional
+    public Boolean maturityProcess(Map<String, Object> param) {
+
+        Boolean result  = true;
+
+        try {
+            // saving_account update
+            Long accountIdx = Long.parseLong(String.valueOf(param.get("accountIdx")));
+            BigDecimal interestAmount = new BigDecimal(String.valueOf(param.get("afterTaxInterest")));
+            accountRepository.updateMaturity(accountIdx, interestAmount);
+
+            // donation_history insert
+            Long memberIdx = Long.parseLong(String.valueOf(param.get("memberIdx")));
+            Long organisationIdx = Long.parseLong(String.valueOf(param.get("organisationIdx")));
+            BigDecimal interest = new BigDecimal(String.valueOf(param.get("interest")));
+            BigDecimal principal = new BigDecimal(String.valueOf(param.get("principal")));
+            BigDecimal point = new BigDecimal(String.valueOf(param.get("point")));
+            DonationHistory donationHistory = DonationHistory.builder()
+                    .member(Member.builder().idx(memberIdx).build())
+                    .account(Account.builder().idx(accountIdx).build())
+                    .donationOrganization(new DonationOrganization() {{
+                        setIdx(organisationIdx);
+                     }})
+                    .interest(interest)
+                    .principal(principal)
+                    .point(point)
+                    .donationAmount(interest.add(principal).add(point))
+                    .donationDate(LocalDateTime.now())
+                    .build();
+            donationHistoryRepository.save(donationHistory);
+
+        } catch (Exception e) {
+            result = false;
         }
 
         return result;

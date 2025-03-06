@@ -4,9 +4,11 @@ import kr.co.leaf2u_api.entity.Account;
 import kr.co.leaf2u_api.entity.AccountHistory;
 import kr.co.leaf2u_api.entity.InterestRateHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,6 +42,19 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     List<AccountHistory> getAccountHistory(@Param("savingAccountIdx") Long savingAccountIdx);
 
     // (4) 계좌 해지 (findByIdx사용)
+
+
+    /* 만기 해지  - 문경미 */
+    @Modifying
+    @Query("""
+        UPDATE Account sa
+        SET sa.interestAmount = :afterTaxInterest,
+            sa.accountStatus = 'M',
+            sa.endDate = now(),
+            sa.updateDate = now()
+        WHERE sa.idx = :accountIdx
+    """)
+    void updateMaturity(@Param("accountIdx") Long accountIdx, @Param("afterTaxInterest")BigDecimal interestAmount);
 
 
 
