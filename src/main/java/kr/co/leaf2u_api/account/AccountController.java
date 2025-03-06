@@ -41,8 +41,7 @@ public class AccountController {
     }
 
 
-    /** 적금 계좌 관리 - 시온 */
-
+    /* 적금 계좌 관리 API - 시온 */
     /** (1) 계좌 기본정보 조회
      * @param memberIdx
      * @return AccountDTO

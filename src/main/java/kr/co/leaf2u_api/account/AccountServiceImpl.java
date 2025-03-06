@@ -203,9 +203,7 @@ public class AccountServiceImpl implements AccountService {
         Account account = accountRepository.findByIdx(accountIdx).orElse(null);
 
         LocalDateTime maturityDate = account.getMaturityDate();  // account엔티티에서 적금만기일 가져오기
-        BigDecimal finalInterestRate = account.getFinalInterestRate().multiply(new BigDecimal("0.01"));  // 최종금리
-
-        System.out.println(finalInterestRate);
+        BigDecimal finalInterestRate = account.getFinalInterestRate().multiply(new BigDecimal("0.01"));  // 최종금리 2.7% 형식으로 저장되어 있어서 * 0.01 으로 0.027로 변환해야함
 
         /** 이자 계산(만기일 해지) START */
         // 이자 계산 공통 메서드(idx, 적용금리:최종금리, 해지일:만기일)
@@ -229,10 +227,7 @@ public class AccountServiceImpl implements AccountService {
 
         LocalDateTime today = LocalDateTime.now();  // 오늘날짜
         LocalDateTime maturityDate = account.getMaturityDate();  // 적금만기일
-        BigDecimal interestRate = account.getInterestRate();  // 기본금리
-
-        System.out.println("적금만기일" + maturityDate);  // 날짜형식 확인위한 코드
-        System.out.println("오늘날짜" + today);  // 날짜형식 확인위한 코드
+        BigDecimal interestRate = account.getInterestRate().multiply(new BigDecimal("0.01"));;  // 기본금리 1.0%로 저장되어 있음. 0.01로 변환
 
         if(today.toLocalDate().equals(maturityDate.toLocalDate())) {  // 오늘날짜가 적금만기일이면 getMaturityInterest() -> 만기일이자조회 메서드 실행
             // .toLocalDate() 이용해서 날짜만 비교(시간X)
@@ -261,8 +256,8 @@ public class AccountServiceImpl implements AccountService {
         // ㄴ endData 사용자한테 입력받아서 DB에 "2025-03-05T15:45:10.385338200" 이런 형태로 들어가야함
 
         Account account = accountRepository.findByIdx(accountIdx).orElse(null);
-        LocalDateTime maturityDate = account.getMaturityDate();  // account엔티티 적금만기일
-        BigDecimal interestRate = account.getInterestRate();  // account엔티티 기본금리
+        LocalDateTime maturityDate = account.getMaturityDate();  // 적금만기일
+        BigDecimal interestRate = account.getInterestRate().multiply(new BigDecimal("0.01"));;  // 기본금리
 
         if(endDate.toLocalDate().equals(maturityDate.toLocalDate())) {  // 사용자로부터 입력받은 날짜가 적금만기일이면 getMaturityInterest() -> 만기일이자조회 메서드 실행
             return getMaturityInterest(accountIdx);
@@ -289,7 +284,7 @@ public class AccountServiceImpl implements AccountService {
         String inputPwd = accountDTO.getAccountPassword();  // 사용자가 입력한 계좌 비밀번호
 
         Account account = accountRepository.findByIdx(idx).orElse(null);  // 계좌 idx 기준으로 Account 엔티티 조회
-        BigDecimal interestRate = account.getInterestRate();  // 기본금리
+        BigDecimal interestRate = account.getInterestRate().multiply(new BigDecimal("0.01"));;  // 기본금리
         LocalDateTime endDate = LocalDateTime.now();  // 종료일 (=해지일)
 
         // 비밀번호 일치하는지 확인
@@ -403,7 +398,7 @@ public class AccountServiceImpl implements AccountService {
 /** ★★★★★★★★★★★     아래는 공통으로 쓰이는 메서드 분리     ★★★★★★★★★★★ */
 
     /** [account 엔티티 -> DTO 변환 공통 메서드]
-     * account 엔티티 컬럼 17개 전체에 대해 DTO 객체에 기본값을 설정하는 공통 메서드 => 가져다 쓸 때 필요한 값 덮어써서 사용 */
+     * account 엔티티 컬럼에 대해 DTO 객체에 기본값을 설정하는 공통 메서드 => 가져다 쓸 때 필요한 값 덮어써서 사용 */
     public AccountDTO entityToDTO(Account account) {
         AccountDTO dto = new AccountDTO();
 
@@ -454,41 +449,29 @@ public class AccountServiceImpl implements AccountService {
      * param 계좌 idx, 적용금리(최종금리 or 기본금리), 해지일(만기일 or 오늘 or 선택일자)
      * */
     public AccountDTO calculateInterest(Long idx, BigDecimal AppliedInterestRate, LocalDateTime terminationDate) {
-        Account account = accountRepository.findByIdx(idx).orElse(null);  // 적금계좌 엔티티
-        BigDecimal balance = account.getBalance();  // 잔액
-        LocalDateTime createDate = account.getCreateDate();  // 적금가입일
-        BigDecimal dutyRate = account.getDutyRate();  // 세금비율 (0.154 고정값)
-
-        List<AccountHistory> accountHistoryList = accountRepository.getAccountHistory(idx);  // 납입내역 엔티티 리스트
+        Account account = accountRepository.findByIdx(idx).orElse(null);  // // 적금계좌idx에 대한 적금계좌 엔티티
+        List<AccountHistory> accountHistoryList = accountRepository.getAccountHistory(idx);  // 적금계좌idx에 대한 납입내역 엔티티 리스트
         BigDecimal daysInYear = new BigDecimal(365);  // 1년 365일 BigDecimal으로 변환
-        BigDecimal totalPreTaxInterestAmount = BigDecimal.ZERO;  // 총 이자금액(세전)
+        BigDecimal totalPreTaxInterestAmount = BigDecimal.ZERO;  // 총 이자금액(세전) = 0;
 
-        for (AccountHistory accountHistory : accountHistoryList) {  // 납입내역 list 반복
+        /** [이자 계산 공식]
+         * 예치일 = 해지일(포함) - 납입일(포함)
+         * 이자계산기간 = 예치일/365
+         * 총이자(세전) = ∑(납입금액 × 적용금리 × 이자계산기간)
+         * */
+        for (AccountHistory accountHistory : accountHistoryList) {
             BigDecimal paymentAmount = accountHistory.getPaymentAmount();  // 납입 금액
             LocalDateTime paymentDate = accountHistory.getPaymentDate();  // 납입일
             BigDecimal depositDate = new BigDecimal(ChronoUnit.DAYS.between(paymentDate, terminationDate) + 1);  // 예치일수 = 해지일-납입일
-                    // ChronoUnit.DAYS.between() => 두 날짜 사이의 차이를 일(day) 단위로 계산하여 반환
-
+                                     // ChronoUnit.DAYS.between() => 두 날짜 사이의 차이를 일(day) 단위로 계산하여 반환
             BigDecimal interestPeriod = depositDate.divide(daysInYear, 7, BigDecimal.ROUND_HALF_UP);  // 이자계산기간 = 예치일수/365
-
-            BigDecimal preTaxInterestAmount = paymentAmount.multiply(AppliedInterestRate).multiply(interestPeriod);
-            // 이자금액(세전) = 납입금액*적용금리*이자계산기간
+            BigDecimal preTaxInterestAmount = paymentAmount.multiply(AppliedInterestRate).multiply(interestPeriod);  // 이자금액(세전) = 납입금액*적용금리*이자계산기간
             totalPreTaxInterestAmount = totalPreTaxInterestAmount.add(preTaxInterestAmount);  // 총이자금액(세전) += 이자금액(세전)
         }
 
-        /** 이자 계산 공식
-         * saving_account_history에서 납입금액이랑 납입일 가져오고 (적금계좌idx로 조인, 리스트로 다 가져옴)
-         * 예치일 = 해지일(포함) - 납입일(포함)
-         * 이자=∑(납입금액 × 365연 이율 × 예치 일수)
-         * 예치일수 = 예치일/365 인가?
-         * */
+        BigDecimal taxAmount = totalPreTaxInterestAmount.multiply(account.getDutyRate());  // 세금액 = 이자금액(세전) × 세금비율(0.154 고정값)
+        BigDecimal interestAmount = totalPreTaxInterestAmount.subtract(taxAmount);  // 이자금액(세후) = 이자금액(세전) - 세금액
 
-        // 세금액 = 이자금액(세전) × 세금비율
-        BigDecimal taxAmount = totalPreTaxInterestAmount.multiply(dutyRate);
-        // 이자금액(세후) = 이자금액(세전) - 세금액
-        BigDecimal interestAmount = totalPreTaxInterestAmount.subtract(taxAmount);
-
-        /** (엔티티 -> DTO 변환) 공통 메서드 사용 */
         AccountDTO dto = entityToDTO(account);  // (엔티티 -> DTO 변환) 공통 메서드 사용
         dto.setEndDate(terminationDate);  // 종료일(=해지일)
         dto.setPreTaxInterestAmount(totalPreTaxInterestAmount.setScale(0, RoundingMode.DOWN));  // 총이자(세전)
@@ -497,5 +480,4 @@ public class AccountServiceImpl implements AccountService {
 
         return dto;
     }
-
 }
