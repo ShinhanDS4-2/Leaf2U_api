@@ -2,6 +2,7 @@ package kr.co.leaf2u_api.point;
 
 import kr.co.leaf2u_api.entity.Member;
 import kr.co.leaf2u_api.entity.Point;
+import kr.co.leaf2u_api.notice.NoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +10,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -16,6 +19,7 @@ import java.util.Optional;
 public class PointService {
 
     private final PointRepository pointRepository;
+    private final NoticeService noticeService;
 
     @Transactional
     public boolean checkIn(Member member) {
@@ -41,6 +45,16 @@ public class PointService {
                 .build();
 
         pointRepository.save(point);
+
+        /* 출석체크 포인트 알림 insert - 문경미 */
+        Map<String, Object> noticeParam = new HashMap<>();
+        noticeParam.put("memberIdx", member.getIdx());
+        noticeParam.put("title", "포인트 획득");
+        noticeParam.put("content", "출석체크 10P 획득!");
+        noticeParam.put("category", "P");
+
+        noticeService.registNotice(noticeParam);
+
         return true;
     }
 }
