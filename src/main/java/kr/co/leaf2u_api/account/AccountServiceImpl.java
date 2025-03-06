@@ -4,9 +4,12 @@ import jakarta.transaction.Transactional;
 import kr.co.leaf2u_api.card.CardRepository;
 import kr.co.leaf2u_api.entity.*;
 import kr.co.leaf2u_api.member.MemberRepository;
+import kr.co.leaf2u_api.notice.NoticeService;
 import kr.co.leaf2u_api.util.CommonUtil;
 import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.resizers.BicubicResizer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +32,8 @@ public class AccountServiceImpl implements AccountService {
     private final MemberRepository memberRepository;
     private final CardRepository cardRepository;
     private final PasswordEncoder passwordEncoder; // 비밀번호 암호화 및 검증을 위한 인코더
+
+    private final NoticeService noticeService;
 
     /**
      * 적금 계좌 생성
@@ -90,7 +95,27 @@ public class AccountServiceImpl implements AccountService {
         account.setMaturityDate(LocalDateTime.now().plusMonths(1));
         account.setInterestAmount(primeRate);
 
+        account.setDutyRate(new BigDecimal("15.4"));
+        account.setFinalInterestRate(baseInterestRate.add(primeRate));
+        account.setPaymentAmount(accountDTO.getPaymentAmount());
+        account.setSavingCnt(0L);
+
         Account savedAccount=accountRepository.save(account);
+
+        /**
+         * TODO account_card, interest_rate_history insert
+         */
+
+
+        /* 적급 가입 알림 insert - 문경미 */
+        Map<String, Object> noticeParam = new HashMap<>();
+        noticeParam.put("memberIdx", member.getIdx());
+        noticeParam.put("title", "한달적금 개설 완료");
+        noticeParam.put("content", "한달적금이 개설되었습니다. 지금 바로 입금하고 우대금리 받아보세요!");
+        noticeParam.put("category", "O");
+
+        noticeService.registNotice(noticeParam);
+
         return EntityToDTO(savedAccount);
     }
 
