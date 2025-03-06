@@ -1,6 +1,7 @@
 package kr.co.leaf2u_api.account;
 
 import kr.co.leaf2u_api.entity.Account;
+import kr.co.leaf2u_api.entity.AccountHistory;
 import kr.co.leaf2u_api.entity.InterestRateHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -33,6 +34,10 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     // 금리내역 조회 -> InterestRateHistory의 account.idx(saving_account_idx)를 기준으로 조회
     @Query("SELECT i FROM InterestRateHistory i WHERE i.account.idx=:savingAccountIdx")
     List<InterestRateHistory> getInterestRateHistory(@Param("savingAccountIdx") Long savingAccountIdx);
+
+    // 납입내역 조회 -> AccountHistory의 account.idx(saving_account_idx)를 기준으로 조회
+    @Query("SELECT ah FROM AccountHistory ah WHERE ah.account.idx=:savingAccountIdx")
+    List<AccountHistory> getAccountHistory(@Param("savingAccountIdx") Long savingAccountIdx);
 
     // (4) 계좌 해지 (findByIdx사용)
 
