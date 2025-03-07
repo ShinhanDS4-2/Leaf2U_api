@@ -12,8 +12,8 @@ import java.util.Optional;
 
 @Repository
 public interface DonationHistoryRepository extends JpaRepository<DonationHistory, Long> {
-                                                                 // ㄴ <관리할 엔티티 클래스(DB테이블과 매핑), 엔티티의 PK 타입>
-// (1) 후원내역 리스트 반환 (DTO 객체 반환)
+/** 후원 관리 - 시온 */
+    // (1) 후원내역 리스트 반환 (DTO 객체 반환)
     @Query("SELECT new kr.co.leaf2u_api.donation.DonationHistoryDTO(dh.idx, do.name, sa.accountNumber, dh.donationAmount, dh.donationDate) " +
             "FROM DonationHistory dh " +  // 데이터를 조회할 주 엔티티 지정
             "JOIN dh.donationOrganization do " +  // DonationOrganization 엔티티 자동조인
@@ -22,12 +22,12 @@ public interface DonationHistoryRepository extends JpaRepository<DonationHistory
     List<DonationHistoryDTO> getDonationHistoryList(@Param("memberIdx") Long memberIdx);
 
 
-// (2) 후원내역 리스트 개수 반환
+    // (2) 후원내역 리스트 개수 반환
     @Query("SELECT COUNT(dh) FROM DonationHistory dh WHERE dh.member.idx = :memberIdx")
     long countByDonationHistoryList(@Param("memberIdx") Long memberIdx);
 
 
-// (3) donationHistoryIdx 받아서 후원내역 상세정보(기부처, 기부내역) 반환하는 JPQL 쿼리
+    // (3) donationHistoryIdx 받아서 후원내역 상세정보(기부처, 기부내역) 반환하는 JPQL 쿼리
     // 기부내역 idx를 기준으로 기부처 정보 조회 (DTO 객체 반환) => 얘는 기본생성자 사용하는거라 DTO에서 별도 생성자 지정안해도댐
     @Query("SELECT new kr.co.leaf2u_api.donation.DonationOrganizationDTO(" +
             "do.idx, " +  // 기부처 ID
