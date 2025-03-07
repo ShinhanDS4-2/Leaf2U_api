@@ -1,17 +1,29 @@
 package kr.co.leaf2u_api.member;
 
+import kr.co.leaf2u_api.entity.Member;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.Map;
+
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class KakaoOAuthController {
 
     private final KakaoOAuthService kakaoOAuthService;
+    private final MemberRepository memberRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Value("${kakao.client.id}")
     private String CLIENT_ID;
@@ -19,19 +31,20 @@ public class KakaoOAuthController {
     @Value("${kakao.redirect.uri}")
     private String REDIRECT_URI;
 
+
     @GetMapping("/auth/kakao/callback")
     public ResponseEntity<Void> kakaoCallback(@RequestParam("code") String code) {
+
         String jwtToken = kakaoOAuthService.kakaoLogin(code);
 
-        // JWT 토큰이 유효한 경우 클라이언트에게 리다이렉트 URL을 반환
         if (jwtToken != null) {
-            return ResponseEntity.status(302)  // 302 상태 코드: Found (리다이렉트)
-                    .header("Location", "http://localhost:3000/start")  // 클라이언트가 리다이렉트될 URL
-                    .header("Authorization", "Bearer " + jwtToken)  // 헤더에 JWT 토큰 추가
+            // JWT 토큰을 쿼리 파라미터로 포함하여 리다이렉트
+            String redirectUrl = "http://localhost:3000/?token=" + jwtToken;
+            return ResponseEntity.status(302) // 302 상태 코드: Found (리다이렉트)
+                    .header("Location", redirectUrl)
                     .build();
         } else {
-            // JWT 토큰이 없으면 다른 적절한 처리를 할 수 있습니다.
-            return ResponseEntity.status(400).build();  // 예: 400 Bad Request
+            return ResponseEntity.status(400).build(); // 예: 400 Bad Request
         }
     }
 
@@ -44,4 +57,40 @@ public class KakaoOAuthController {
                 CLIENT_ID, REDIRECT_URI);
         return ResponseEntity.ok(kakaoAuthUrl);
     }
+
+    /**
+     * jwtToken에서 이메일 받아오기
+     */
+    @GetMapping("/api/member-info")
+    public ResponseEntity<Map<String, Object>> getMemberCardYn(@RequestHeader("Authorization") String token) {
+
+        if (token == null || !token.startsWith("Bearer ")) {
+            log.error("JWT 토큰이 제공되지 않았습니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "인증 토큰이 필요합니다."));
+        }
+
+        log.info("전달 받은 토큰: {}", token);
+
+        String jwtToken = token.substring(7);                     // "Bearer " 부분을 제거
+        String email = jwtTokenProvider.getEmailFromToken(jwtToken);        // JwtTokenProvider에서 이메일 추출
+
+        log.info("인증된 사용자 email: {}", email);
+
+        try {
+            Member member = memberRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("cardYn", member.getCardYn());
+
+            log.info("member: {}", member);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("회원 정보 조회 실패: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "오류발생!!"));
+        }
+    }
+
+
 }

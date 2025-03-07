@@ -14,10 +14,8 @@ public class DonationController {
 
     private final DonationService donationService;  // DonationService 객체를 생성자 주입 방식으로 자동 주입해줌
 
-// 사용자 인증 매번해야함. api 호출시마다 MEMBER(사용자테이블) idx 받아야함
-// 1. 후원단체 리스트 페이지 관련
-    /** (1)
-     * 후원단체 리스트 조회
+    /* 후원 관리 API - 시온 */
+    /** (1) 후원단체 리스트 조회
      * @param
      * @return List<DonationOrganizationDTO>
      */
@@ -27,7 +25,7 @@ public class DonationController {
         return ResponseEntity.ok(donationOrganizationList);
     }
 
-    /** (2)후원단체 상세정보 조회 (완료)
+    /** (2)후원단체 상세정보 조회
      * @param donationOrganizationIdx
      * @return DonationOrganizationDTO
      */
@@ -37,20 +35,17 @@ public class DonationController {
         return ResponseEntity.ok(donationOrganizationDetail);
     }
 
-// 2. 후원내역 페이지 관련
-    /** (1) 후원내역 리스트 조회 (완료)
+    /** (1) 후원내역 리스트 조회
      * @param memberIdx
      * @return List, Count
      */
     @GetMapping("historyList/{memberIdx}")  // 사용자 idx값을 경로 변수로 받을 수 있도록 하는게 맞나..?
     public ResponseEntity<Map<String, Object>> getDonationHistoryList(@PathVariable Long memberIdx) {
         Map<String, Object> donationHistoryList = donationService.getDonationHistoryList(memberIdx);
-        return ResponseEntity.ok(donationHistoryList);  // 응답 반환 (상태 코드 200과 함께 Map 반환)
+        return ResponseEntity.ok(donationHistoryList);  // 응답 반환 (상태 코드 200과 함께 Map 반환)ㅇ
     }
 
-
-    /** (2)
-     * 후원내역 상세정보 조회 (완료)
+    /** (2) 후원내역 상세정보 조회
      * @param donationHistoryIdx
      * @return donationHistory(기부내역), donationOrganization(기부처)
      */
@@ -67,7 +62,7 @@ public class DonationController {
      */
 
 
-    /* 후원 기여도 api */
+    /* 후원 기여도 api - 문경미 */
 
     /**
      * 후원 기여도
@@ -81,4 +76,5 @@ public class DonationController {
 
         return ResponseEntity.ok(result);
     }
+
 }
