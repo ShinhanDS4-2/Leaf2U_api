@@ -41,8 +41,7 @@ public class AccountController {
     }
 
 
-    /** 적금 계좌 관리 - 시온 */
-
+    /* 적금 계좌 관리 API - 시온 */
     /** (1) 계좌 기본정보 조회
      * @param memberIdx
      * @return AccountDTO
@@ -137,6 +136,21 @@ public class AccountController {
     public ResponseEntity<Map<String, Object>> getAccountCurrent(@RequestBody Map<String, Object> param) {
 
         Map<String, Object> result = accountService.getAccountCurrent(param);
+
+        return ResponseEntity.ok(result);
+    }
+
+    /* 만기 해지 api - 문경미 */
+
+    /**
+     * 만기 해지 프로세스
+     * @param param (memberIdx, accountIdx, organizationIdx, afterTaxInterest(세후이자), interest(이자 후원금), principal(원금 후원금), point(포인트 후원금)
+     * @return
+     */
+    @PostMapping("/maturity")
+    public ResponseEntity<Boolean> maturityProcess(@RequestBody Map<String, Object> param) {
+
+        Boolean result = accountService.maturityProcess(param);
 
         return ResponseEntity.ok(result);
     }

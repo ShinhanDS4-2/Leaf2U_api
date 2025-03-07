@@ -5,11 +5,13 @@ import kr.co.leaf2u_api.entity.Account;
 import kr.co.leaf2u_api.entity.Card;
 import kr.co.leaf2u_api.entity.Member;
 import kr.co.leaf2u_api.member.MemberRepository;
+import kr.co.leaf2u_api.notice.NoticeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -32,6 +34,9 @@ public class AccountServiceImplTests {
 
     @Mock
     private CardRepository cardRepository;
+
+//    @Mock
+//    private NoticeService noticeService;
 
     @InjectMocks
     private AccountServiceImpl accountService;
