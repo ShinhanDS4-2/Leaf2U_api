@@ -19,11 +19,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        String token = resolveToken(request);  // 요청에서 토큰 추출
-        if (token != null && jwtTokenProvider.validateToken(token)) {  // ⬅️ validateToken 사용
-            // 유효한 토큰일 경우, SecurityContext에 설정 (인증 로직 추가 가능)
-            SecurityContextHolder.getContext().setAuthentication(null);
-        }
+//        String token = resolveToken(request);  // 요청에서 토큰 추출
+//        if (token != null && jwtTokenProvider.validateToken(token)) {  // ⬅️ validateToken 사용
+//            // 유효한 토큰일 경우, SecurityContext에 설정 (인증 로직 추가 가능)
+//            SecurityContextHolder.getContext().setAuthentication(null);
+//        }
 
         filterChain.doFilter(request, response);
     }

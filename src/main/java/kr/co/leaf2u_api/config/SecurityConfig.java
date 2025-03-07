@@ -45,10 +45,11 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/kakao/**").permitAll()
-                        .requestMatchers("/public/**").permitAll()
-                        .requestMatchers("/api/member-info").authenticated()
-                        .anyRequest().authenticated()
+//                        .requestMatchers("/auth/kakao/**").permitAll()
+//                        .requestMatchers("/public/**").permitAll()
+//                        .requestMatchers("/api/member-info").authenticated()
+//                        .anyRequest().authenticated()
+                                .anyRequest().permitAll()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.decoder(jwtDecoder()))
