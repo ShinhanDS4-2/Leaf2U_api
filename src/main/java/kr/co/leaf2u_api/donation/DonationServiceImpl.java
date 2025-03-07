@@ -23,8 +23,8 @@ public class DonationServiceImpl implements DonationService {
     private final double RECEIPT_CARBON = 3;
     private final double BICYCLE_CARBON = 2278;
 
-// 1. 후원단체 리스트 페이지 관련
-    /** (1)후원단체 리스트 조회 (완료)
+/* 후원 관리 - 시온 */
+    /** (1) 후원단체 리스트 조회
      * @return List<DonationOrganizationDTO>
      */
     @Override
@@ -44,7 +44,7 @@ public class DonationServiceImpl implements DonationService {
                 .collect(Collectors.toList());  // 변환된 DTO 목록을 리스트로 모아 반환
     }
 
-    /** (2)후원단체 상세정보 조회 (완료)
+    /** (2) 후원단체 상세정보 조회
      * @param donationOrganizationIdx
      * @return Optional<DonationOrganizationDTO>
      */
@@ -62,9 +62,7 @@ public class DonationServiceImpl implements DonationService {
                 .orElse(null);  // .map -> Optional에서 값 꺼내서 반환 (값 있으면 그대로 반환, 값 없으면 null반환)
     }  // => 리스트는 Optional을 반환할 필요가 없음
 
-
-// 2. 후원내역 페이지 관련
-    /** (1) 후원내역 리스트 조회 (완료)
+    /** (1) 후원내역 리스트 조회
      * @param memberIdx
      * @return List, Count
      */
@@ -83,8 +81,7 @@ public class DonationServiceImpl implements DonationService {
         return result;
     }
 
-
-    /** (2) 후원내역 상세정보 조회 (완료)
+    /** (2) 후원내역 상세정보 조회
      * @param
      * @return donationHistory(기부내역), donationOrganization(기부처)
      */
