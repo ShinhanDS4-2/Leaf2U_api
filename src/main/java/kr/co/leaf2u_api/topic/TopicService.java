@@ -10,7 +10,7 @@ public interface TopicService {
     List<EcoTips> getEcoTips(char category);
     EcoTips saveEcoTips(EcoTips  ecoTips);
 
-    Map<String, Object> getNews(String keyword);
+    List<Map<String, Object>> getNews();
     String createQuiz(String title, String content);
 
     Map<String, Object> getFineDustInfo();

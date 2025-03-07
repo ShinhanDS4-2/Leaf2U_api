@@ -11,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
@@ -47,39 +48,53 @@ public class TopicServiceImpl implements TopicService {
         return topicRepository.save(ecoTips);
     }
 
-    public Map<String, Object> getNews(String keyword) {
-        String url = "https://newsapi.org/v2/everything?q=" + keyword + "+&language=ko&sortBy=relevancy&apiKey=" + NEWS_API_KEY;
+    /**
+     * 뉴스 리스트
+     * @return
+     */
+    public List<Map<String, Object>> getNews() {
+        String url = "https://newsapi.org/v2/everything?q=기후&language=ko&sortBy=sim&apiKey=" + NEWS_API_KEY;
 
         // 뉴스 API 호출
         Map<String, Object> response = restTemplate.getForObject(url, Map.class);
 
         List<Map<String, Object>> articles = (List<Map<String, Object>>) response.get("articles");
 
-        if (articles == null || articles.isEmpty()) {
-            return Map.of("error", "No articles found");
+        List<Map<String, Object>> resultList = new ArrayList<>();
+
+        for (Map<String, Object> article : articles) {
+            // 날짜를 "YYYY-MM-DD" 형식으로 반환
+            String publishedAt = (String) article.get("publishedAt");
+            String formattedDate = (publishedAt != null && publishedAt.length() >= 10) ? publishedAt.substring(0, 10) : "N/A";
+
+            resultList.add(Map.of(
+                    "title", (String) article.get("title"),
+                    "description", (String) article.get("description"),
+                    "url", (String) article.get("url"),
+                    "date", formattedDate
+            ));
         }
 
-        // 첫 번째 기사만 선택
-        Map<String, Object> article = articles.get(0);
+//        // 첫 번째 기사만 선택
+//        Map<String, Object> article = articles.get(0);
 
-        // 날짜를 "YYYY-MM-DD" 형식으로 반환
-        String publishedAt = (String) article.get("publishedAt");
-        String formattedDate = (publishedAt != null && publishedAt.length() >= 10) ? publishedAt.substring(0, 10) : "N/A";
-
-
-        return Map.of(
-                "title", (String) article.get("title"),
-                "description", (String) article.get("description"),
-                "url", (String) article.get("url"),
-                "date", formattedDate
-        );
+        return resultList;
     }
 
-    // OpenAIService를 활용하여 퀴즈 생성
+    /**
+     * OpenAIService를 활용하여 퀴즈 생성
+     * @param title
+     * @param content
+     * @return
+     */
     public String createQuiz(String title, String content) {
         return openaiService.createQuiz(title, content);
     }
-    //미세먼지api 가져오기
+
+    /**
+     * 미세먼지api 가져오기
+     * @return
+     */
     public Map<String, Object> getFineDustInfo() {
         String apiUrl = "http://openAPI.seoul.go.kr:8088/" + FINE_DUST_API_KEY + "/xml/ListAvgOfSeoulAirQualityService/1/5/";
 
