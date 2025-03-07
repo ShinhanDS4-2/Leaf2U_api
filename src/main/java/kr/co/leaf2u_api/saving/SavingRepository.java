@@ -153,4 +153,22 @@ public interface SavingRepository extends JpaRepository<AccountHistory, Long> {
     WHERE sa.idx = :accountIdx
 """, nativeQuery = true)
     void updateSavingAccountBalance(@Param("accountIdx") Long accountIdx);
+
+    /**
+     * 🔹 8️⃣ 적금 납입 횟수(saving_cnt) 업데이트
+     */
+    @Modifying
+    @Transactional
+    @Query(value = """
+    UPDATE saving_account sa
+    SET sa.saving_cnt = (
+        SELECT COUNT(*)
+        FROM interest_rate_history irh
+        WHERE irh.saving_account_idx = sa.idx
+        AND irh.rate_type = 'D'
+    )
+    WHERE sa.idx = :accountIdx
+""", nativeQuery = true)
+    void updateSavingCount(@Param("accountIdx") Long accountIdx);
+
 }

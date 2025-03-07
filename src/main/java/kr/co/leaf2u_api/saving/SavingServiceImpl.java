@@ -138,6 +138,9 @@ public class SavingServiceImpl implements SavingService {
         // 🔹 7️⃣ 적금 계좌 잔액(balance) 업데이트
         savingRepository.updateSavingAccountBalance(accountIdx);
 
+        // 🔹 8️⃣적금 납입 횟수(saving_cnt) 업데이트
+        savingRepository.updateSavingCount(accountIdx);
+
         result.put("message", "적금 납입이 완료되었습니다.");
         return result;
     }
