@@ -62,7 +62,7 @@ public class DonationController {
      */
 
 
-    /* 후원 기여도 api */
+    /* 후원 기여도 api - 문경미 */
 
     /**
      * 후원 기여도
@@ -76,4 +76,5 @@ public class DonationController {
 
         return ResponseEntity.ok(result);
     }
+
 }

@@ -5,7 +5,9 @@ import kr.co.leaf2u_api.donation.DonationHistoryDTO;
 import kr.co.leaf2u_api.donation.DonationOrganizationDTO;
 import kr.co.leaf2u_api.entity.Card;
 import kr.co.leaf2u_api.entity.Member;
+import kr.co.leaf2u_api.entity.Notice;
 import kr.co.leaf2u_api.member.MemberRepository;
+import kr.co.leaf2u_api.notice.NoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,8 @@ public class CardServiceImpl implements CardService {
 
     private final CardRepository cardRepository;
     private final MemberRepository memberRepository;
+
+    private final NoticeService noticeService;
 
     @Transactional
     @Override
@@ -41,6 +45,16 @@ public class CardServiceImpl implements CardService {
                 .build();
         
         cardRepository.save(card);
+
+        /* 카드 발급 알림 insert - 문경미 */
+        Map<String, Object> noticeParam = new HashMap<>();
+        noticeParam.put("memberIdx", member.getIdx());
+        noticeParam.put("title", "리프카드 발급 완료");
+        noticeParam.put("content", "리프카드를 발급 받았습니다.");
+        noticeParam.put("category", "C");
+
+        noticeService.registNotice(noticeParam);
+
         return entityToDTO(card);
     }
 

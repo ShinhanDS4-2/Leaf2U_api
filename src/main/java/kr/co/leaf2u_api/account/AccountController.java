@@ -140,4 +140,19 @@ public class AccountController {
         return ResponseEntity.ok(result);
     }
 
+    /* 만기 해지 api - 문경미 */
+
+    /**
+     * 만기 해지 프로세스
+     * @param param (memberIdx, accountIdx, organizationIdx, afterTaxInterest(세후이자), interest(이자 후원금), principal(원금 후원금), point(포인트 후원금)
+     * @return
+     */
+    @PostMapping("/maturity")
+    public ResponseEntity<Boolean> maturityProcess(@RequestBody Map<String, Object> param) {
+
+        Boolean result = accountService.maturityProcess(param);
+
+        return ResponseEntity.ok(result);
+    }
+
 }
