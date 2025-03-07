@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -48,7 +50,19 @@ public class TopicServiceImpl implements TopicService {
     }
 
     public Map<String, Object> getNews(String keyword) {
-        String url = "https://newsapi.org/v2/everything?q=" + keyword + "+&language=ko&sortBy=relevancy&apiKey=" + NEWS_API_KEY;
+
+        // 추가
+        String category = "science"; // 카테고리 지정 (과학)
+        String keywords = "환경 OR 친환경 OR 기후변화 OR 지속가능성";
+        String encodedKeywords = URLEncoder.encode(keywords, StandardCharsets.UTF_8);
+
+        String url = "https://newsapi.org/v2/top-headlines?" +
+                "category=science" +
+                "&q=" + encodedKeywords +
+                "&language=ko" +
+                "&apiKey=YOUR_NEWS_API_KEY";
+
+//        String url = "https://newsapi.org/v2/everything?q=" + keyword + "+&language=ko&sortBy=relevancy&apiKey=" + NEWS_API_KEY;
 
         // 뉴스 API 호출
         Map<String, Object> response = restTemplate.getForObject(url, Map.class);
