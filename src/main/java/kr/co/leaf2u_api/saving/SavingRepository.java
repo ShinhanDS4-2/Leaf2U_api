@@ -34,20 +34,18 @@ public interface SavingRepository extends JpaRepository<AccountHistory, Long> {
     @Modifying
     @Transactional
     @Query(value = """
-    INSERT INTO saving_account_history (saving_account_idx, member_idx, payment_amount, cumulative_amount, payment_date, challenge_type)
+        INSERT INTO saving_account_history (saving_account_idx, member_idx, payment_amount, cumulative_amount, payment_date, challenge_type)
         SELECT\s
             sa.idx,          \s
             sa.member_idx,   \s
             sa.payment_amount, \s
-            IFNULL((
-                SELECT SUM(payment_amount) FROM saving_account_history WHERE saving_account_idx = sa.idx
-            ), 0) + sa.payment_amount AS cumulative_amount, \s
+            IFNULL((SELECT SUM(payment_amount) FROM saving_account_history WHERE saving_account_idx = sa.idx), 0) + sa.payment_amount AS cumulative_amount, \s
             NOW(),
-            'T'
+            :challengeType
         FROM saving_account sa
         WHERE sa.member_idx = :memberIdx
     """, nativeQuery = true)
-    void insertSavingHistory(@Param("memberIdx") Long accountIdx);
+    void insertSavingHistory(@Param("memberIdx") Long memberIdx, @Param("challengeType") String challengeType);
 
 
     /**

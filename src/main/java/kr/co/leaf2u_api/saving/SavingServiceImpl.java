@@ -116,12 +116,13 @@ public class SavingServiceImpl implements SavingService {
 
         Long memberIdx = Long.parseLong(String.valueOf(param.get("memberIdx")));
         Long accountIdx = Long.parseLong(String.valueOf(param.get("accountIdx")));
+        String challengeType = param.get("challengeType").toString();
 
         // 🔹 1️⃣ 카드 잔액 차감
         savingRepository.updateCardBalance(accountIdx);
 
         // 🔹 2️⃣ 적금 납입 내역 추가
-        savingRepository.insertSavingHistory(memberIdx);
+        savingRepository.insertSavingHistory(memberIdx, challengeType);
 
         // 🔹 3️⃣ 매일 금리 (D) 추가
         savingRepository.insertDailyInterest(accountIdx);
