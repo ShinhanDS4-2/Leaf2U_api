@@ -81,4 +81,38 @@ public class PointServiceImpl implements PointService {
 
         noticeService.registNotice(noticeParam);
     }
+    @Transactional
+    @Override
+    public void addQuizHintPoint(Member member) {
+        Point point = Point.builder()
+                .member(member)
+                .earnType('H') // 힌트 포인트
+                .earnPoint(BigDecimal.valueOf(5))
+                .usePoint(BigDecimal.ZERO)
+                .earnDate(LocalDateTime.now())
+                .build();
+
+        pointRepository.save(point);
+    }
+
+    @Transactional
+    @Override
+    public void addQuizCorrectPoint(Member member) {
+        Point point = Point.builder()
+                .member(member)
+                .earnType('Q') // 퀴즈 정답 포인트
+                .earnPoint(BigDecimal.valueOf(10))
+                .usePoint(BigDecimal.ZERO)
+                .earnDate(LocalDateTime.now())
+                .build();
+
+        pointRepository.save(point);
+    }
+
+    @Override
+    public boolean checkQuizAnswer(String answer) {
+        // OX 정답 체크 로직 (임시)
+        return "O".equalsIgnoreCase(answer); // "O"이면 정답, "X"이면 오답
+    }
+
 }
