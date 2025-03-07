@@ -34,19 +34,20 @@ public interface SavingRepository extends JpaRepository<AccountHistory, Long> {
     @Modifying
     @Transactional
     @Query(value = """
-        INSERT INTO saving_account_history (saving_account_idx, member_idx, payment_amount, cumulative_amount, payment_date, challenge_type)
-        SELECT 
-            sa.idx, sa.member_idx, sa.payment_amount,
-            COALESCE((SELECT cumulative_amount FROM saving_account_history 
-                      WHERE saving_account_idx = sa.idx 
-                      ORDER BY payment_date DESC 
-                      LIMIT 1), 0) + sa.payment_amount,
+    INSERT INTO saving_account_history (saving_account_idx, member_idx, payment_amount, cumulative_amount, payment_date, challenge_type)
+        SELECT\s
+            sa.idx,          \s
+            sa.member_idx,   \s
+            sa.payment_amount, \s
+            IFNULL((
+                SELECT SUM(payment_amount) FROM saving_account_history WHERE saving_account_idx = sa.idx
+            ), 0) + sa.payment_amount AS cumulative_amount, \s
             NOW(),
-            'T'  
+            'T'
         FROM saving_account sa
-        WHERE sa.idx = :accountIdx
+        WHERE sa.member_idx = :memberIdx
     """, nativeQuery = true)
-    void insertSavingHistory(@Param("accountIdx") Long accountIdx);
+    void insertSavingHistory(@Param("memberIdx") Long accountIdx);
 
 
     /**
@@ -56,10 +57,18 @@ public interface SavingRepository extends JpaRepository<AccountHistory, Long> {
     @Transactional
     @Query(value = """
         INSERT INTO interest_rate_history (saving_account_idx, saving_account_history_idx, rate_type, rate, create_date)
-        SELECT sah.saving_account_idx, sah.idx, 'D', 0.1, NOW()
+        SELECT\s
+         sah.saving_account_idx, \s
+         sah.idx AS saving_account_history_idx, \s
+         'D' AS rate_type,
+         0.1 AS rate,
+         NOW()
         FROM saving_account_history sah
-        WHERE DATE(sah.payment_date) = CURDATE()
-        AND sah.saving_account_idx = :accountIdx
+        WHERE sah.idx = (
+         SELECT MAX(idx)\s
+         FROM saving_account_history\s
+         WHERE DATE(payment_date) = CURDATE()
+        )
     """, nativeQuery = true)
     void insertDailyInterest(@Param("accountIdx") Long accountIdx);
 
@@ -71,17 +80,27 @@ public interface SavingRepository extends JpaRepository<AccountHistory, Long> {
     @Transactional
     @Query(value = """
         INSERT INTO interest_rate_history (saving_account_idx, saving_account_history_idx, rate_type, rate, create_date)
-        SELECT sah.saving_account_idx, sah.idx, 'W', 0.2, NOW()
+        SELECT\s
+            sah.saving_account_idx, \s
+            sah.idx AS saving_account_history_idx, \s
+            'W' AS rate_type,
+            0.2 AS rate,
+            NOW()
         FROM saving_account_history sah
         JOIN (
+            -- 'D' 금리가 7번째 추가된 경우만 찾음
             SELECT saving_account_idx, COUNT(*) AS d_count
             FROM interest_rate_history
             WHERE rate_type = 'D'
             GROUP BY saving_account_idx
             HAVING d_count % 7 = 0
         ) seq ON sah.saving_account_idx = seq.saving_account_idx
-        WHERE DATE(sah.payment_date) = CURDATE()
-        AND sah.saving_account_idx = :accountIdx
+        WHERE sah.idx = (
+            -- 가장 최근 추가된 saving_account_history의 idx만 선택
+            SELECT MAX(idx)\s
+            FROM saving_account_history\s
+            WHERE DATE(payment_date) = CURDATE()
+        )
     """, nativeQuery = true)
     void insertWeeklyInterest(@Param("accountIdx") Long accountIdx);
 
@@ -115,4 +134,23 @@ public interface SavingRepository extends JpaRepository<AccountHistory, Long> {
         WHERE idx = :accountIdx
     """, nativeQuery = true)
     void updateFinalInterestRate(@Param("accountIdx") Long accountIdx);
+
+
+    /**
+     * 🔹 7️⃣ 적금 계좌 잔액(balance) 업데이트
+     */
+    @Modifying
+    @Transactional
+    @Query(value = """
+    UPDATE saving_account sa
+    SET sa.balance = (
+        SELECT sah.cumulative_amount
+        FROM saving_account_history sah
+        WHERE sah.saving_account_idx = sa.idx
+        ORDER BY sah.payment_date DESC
+        LIMIT 1
+    )
+    WHERE sa.idx = :accountIdx
+""", nativeQuery = true)
+    void updateSavingAccountBalance(@Param("accountIdx") Long accountIdx);
 }

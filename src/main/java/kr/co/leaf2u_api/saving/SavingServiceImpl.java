@@ -114,13 +114,14 @@ public class SavingServiceImpl implements SavingService {
     public Map<String, Object> processSavingDeposit(Map<String, Object> param) {
         Map<String, Object> result = new HashMap<>();
 
+        Long memberIdx = Long.parseLong(String.valueOf(param.get("memberIdx")));
         Long accountIdx = Long.parseLong(String.valueOf(param.get("accountIdx")));
 
         // 🔹 1️⃣ 카드 잔액 차감
         savingRepository.updateCardBalance(accountIdx);
 
         // 🔹 2️⃣ 적금 납입 내역 추가
-        savingRepository.insertSavingHistory(accountIdx);
+        savingRepository.insertSavingHistory(memberIdx);
 
         // 🔹 3️⃣ 매일 금리 (D) 추가
         savingRepository.insertDailyInterest(accountIdx);
@@ -133,6 +134,9 @@ public class SavingServiceImpl implements SavingService {
 
         // 🔹 6️⃣ 최종 금리 업데이트
         savingRepository.updateFinalInterestRate(accountIdx);
+
+        // 🔹 7️⃣ 적금 계좌 잔액(balance) 업데이트
+        savingRepository.updateSavingAccountBalance(accountIdx);
 
         result.put("message", "적금 납입이 완료되었습니다.");
         return result;

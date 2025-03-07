@@ -10,6 +10,6 @@ public interface SavingService {
     // 챌린지 현황
     Map<String, Object> getChallengeList(Map<String, Object> param);
 
-    // 적금 납입
+    // 적금 납입 & 우대 금리
     Map<String, Object> processSavingDeposit(Map<String, Object> param);
 }
