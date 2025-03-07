@@ -51,13 +51,19 @@ public class PointServiceImpl implements PointService {
         Map<String, Object> noticeParam = new HashMap<>();
         noticeParam.put("memberIdx", member.getIdx());
         noticeParam.put("title", "포인트 획득");
-        noticeParam.put("content", "출석체크 10P 획득!");
+        noticeParam.put("content", "출석체크 포인트 10P 적립!");
         noticeParam.put("category", "P");
 
         noticeService.registNotice(noticeParam);
 
         return true;
     }
+
+    /**
+     * 만보기
+     * @param member
+     * @param points
+     */
     @Transactional
     @Override
     public void addPedometerPoints(Member member, int points) {

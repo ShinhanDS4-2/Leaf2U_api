@@ -4,8 +4,11 @@ import kr.co.leaf2u_api.account.AccountRepository;
 import kr.co.leaf2u_api.account.AccountService;
 import kr.co.leaf2u_api.entity.AccountHistory;
 import kr.co.leaf2u_api.entity.InterestRateHistory;
+import kr.co.leaf2u_api.member.MemberRepository;
+import kr.co.leaf2u_api.notice.NoticeService;
 import kr.co.leaf2u_api.util.CommonUtil;
 import lombok.RequiredArgsConstructor;
+import org.json.simple.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +29,8 @@ public class SavingServiceImpl implements SavingService {
     private final AccountService accountService;
 
     private final SavingRepository savingRepository;
+
+    private final NoticeService noticeService;
 
     /**
      * 납입 내역 리스트
@@ -109,7 +114,11 @@ public class SavingServiceImpl implements SavingService {
         );
     }
 
-
+    /**
+     * 납입
+     * @param param
+     * @return
+     */
     @Transactional
     public Map<String, Object> processSavingDeposit(Map<String, Object> param) {
         Map<String, Object> result = new HashMap<>();
@@ -141,6 +150,19 @@ public class SavingServiceImpl implements SavingService {
 
         // 🔹 8️⃣적금 납입 횟수(saving_cnt) 업데이트
         savingRepository.updateSavingCount(accountIdx);
+
+        // 납입 알림 insert
+        List<Object[]> obj = accountRepository.findAccountInfo(accountIdx);
+        Map<String, Object> noticeParam = new HashMap<>();
+
+        for (Object[] info : obj) {
+            noticeParam.put("memberIdx", memberIdx);
+            noticeParam.put("title", info[0] + "의 통장 (" + info[3] + ")");
+            noticeParam.put("content", "출금 (" + info[1] + ") | 한달적금 (" + info[2] + ")");
+            noticeParam.put("category", "S");
+        }
+
+        noticeService.registNotice(noticeParam);
 
         result.put("message", "적금 납입이 완료되었습니다.");
         return result;
