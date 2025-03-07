@@ -134,7 +134,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     /**
-     * 계좌 번호 만들기 //앞 세 글자 222로 시작, 중간 세 글자, 뒤에 여섯 글자
+     * 계좌 번호 만들기 //앞 세 글자 222로 시작, 날짜 + 랜덤번호
      * @author 강현욱
      * @return
      */

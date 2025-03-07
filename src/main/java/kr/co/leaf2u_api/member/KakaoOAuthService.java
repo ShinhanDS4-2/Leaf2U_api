@@ -20,7 +20,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class KakaoOAuthService {
 
-    private static final Logger logger = LoggerFactory.getLogger(KakaoOAuthService.class);
     private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final RestTemplate restTemplate = new RestTemplate();
@@ -33,6 +32,7 @@ public class KakaoOAuthService {
     private String REDIRECT_URI;
 
     public String kakaoLogin(String code) {
+
         // 1. 액세스 토큰 발급
         String accessToken = getAccessToken(code);
         log.info("Kakao Access Token: {}", accessToken);
@@ -80,6 +80,7 @@ public class KakaoOAuthService {
     }
 
     private String getAccessToken(String code) {
+
         String tokenUrl = "https://kauth.kakao.com/oauth/token";
         String requestBody = String.format(
                 "grant_type=authorization_code&client_id=%s&redirect_uri=%s&code=%s",
