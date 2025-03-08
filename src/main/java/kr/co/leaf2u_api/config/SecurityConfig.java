@@ -2,7 +2,9 @@ package kr.co.leaf2u_api.config;
 
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import kr.co.leaf2u_api.account.AccountRepository;
 import kr.co.leaf2u_api.member.JwtTokenProvider;
+import kr.co.leaf2u_api.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -32,6 +34,8 @@ public class SecurityConfig {
     private String secretKey;
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final MemberRepository memberRepository;
+    private final AccountRepository accountRepository;
 
     /**
      * 빨간줄 떠도 괜찮음
@@ -55,7 +59,7 @@ public class SecurityConfig {
                 );
 
         // ⬇️ JwtAuthenticationFilter 추가 (validateToken을 활용)
-        http.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, memberRepository, accountRepository), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

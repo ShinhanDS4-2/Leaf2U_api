@@ -1,5 +1,6 @@
 package kr.co.leaf2u_api.notice;
 
+import kr.co.leaf2u_api.config.TokenContext;
 import kr.co.leaf2u_api.entity.Member;
 import kr.co.leaf2u_api.entity.Notice;
 import kr.co.leaf2u_api.util.CommonUtil;
@@ -27,15 +28,14 @@ public class NoticeServiceImpl implements NoticeService {
 
     /**
      * 사용자 별 알림 리스트
-     * @param param
      * @return
      */
     @Override
-    public Map<String, Object> getNoticeList(Map<String, Object> param) {
+    public Map<String, Object> getNoticeList() {
 
         Map<String, Object> result = new HashMap<>();
 
-        Long memberIdx = ((Integer) param.get("memberIdx")).longValue();
+        Long memberIdx = TokenContext.getMemberIdx();
         List<Notice> todayList = noticeRepository.getNoticeListWithToday(memberIdx);
 
         List<NoticeDTO> dtoList = todayList.stream()
@@ -57,14 +57,13 @@ public class NoticeServiceImpl implements NoticeService {
 
     /**
      * 오늘 알림 등록
-     * @param param
      * @return
      */
     @Override
-    public Long checkDailyNotice(Map<String, Object> param) {
+    public Long checkDailyNotice() {
 
         // 오늘 알림 유무 체크
-        Long memberIdx = ((Integer) param.get("memberIdx")).longValue();
+        Long memberIdx = TokenContext.getMemberIdx();
         Long result = noticeRepository.checkDailyNotice(memberIdx);
 
         // 오늘 날짜에 등록된 알림이 없을 경우 오늘 알림 등록
@@ -88,8 +87,10 @@ public class NoticeServiceImpl implements NoticeService {
      */
     public Long registNotice(Map<String, Object> param) {
 
+        Long memberIdx = TokenContext.getMemberIdx();
+
         Notice notice = Notice.builder()
-                .member(Member.builder().idx((Long) param.get("memberIdx")).build())
+                .member(Member.builder().idx(memberIdx).build())
                 .title((String) param.get("title"))
                 .content((String) param.get("content"))
                 .category(((String) param.get("category")).charAt(0))
