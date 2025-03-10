@@ -11,10 +11,11 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Random;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
@@ -63,37 +64,63 @@ public class TopicServiceImpl implements TopicService {
                 "&apiKey=YOUR_NEWS_API_KEY";
 
 //        String url = "https://newsapi.org/v2/everything?q=" + keyword + "+&language=ko&sortBy=relevancy&apiKey=" + NEWS_API_KEY;
+    public List<Map<String, Object>> getNews() {
+        String url = "https://newsapi.org/v2/everything?q=기후&language=ko&sortBy=sim&apiKey=" + NEWS_API_KEY;
 
         // 뉴스 API 호출
         Map<String, Object> response = restTemplate.getForObject(url, Map.class);
 
         List<Map<String, Object>> articles = (List<Map<String, Object>>) response.get("articles");
 
-        if (articles == null || articles.isEmpty()) {
-            return Map.of("error", "No articles found");
+        List<Map<String, Object>> filteredList = new ArrayList<>();
+        List<String> ecoKeywords = List.of("환경", "기후", "오염", "탄소", "에너지", "재생", "지구", "미세먼지", "온실가스", "전기차");
+
+        // 환경 관련 기사 10개 추출
+        for (Map<String, Object> article : articles) {
+            String title = (String) article.get("title");
+            String description = (String) article.get("description");
+
+            boolean isEcoRelated = ecoKeywords.stream().anyMatch(keyword ->
+                    (title != null && title.contains(keyword)) || (description != null && description.contains(keyword))
+            );
+
+            if (isEcoRelated) {
+                String publishedAt = (String) article.get("publishedAt");
+                String formattedDate = (publishedAt != null && publishedAt.length() >= 10) ? publishedAt.substring(0, 10) : "N/A";
+
+                filteredList.add(Map.of(
+                        "title", title,
+                        "description", description,
+                        "url", article.get("url"),
+                        "date", formattedDate
+                ));
+            }
+
+            if (filteredList.size() >= 10) {
+                break;
+            }
         }
 
-        // 첫 번째 기사만 선택
-        Map<String, Object> article = articles.get(0);
-
-        // 날짜를 "YYYY-MM-DD" 형식으로 반환
-        String publishedAt = (String) article.get("publishedAt");
-        String formattedDate = (publishedAt != null && publishedAt.length() >= 10) ? publishedAt.substring(0, 10) : "N/A";
-
-
-        return Map.of(
-                "title", (String) article.get("title"),
-                "description", (String) article.get("description"),
-                "url", (String) article.get("url"),
-                "date", formattedDate
-        );
+        // 10개 기사 중에서 랜덤하게 3개 선택
+        Collections.shuffle(filteredList, new Random());
+        return filteredList.size() > 3 ? filteredList.subList(0, 3) : filteredList;
     }
 
-    // OpenAIService를 활용하여 퀴즈 생성
+
+    /**
+     * OpenAIService를 활용하여 퀴즈 생성
+     * @param title
+     * @param content
+     * @return
+     */
     public String createQuiz(String title, String content) {
         return openaiService.createQuiz(title, content);
     }
-    //미세먼지api 가져오기
+
+    /**
+     * 미세먼지api 가져오기
+     * @return
+     */
     public Map<String, Object> getFineDustInfo() {
         String apiUrl = "http://openAPI.seoul.go.kr:8088/" + FINE_DUST_API_KEY + "/xml/ListAvgOfSeoulAirQualityService/1/5/";
 

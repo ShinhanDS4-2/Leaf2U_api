@@ -116,26 +116,24 @@ public class AccountController {
     /* 메인화면에 필요한 api - 문경미 */
     /**
      * 적금 계좌의 잔액, 총금리 정보
-     * @param param (memberIdx)
      * @return balance, final_interest_rate
      */
     @PostMapping("/saving/info")
-    public ResponseEntity<Map<String, Object>> getSavingInfo(@RequestBody Map<String, Object> param) {
+    public ResponseEntity<Map<String, Object>> getSavingInfo() {
 
-        Map<String, Object> result = accountService.getSavingInfo(param);
+        Map<String, Object> result = accountService.getSavingInfo();
 
         return ResponseEntity.ok(result);
     }
 
     /**
      * 적금 계좌 현재 상태 (단계 및 만기 확인)
-     * @param param (memberIdx)
      * @return
      */
     @PostMapping("/current")
-    public ResponseEntity<Map<String, Object>> getAccountCurrent(@RequestBody Map<String, Object> param) {
+    public ResponseEntity<Map<String, Object>> getAccountCurrent() {
 
-        Map<String, Object> result = accountService.getAccountCurrent(param);
+        Map<String, Object> result = accountService.getAccountCurrent();
 
         return ResponseEntity.ok(result);
     }
@@ -144,7 +142,7 @@ public class AccountController {
 
     /**
      * 만기 해지 프로세스
-     * @param param (memberIdx, accountIdx, organizationIdx, afterTaxInterest(세후이자), interest(이자 후원금), principal(원금 후원금), point(포인트 후원금)
+     * @param param (organizationIdx, afterTaxInterest(세후이자), interest(이자 후원금), principal(원금 후원금), point(포인트 후원금)
      * @return
      */
     @PostMapping("/maturity")

@@ -2,6 +2,7 @@ package kr.co.leaf2u_api.saving;
 
 import kr.co.leaf2u_api.account.AccountRepository;
 import kr.co.leaf2u_api.account.AccountService;
+import kr.co.leaf2u_api.config.TokenContext;
 import kr.co.leaf2u_api.entity.AccountHistory;
 import kr.co.leaf2u_api.entity.InterestRateHistory;
 import kr.co.leaf2u_api.util.CommonUtil;
@@ -29,19 +30,18 @@ public class SavingServiceImpl implements SavingService {
 
     /**
      * 납입 내역 리스트
-     * @param param
      * @return
      */
     @Override
-    public Map<String, Object> getSavingHistoryList(Map<String, Object> param) {
+    public Map<String, Object> getSavingHistoryList() {
 
         Map<String, Object> result = new HashMap<>();
 
         // 납입내역
-        Long accountIdx = Long.parseLong(String.valueOf(param.get("accountIdx")));
+        Long accountIdx = TokenContext.getSavingAccountIdx();
         List<AccountHistory> list = accountHistoryRepository.findAccountHistoryListByAccountIdx(accountIdx);
 
-        AtomicInteger rowNum = new AtomicInteger(1);
+        AtomicInteger rowNum = new AtomicInteger(list.size());
 
         List<SavingHistoryDTO> dtoList = new ArrayList<>();
 
@@ -52,7 +52,7 @@ public class SavingServiceImpl implements SavingService {
 
                     SavingHistoryDTO dto = entityToDTO(history);
                     dto.setInterestRateList(interestRateList);
-                    dto.setRowNum((long) rowNum.getAndIncrement());
+                    dto.setRowNum((long) rowNum.getAndDecrement());
 
                     return dto;
                 })
@@ -61,7 +61,7 @@ public class SavingServiceImpl implements SavingService {
         result.put("list", dtoList);
 
         // 계좌 정보
-        Map<String, Object> info = accountService.getSavingInfo(param);
+        Map<String, Object> info = accountService.getSavingInfo();
         result.put("info", info);
 
         return result;
@@ -69,16 +69,15 @@ public class SavingServiceImpl implements SavingService {
 
     /**
      * 챌린지 현황
-     * @param param
      * @return
      */
     @Override
-    public Map<String, Object> getChallengeList(Map<String, Object> param) {
+    public Map<String, Object> getChallengeList() {
 
         Map<String, Object> result = new HashMap<>();
 
         // 납입일 리스트
-        Long accountIdx = Long.parseLong(String.valueOf(param.get("accountIdx")));
+        Long accountIdx = TokenContext.getSavingAccountIdx();
         List<String> paymentDateList = accountHistoryRepository.getFormatPaymentDate(accountIdx);
         result.put("paymentDateList", paymentDateList);
 

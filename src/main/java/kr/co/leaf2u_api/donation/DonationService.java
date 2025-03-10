@@ -15,5 +15,5 @@ public interface DonationService {
     Map<String, Object> getDonationHistoryDetail(Long donationHistoryIdx);  // (4) 후원내역 상세정보 조회 (DTO 객체 반환)
 
     // 후원 기여도
-    Map<String, Object> getDonationStatistics(Map<String, Object> param);
+    Map<String, Object> getDonationStatistics();
 }
