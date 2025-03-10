@@ -115,25 +115,13 @@ public class AccountController {
 
     /* 메인화면에 필요한 api - 문경미 */
     /**
-     * 적금 계좌의 잔액, 총금리 정보
-     * @return balance, final_interest_rate
+     * 메인홈 적금 계좌 정보
+     * @return 단계, 오늘 납입 유무, 납입금액, 만기 확인, 총금리, 총잔액
      */
     @PostMapping("/saving/info")
     public ResponseEntity<Map<String, Object>> getSavingInfo() {
 
         Map<String, Object> result = accountService.getSavingInfo();
-
-        return ResponseEntity.ok(result);
-    }
-
-    /**
-     * 적금 계좌 현재 상태 (단계 및 만기 확인)
-     * @return
-     */
-    @PostMapping("/current")
-    public ResponseEntity<Map<String, Object>> getAccountCurrent() {
-
-        Map<String, Object> result = accountService.getAccountCurrent();
 
         return ResponseEntity.ok(result);
     }

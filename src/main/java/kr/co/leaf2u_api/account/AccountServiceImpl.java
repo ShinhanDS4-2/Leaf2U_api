@@ -7,6 +7,7 @@ import kr.co.leaf2u_api.donation.DonationHistoryRepository;
 import kr.co.leaf2u_api.entity.*;
 import kr.co.leaf2u_api.member.MemberRepository;
 import kr.co.leaf2u_api.notice.NoticeService;
+import kr.co.leaf2u_api.saving.AccountHistoryRepository;
 import kr.co.leaf2u_api.util.CommonUtil;
 import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.resizers.BicubicResizer;
@@ -35,6 +36,7 @@ public class AccountServiceImpl implements AccountService {
     private final MemberRepository memberRepository;
     private final CardRepository cardRepository;
     private final DonationHistoryRepository donationHistoryRepository;
+    private final AccountHistoryRepository accountHistoryRepository;
     private final PasswordEncoder passwordEncoder; // 비밀번호 암호화 및 검증을 위한 인코더
 
     private final NoticeService noticeService;
@@ -360,6 +362,7 @@ public class AccountServiceImpl implements AccountService {
         Map<String, Object> result = new HashMap<>();
 
         Long memberIdx = TokenContext.getMemberIdx();
+        Long accountIdx = TokenContext.getSavingAccountIdx();
         Optional<AccountDTO> accountDTO = entityToDTOWithSaving(accountRepository.findAccountByMember(memberIdx));
 
         if (accountDTO.isPresent()) {
@@ -371,32 +374,9 @@ public class AccountServiceImpl implements AccountService {
             LocalDate today = LocalDate.now();
             LocalDate maturityDate = dto.getMaturityDate().toLocalDate();
             long diff = ChronoUnit.DAYS.between(today, maturityDate);
-
             result.put("diff", diff);
-        }
-
-        return result;
-    }
-
-    /**
-     * 적금 계좌 현재 상태 (단계 및 만기 확인)
-     * @return
-     */
-    @Override
-    public Map<String, Object> getAccountCurrent() {
-
-        Map<String, Object> result = new HashMap<>();
-
-        Long memberIdx = TokenContext.getMemberIdx();
-        Optional<AccountDTO> accountDTO = entityToDTOWithCurrent(accountRepository.findAccountByMember(memberIdx));
-
-        if (accountDTO.isPresent()) {
-            AccountDTO dto = accountDTO.get();
 
             // 만기일 확인
-            LocalDate today = LocalDate.now();
-            LocalDate maturityDate = dto.getMaturityDate().toLocalDate();
-
             if (maturityDate.isEqual(today)) {
                 result.put("maturity_yn", "Y");
             } else {
@@ -415,6 +395,10 @@ public class AccountServiceImpl implements AccountService {
                 step = 2;
             }
             result.put("account_step", step);
+
+            // 오늘 납입 유무
+            result.put("saving_yn", accountHistoryRepository.checkSavingToday(accountIdx));
+
         }
 
         return result;
@@ -499,19 +483,9 @@ public class AccountServiceImpl implements AccountService {
         return account.map(entity -> new AccountDTO(
                 entity.getBalance(),
                 entity.getFinalInterestRate(),
-                entity.getMaturityDate()
-        ));
-    }
-
-    /**
-     * 적금 단계, 만기일 엔티티 -> DTO
-     * @param account
-     * @return
-     */
-    private Optional<AccountDTO> entityToDTOWithCurrent(Optional<Account> account) {
-        return account.map(entity -> new AccountDTO(
-                entity.getSavingCnt(),
-                entity.getMaturityDate()
+                entity.getMaturityDate(),
+                entity.getPaymentAmount(),
+                entity.getSavingCnt()
         ));
     }
 
