@@ -36,13 +36,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String email = jwtTokenProvider.getEmailFromToken(token);
             Optional<Member> member = memberRepository.findByEmail(email);
             Long memberIdx = member.get().getIdx();
+            TokenContext.setMemberIdx(memberIdx);
 
             Optional<Account> account = accountRepository.findAccountByMember(memberIdx);
-            Long savingAccountIdx = account.get().getIdx();
-
-            TokenContext.setMemberIdx(memberIdx);
-            TokenContext.setSavingAccountIdx(savingAccountIdx);
-            /* 추출 끝 */
+            Long savingAccountIdx = null;
+            if (account.isPresent()) {
+                savingAccountIdx = account.get().getIdx();
+                TokenContext.setSavingAccountIdx(savingAccountIdx);
+            }
         }
 
         filterChain.doFilter(request, response);
