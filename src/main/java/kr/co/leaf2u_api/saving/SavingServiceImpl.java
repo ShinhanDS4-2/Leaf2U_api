@@ -41,7 +41,7 @@ public class SavingServiceImpl implements SavingService {
         Long accountIdx = TokenContext.getSavingAccountIdx();
         List<AccountHistory> list = accountHistoryRepository.findAccountHistoryListByAccountIdx(accountIdx);
 
-        AtomicInteger rowNum = new AtomicInteger(1);
+        AtomicInteger rowNum = new AtomicInteger(list.size());
 
         List<SavingHistoryDTO> dtoList = new ArrayList<>();
 
@@ -52,7 +52,7 @@ public class SavingServiceImpl implements SavingService {
 
                     SavingHistoryDTO dto = entityToDTO(history);
                     dto.setInterestRateList(interestRateList);
-                    dto.setRowNum((long) rowNum.getAndIncrement());
+                    dto.setRowNum((long) rowNum.getAndDecrement());
 
                     return dto;
                 })
