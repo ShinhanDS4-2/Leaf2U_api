@@ -2,6 +2,7 @@ package kr.co.leaf2u_api.account;
 
 import jakarta.transaction.Transactional;
 import kr.co.leaf2u_api.card.CardRepository;
+import kr.co.leaf2u_api.config.TokenContext;
 import kr.co.leaf2u_api.donation.DonationHistoryRepository;
 import kr.co.leaf2u_api.entity.*;
 import kr.co.leaf2u_api.member.MemberRepository;
@@ -351,15 +352,14 @@ public class AccountServiceImpl implements AccountService {
     /* 메인화면에 필요한 api - 문경미 */
     /**
      * 적금 계좌의 잔액, 총금리 정보
-     * @param param (memberIdx)
      * @return balanse, final_interest_rate 포함 DTO
      */
     @Override
-    public Map<String, Object> getSavingInfo(Map<String, Object> param) {
+    public Map<String, Object> getSavingInfo() {
 
         Map<String, Object> result = new HashMap<>();
 
-        Long memberIdx = Long.parseLong(String.valueOf(param.get("memberIdx")));
+        Long memberIdx = TokenContext.getMemberIdx();
         Optional<AccountDTO> accountDTO = entityToDTOWithSaving(accountRepository.findAccountByMember(memberIdx));
 
         if (accountDTO.isPresent()) {
@@ -380,15 +380,14 @@ public class AccountServiceImpl implements AccountService {
 
     /**
      * 적금 계좌 현재 상태 (단계 및 만기 확인)
-     * @param param (memberIdx)
      * @return
      */
     @Override
-    public Map<String, Object> getAccountCurrent(Map<String, Object> param) {
+    public Map<String, Object> getAccountCurrent() {
 
         Map<String, Object> result = new HashMap<>();
 
-        Long memberIdx = Long.parseLong(String.valueOf(param.get("memberIdx")));
+        Long memberIdx = TokenContext.getMemberIdx();
         Optional<AccountDTO> accountDTO = entityToDTOWithCurrent(accountRepository.findAccountByMember(memberIdx));
 
         if (accountDTO.isPresent()) {
@@ -434,12 +433,12 @@ public class AccountServiceImpl implements AccountService {
 
         try {
             // saving_account update
-            Long accountIdx = Long.parseLong(String.valueOf(param.get("accountIdx")));
+            Long accountIdx = TokenContext.getSavingAccountIdx();
             BigDecimal interestAmount = new BigDecimal(String.valueOf(param.get("afterTaxInterest")));
             accountRepository.updateMaturity(accountIdx, interestAmount);
 
             // donation_history insert
-            Long memberIdx = Long.parseLong(String.valueOf(param.get("memberIdx")));
+            Long memberIdx = TokenContext.getMemberIdx();
             Long organisationIdx = Long.parseLong(String.valueOf(param.get("organisationIdx")));
             BigDecimal interest = new BigDecimal(String.valueOf(param.get("interest")));
             BigDecimal principal = new BigDecimal(String.valueOf(param.get("principal")));

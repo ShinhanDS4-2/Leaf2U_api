@@ -19,26 +19,24 @@ public class NoticeController {
 
     /**
      * 사용자 별 알림 리스트
-     * @param param (memberIdx)
      * @return
      */
     @PostMapping("/list")
-    public ResponseEntity<Map<String, Object>> getNoticeList(@RequestBody Map<String, Object> param) {
+    public ResponseEntity<Map<String, Object>> getNoticeList() {
 
-        Map<String, Object> result = noticeService.getNoticeList(param);
+        Map<String, Object> result = noticeService.getNoticeList();
 
         return ResponseEntity.ok(result);
     }
 
     /**
      * 오늘 알림 등록
-     * @param param (memberIdx)
      * @return
      */
     @PostMapping("/daily")
-    public ResponseEntity<Long> checkDailyNotice(@RequestBody Map<String, Object> param) {
+    public ResponseEntity<Long> checkDailyNotice() {
 
-        Long noticeIdx = noticeService.checkDailyNotice(param);
+        Long noticeIdx = noticeService.checkDailyNotice();
 
         return ResponseEntity.ok(noticeIdx);
     }

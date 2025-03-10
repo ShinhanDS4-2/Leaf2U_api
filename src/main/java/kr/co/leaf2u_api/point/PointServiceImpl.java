@@ -58,4 +58,27 @@ public class PointServiceImpl implements PointService {
 
         return true;
     }
+    @Transactional
+    @Override
+    public void addPedometerPoints(Member member, int points) {
+        Point point = Point.builder()
+                .member(member)
+                .earnType('S')
+                .earnPoint(BigDecimal.valueOf(points))
+                .usePoint(BigDecimal.ZERO)
+                .earnDate(LocalDateTime.now())
+                .useDate(null)
+                .build();
+
+        pointRepository.save(point);
+
+        // 포인트 적립 알림
+        Map<String, Object> noticeParam = new HashMap<>();
+        noticeParam.put("memberIdx", member.getIdx());
+        noticeParam.put("title", "포인트 적립");
+        noticeParam.put("content", "만보기 포인트 " + points + "P 적립!");
+        noticeParam.put("category", "P");
+
+        noticeService.registNotice(noticeParam);
+    }
 }
