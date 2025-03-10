@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.List;
 import java.util.Random;
@@ -122,5 +123,16 @@ public class PointController {
 
         return ResponseEntity.ok(Map.of("message", "정답! 10P 적립"));
     }
+    @GetMapping("/total")
+    public ResponseEntity<Map<String, Object>> getTotalPoints(@RequestParam("memberIdx") Long memberIdx) {
+        Member member = new Member();
+        member.setIdx(memberIdx);
 
+        // 포인트 총합 계산
+        BigDecimal totalPoints = pointService.getTotalPoints(member);
+
+        return ResponseEntity.ok(Map.of(
+                "totalPoints", totalPoints
+        ));
+    }
 }
