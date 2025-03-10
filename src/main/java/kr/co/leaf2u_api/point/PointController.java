@@ -1,7 +1,5 @@
 package kr.co.leaf2u_api.point;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.co.leaf2u_api.entity.Member;
 import kr.co.leaf2u_api.openai.OpenAIService;
 import kr.co.leaf2u_api.topic.TopicService;
@@ -10,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.Random;

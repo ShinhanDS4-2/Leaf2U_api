@@ -47,42 +47,6 @@ public class TopicServiceImpl implements TopicService {
         return topicRepository.save(ecoTips);
     }
 
-    /**
-     * 뉴스 리스트
-     * @return
-     */
-//    public List<Map<String, Object>> getNews() {
-//        String url = "https://newsapi.org/v2/everything?q=기후&language=ko&sortBy=sim&apiKey=" + NEWS_API_KEY;
-//
-//        // 뉴스 API 호출
-//        Map<String, Object> response = restTemplate.getForObject(url, Map.class);
-//
-//        List<Map<String, Object>> articles = (List<Map<String, Object>>) response.get("articles");
-//
-//        List<Map<String, Object>> resultList = new ArrayList<>();
-//
-//        for (Map<String, Object> article : articles) {
-//            // 날짜를 "YYYY-MM-DD" 형식으로 반환
-//            String publishedAt = (String) article.get("publishedAt");
-//            String formattedDate = (publishedAt != null && publishedAt.length() >= 10) ? publishedAt.substring(0, 10) : "N/A";
-//
-//            resultList.add(Map.of(
-//                    "title", (String) article.get("title"),
-//                    "description", (String) article.get("description"),
-//                    "url", (String) article.get("url"),
-//                    "date", formattedDate
-//            ));
-//        }
-//
-//
-//
-////        // 첫 번째 기사만 선택
-////        Map<String, Object> article = articles.get(0);
-//
-//        return resultList;
-//    }
-
-
     public List<Map<String, Object>> getNews() {
         String url = "https://newsapi.org/v2/everything?q=기후&language=ko&sortBy=sim&apiKey=" + NEWS_API_KEY;
 
