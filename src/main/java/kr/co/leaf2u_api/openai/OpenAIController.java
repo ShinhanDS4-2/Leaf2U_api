@@ -35,7 +35,7 @@ public class OpenAIController {
     public ResponseEntity<Map<String, Object>> checkBicycle(@RequestParam("file") MultipartFile file) {
         try {
             String systemPrompt = "당신은 서울시 공공자전거 따릉이 반납완료 스크린샷을 확인하는 AI 비서입니다. 이미지에서 반납일시 추출하는 데 중점을 둡니다.";
-            String userPrompt = "추가적인 코멘트 없이 이 이미지에서 반납일시만 추출해 주세요. 'MM-dd' 형태로 출력해 주세요.";
+            String userPrompt = "추가적인 코멘트 없이 이 이미지에서 반납일시만 추출해 주세요. 전자영수증이면 날짜를 출력하지 말아주세요. 'MM-dd' 형태로 출력해 주세요.";
             String result = openAIService.sendImageToGPT(file, systemPrompt, userPrompt);
 
             return ResponseEntity.ok(Map.of("result", result));
