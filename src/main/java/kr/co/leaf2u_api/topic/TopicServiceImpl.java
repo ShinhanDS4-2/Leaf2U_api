@@ -8,9 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Random;
 import java.time.LocalDateTime;
@@ -50,20 +47,6 @@ public class TopicServiceImpl implements TopicService {
         return topicRepository.save(ecoTips);
     }
 
-    public Map<String, Object> getNews(String keyword) {
-
-        // 추가
-        String category = "science"; // 카테고리 지정 (과학)
-        String keywords = "환경 OR 친환경 OR 기후변화 OR 지속가능성";
-        String encodedKeywords = URLEncoder.encode(keywords, StandardCharsets.UTF_8);
-
-        String url = "https://newsapi.org/v2/top-headlines?" +
-                "category=science" +
-                "&q=" + encodedKeywords +
-                "&language=ko" +
-                "&apiKey=YOUR_NEWS_API_KEY";
-
-//        String url = "https://newsapi.org/v2/everything?q=" + keyword + "+&language=ko&sortBy=relevancy&apiKey=" + NEWS_API_KEY;
     public List<Map<String, Object>> getNews() {
         String url = "https://newsapi.org/v2/everything?q=기후&language=ko&sortBy=sim&apiKey=" + NEWS_API_KEY;
 
