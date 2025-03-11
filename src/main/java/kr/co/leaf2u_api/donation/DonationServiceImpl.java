@@ -64,11 +64,11 @@ public class DonationServiceImpl implements DonationService {
     }  // => 리스트는 Optional을 반환할 필요가 없음
 
     /** (1) 후원내역 리스트 조회
-     * @param memberIdx
      * @return List, Count
      */
     @Override
-    public Map<String, Object> getDonationHistoryList(Long memberIdx) {
+    public Map<String, Object> getDonationHistoryList() {
+        Long memberIdx = TokenContext.getMemberIdx();  // 토큰에서 뽑은 사용자 idx
         // 후원내역 리스트
         List<DonationHistoryDTO> donationHistoryList = donationHistoryRepository.getDonationHistoryList(memberIdx);
         // 후원내역 리스트 개수
