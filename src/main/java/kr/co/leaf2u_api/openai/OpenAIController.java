@@ -48,7 +48,7 @@ public class OpenAIController {
     public ResponseEntity<Map<String, Object>> checkReceipt(@RequestParam("file") MultipartFile file) {
         try {
             String systemPrompt = "당신은 전자 영수증 스크린샷을 확인하는 AI 비서입니다. 종이로 된 영수증 이미지를 받을 경우 대답은 절대 'No'입니다. 이미지에서 영수증 발급 날짜 추출하는 데 중점을 둡니다.";
-            String userPrompt = "해당 이미지가 전자영수증이면 'Yes', 아니면 'No'로만 답해주고, 만약 Yes일 경우 해당 이미지에서 영수증 발급 날짜도 더해서 출력해 주세요. 날짜 형식은 yyyy-mm-dd(시간까지 있을 경우 yyyy-mm-dd HH:mm:ss)";
+            String userPrompt = "따릉이 반납 사진은 무조건 'No' 입니다. 해당 이미지가 전자영수증이면 'Yes', 아니면 'No'로만 답해주고, 만약 Yes일 경우 해당 이미지에서 영수증 발급 날짜도 더해서 출력해 주세요. 날짜 형식은 yyyy-mm-dd(시간까지 있을 경우 yyyy-mm-dd HH:mm:ss)";
             String result = openAIService.sendImageToGPT(file, systemPrompt, userPrompt);
 
             return ResponseEntity.ok(Map.of("result", result));
