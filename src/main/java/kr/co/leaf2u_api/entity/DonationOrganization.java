@@ -27,12 +27,20 @@ public class DonationOrganization {
     @Column(nullable = false)
     private String description;  // 단체 설명
 
+    @Column
+    private String icon; // 단체 이미지 아이콘
+
+    @Column
+    private String url; // 단체 홈페이지 url
+
     // 특정 생성자에만 @Builder 적용
     @Builder
-    public DonationOrganization(String name, String telNumber, String description) {
+    public DonationOrganization(String name, String telNumber, String description, String icon, String url) {
         this.name = name;
         this.telNumber = telNumber;
         this.description = description;
+        this.icon = icon;
+        this.url = url;
     }
 
     // DTO -> Entity 변환 메서드(엔티티 클래스에 작성해야함)
@@ -41,6 +49,8 @@ public class DonationOrganization {
                 .name(dto.getName())
                 .telNumber(dto.getTelNumber())
                 .description(dto.getDescription())
+                .icon(dto.getIcon())
+                .url(dto.getUrl())
                 .build();  // 빌더 패턴을 통해 객체 생성
     }
 }
