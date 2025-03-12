@@ -41,6 +41,8 @@ public class DonationServiceImpl implements DonationService {
                         .name(donationOrganization.getName())
                         .telNumber(donationOrganization.getTelNumber())
                         .description(donationOrganization.getDescription())
+                        .icon(donationOrganization.getIcon())
+                        .url(donationOrganization.getUrl())
                         .build())  // 빌더로 객체 생성
                 .collect(Collectors.toList());  // 변환된 DTO 목록을 리스트로 모아 반환
     }
@@ -59,6 +61,8 @@ public class DonationServiceImpl implements DonationService {
                 .name(donationOrganization.getName())
                 .telNumber(donationOrganization.getTelNumber())
                 .description(donationOrganization.getDescription())
+                .icon(donationOrganization.getIcon())
+                .url(donationOrganization.getUrl())
                 .build())  // 빌더로 객체 생성
                 .orElse(null);  // .map -> Optional에서 값 꺼내서 반환 (값 있으면 그대로 반환, 값 없으면 null반환)
     }  // => 리스트는 Optional을 반환할 필요가 없음

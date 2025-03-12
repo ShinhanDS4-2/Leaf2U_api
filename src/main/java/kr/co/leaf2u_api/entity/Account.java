@@ -54,7 +54,7 @@ public class Account extends BaseEntity{
     @Column(nullable = false, name = "taxation_yn")
     private char taxationYn;
 
-    @Column(nullable = false, precision = 3,scale = 1)
+    @Column(nullable = false, precision = 4,scale = 3)
     private BigDecimal dutyRate;
 
     @Column(precision = 5)
