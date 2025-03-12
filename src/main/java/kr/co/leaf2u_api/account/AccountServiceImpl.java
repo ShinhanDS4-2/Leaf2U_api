@@ -224,31 +224,30 @@ public class AccountServiceImpl implements AccountService {
     }
 
     /** (3-1) 예상이자조회 - 만기일해지
-     * @return accountDTO(적금계좌), interestRateHistory(금리내역)
+     * @return accountDTO(적금계좌), rateSumMap(금리타입별 금리합계)
      */
     @Override
     public Map<String, Object> getMaturityInterest() throws AccountNotFoundException {
         Long accountIdx = TokenContext.getSavingAccountIdx();  // 토큰에서 뽑은 계좌 idx
 
-        // 계좌 idx 기준으로 List<InterestRateHistory금리내역> 엔티티 반환
-        List<InterestRateHistory> interestRateHistory= accountRepository.getInterestRateHistory(accountIdx);  // 금리내역
+        System.out.println("토큰에서 뽑은 계좌 idx???" + accountIdx);
+
+        // 금리타입별 금리합계 추출 메서드 getRateSumByType(accountIdx)
+        Map<String, BigDecimal> rateSumMap = getRateSumByType(accountIdx);
+
         Account account = accountRepository.findByIdx(accountIdx).orElse(null);
-
-
         if(account == null){
             throw new AccountNotFoundException("사용자에 대한 계좌 없음 null 오류"+accountIdx);
         }
         LocalDateTime maturityDate = account.getMaturityDate();  // account엔티티에서 적금만기일 가져오기
-        BigDecimal finalInterestRate = account.getFinalInterestRate().multiply(new BigDecimal("0.01"));  // 최종금리 2.7% 형식으로 저장되어 있어서 * 0.01 으로 0.027로 변환해야함
+        BigDecimal finalInterestRate = account.getFinalInterestRate().multiply(new BigDecimal("0.01"));  // 최종금리 2.7% 형식으로 저장되어 있어서 * 0.01 으로 0.027로 변환
 
-        /** 이자 계산(만기일 해지) START */
-        // 이자 계산 공통 메서드(idx, 적용금리:최종금리, 해지일:만기일)
+        /** 이자 계산 공통 메서드(idx, 적용금리:최종금리, 해지일:만기일) */
         AccountDTO dto = calculateInterest(accountIdx, finalInterestRate, maturityDate);
-        /** 이자 계산(만기일 해지) END */
 
         Map<String, Object> result = new HashMap<>();
         result.put("accountDTO", dto);  // 계좌 DTO
-        result.put("interestRateHistory", interestRateHistory);  // 금리내역
+        result.put("rateSumMap", rateSumMap);  // rate_type 별 금리 합계
 
         return result;
     }
@@ -316,26 +315,27 @@ public class AccountServiceImpl implements AccountService {
     }
 
     /** (4) 계좌 해지 (중도해지이므로 우대금리 X)  =>  만약 해지하는 날짜가 만기일이라면? 만기 해지 화면으로 이동시켜야하나? ? ? ?
-     * @param accountDTO idx, accountPassword(계좌 비밀번호)
+     * @param accountPassword(계좌 비밀번호)
      * @return 1(성공), 0(실패), 401(비밀번호 불일치)
      */
     // 클라이언트로부터 인증 비밀번호6자리 입력받음. (비밀번호 일치 시에만 로직 수행되도록)
     @Override
-    public int terminateAccount(AccountDTO accountDTO) throws AccountNotFoundException {
-        Long idx = accountDTO.getIdx();  // 계좌 idx
-        String inputPwd = accountDTO.getAccountPassword();  // 사용자가 입력한 계좌 비밀번호
+    public int terminateAccount(String accountPassword) throws AccountNotFoundException {
+        Long accountIdx = TokenContext.getSavingAccountIdx();  // 토큰에서 뽑은 계좌 idx
+        String inputPwd = accountPassword;  // 사용자가 입력한 계좌 비밀번호
 
-        Account account = accountRepository.findByIdx(idx).orElse(null);  // 계좌 idx 기준으로 Account 엔티티 조회
+        Account account = accountRepository.findByIdx(accountIdx).orElse(null);  // 계좌 idx 기준으로 Account 엔티티 조회
         if(account == null){
             throw new AccountNotFoundException("사용자에 대한 계좌 없음 null 오류");
         }
         BigDecimal interestRate = account.getInterestRate().multiply(new BigDecimal("0.01"));;  // 기본금리
         LocalDateTime endDate = LocalDateTime.now();  // 종료일 (=해지일)
 
+        System.out.println(account.getAccountPassword() + "이건 계좌 엔티티에서 꺼낸 비번값");
+        System.out.println(inputPwd + "이건 사용자한테 입력받은 비번값");
         // 비밀번호 일치하는지 확인
-//      if(!passwordEncoder.matches(inputPwd, account.getAccountPassword())){  // 해당 적금계좌의 현재 비밀번호를 DB에서 조회
+//      if(!passwordEncoder.matches(inputPwd, account.getAccountPassword())){  // 해당 적금계좌의 현재 비밀번호를 DB에서 조회 -> 암호화된 비번 조회
         if(!inputPwd.equals(account.getAccountPassword())){  // API테스트용 임시 코드(위에거로 변경해야함)
-
                 // ㄴ 사용자가 입력한 비밀번호가 DB에 저장된 비밀번호와 일치하는지 확인
             return 401;  // 비밀번호 불일치시 401반환
         }
@@ -349,7 +349,7 @@ public class AccountServiceImpl implements AccountService {
         * */
 
         // 2. 세후이자 계산 => 이자계산하는 공통 메서드 사용 calculateInterest(계좌idx, 적용금리(=기본금리), 해지일(=오늘))
-        AccountDTO dto = calculateInterest(idx, interestRate, endDate);
+        AccountDTO dto = calculateInterest(accountIdx, interestRate, endDate);
         BigDecimal interestAmount = dto.getInterestAmount();  // 세후이자
 
         account.setAccountStatus('C');  // 1
@@ -362,9 +362,9 @@ public class AccountServiceImpl implements AccountService {
 
         // save() 메서드는 반환 값으로 저장된(업데이트된) 엔티티를 반환함 => 반환된 엔티티가 null이 아니면 업데이트 성공
         if(updatedAccount != null){
-            return 1;  // 성공 시 1 반환
+            return 1;  // 적금 해지 성공 시 1 반환
         } else {
-            return 0;  // 실패 시 0 반환
+            return 0;  // 적금 해지 실패 시 0 반환
         }
     }
 
@@ -489,6 +489,38 @@ public class AccountServiceImpl implements AccountService {
         dto.setInterestAmount(account.getInterestAmount());  // 세후 이자
 
         return dto;
+    }
+
+    /**
+     * 금리타입별 금리합계 뽑아서 Map으로 반환
+     * @param accountIdx
+     * @return rateSumMap
+     */
+    private Map<String, BigDecimal> getRateSumByType(Long accountIdx) {
+        Object[] rateSumByType = accountRepository.rateSumByType(accountIdx); // rate_type 별 금리 합계
+        System.out.println("rateSumByType은???????????????????????????" + Arrays.deepToString(rateSumByType));
+        // rateSumByType은 2차원 배열 [[1.00, 0.10, 0.00, 0.00, 1.70, 0.60]] 형태로 되어있어서 첫번째 배열을 꺼내줘야함
+        Object[] firstElement = (Object[]) rateSumByType[0]; // 첫 번째 배열을 가져오기
+        System.out.println("rateSumByType의 첫 번째 요소: " + Arrays.toString(firstElement));
+        Map<String, BigDecimal> rateSumMap = new HashMap<>();
+
+        // null 또는 값이 없는 경우 처리
+        if (firstElement == null || firstElement.length < 6) {
+            rateSumMap.put("rateB", BigDecimal.ZERO);
+            rateSumMap.put("rateC", BigDecimal.ZERO);
+            rateSumMap.put("rateE", BigDecimal.ZERO);
+            rateSumMap.put("rateF", BigDecimal.ZERO);
+            rateSumMap.put("rateD", BigDecimal.ZERO);
+            rateSumMap.put("rateW", BigDecimal.ZERO);
+        } else {
+            rateSumMap.put("rateB", firstElement[0] != null ? new BigDecimal(firstElement[0].toString()) : BigDecimal.ZERO);
+            rateSumMap.put("rateC", firstElement[1] != null ? new BigDecimal(firstElement[1].toString()) : BigDecimal.ZERO);
+            rateSumMap.put("rateE", firstElement[2] != null ? new BigDecimal(firstElement[2].toString()) : BigDecimal.ZERO);
+            rateSumMap.put("rateF", firstElement[3] != null ? new BigDecimal(firstElement[3].toString()) : BigDecimal.ZERO);
+            rateSumMap.put("rateD", firstElement[4] != null ? new BigDecimal(firstElement[4].toString()) : BigDecimal.ZERO);
+            rateSumMap.put("rateW", firstElement[5] != null ? new BigDecimal(firstElement[5].toString()) : BigDecimal.ZERO);
+        }
+        return rateSumMap;
     }
 
     /**

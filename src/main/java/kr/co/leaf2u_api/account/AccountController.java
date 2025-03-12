@@ -71,8 +71,9 @@ public class AccountController {
     }
 // ResponseEntity는 컨트롤러 계층에서 사용하는 것이 좋다 (서비스계층은 비즈니스 로직에 집중하고, HTTP 관련 로직은 컨트롤러에서 처리하도록)
 
+
     /** (3-1) 예상이자조회 - 만기일해지
-     * @return account(적금계좌), interestRateHistory(금리내역)
+     * @return accountDTO(적금계좌), rateSumMap(금리타입별 금리합계)
      */
     @GetMapping("/interest/maturity")
     public ResponseEntity<Map<String, Object>> getMaturityInterest() throws AccountNotFoundException {
@@ -98,19 +99,15 @@ public class AccountController {
     }
 
     /** (4) 계좌 해지 (중도해지이므로 우대금리 X)
-     * @param accountDTO idx, accountPassword(계좌 비밀번호)
+     * @param accountDTO(계좌 비밀번호)
      * @return 1(성공), 0(실패), 401(비밀번호 불일치)
      */
     @PatchMapping("/termination")
-    public ResponseEntity<String> terminateAccount(@RequestBody AccountDTO accountDTO) throws AccountNotFoundException {
-        int result = accountService.terminateAccount(accountDTO);  // 1 or 0 or 401
-        if (result == 1) {
-            return ResponseEntity.ok("적금 해지가 완료되었습니다. ");
-        } else if (result == 401) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("비밀번호가 일치하지 않습니다.");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("적금 해지가 실패하였습니다. 다시 시도해주세요.");
-        }
+    public ResponseEntity<Integer> terminateAccount(@RequestBody AccountDTO accountDTO) throws AccountNotFoundException {
+        System.out.println("받은 비밀번호: " + accountDTO.getAccountPassword());
+        int result = accountService.terminateAccount(accountDTO.getAccountPassword());  // 1 or 0 or 401
+        System.out.println("해지 결과값??" + result);
+            return ResponseEntity.ok(result);
     }
 
     /* 메인화면에 필요한 api - 문경미 */

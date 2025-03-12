@@ -20,7 +20,7 @@ public interface AccountService {
     Map<String, Object> getMaturityInterest() throws AccountNotFoundException;  // (3-1) 예상 이자 조회 - 만기일 해지
     Map<String, Object> getTodayInterest() throws AccountNotFoundException;  // (3-2) 예상 이자 조회 - 오늘 해지 getTodayInterest
     Map<String, Object> getCustomDateInterest(LocalDateTime endDate) throws AccountNotFoundException;  // (3-3) 예상 이자 조회 - 선택일자 해지 getCustomDateInterest
-    int terminateAccount(AccountDTO accountDTO) throws AccountNotFoundException;  // (4) 계좌 해지
+    int terminateAccount(String accountPassword) throws AccountNotFoundException;  // (4) 계좌 해지
 
     /* 메인화면에 필요한 api - 문경미 */
     Map<String, Object> getSavingInfo();                    // 메인 홈 적금 계좌 정보
