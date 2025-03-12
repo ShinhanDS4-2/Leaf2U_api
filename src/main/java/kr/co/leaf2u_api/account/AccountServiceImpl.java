@@ -550,6 +550,7 @@ public class AccountServiceImpl implements AccountService {
         return account.map(entity -> new AccountDTO(
                 entity.getBalance(),
                 entity.getFinalInterestRate(),
+                entity.getCreateDate(),
                 entity.getMaturityDate(),
                 entity.getPaymentAmount(),
                 entity.getSavingCnt()
