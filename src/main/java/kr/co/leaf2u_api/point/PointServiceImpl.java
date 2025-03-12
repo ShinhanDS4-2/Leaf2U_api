@@ -118,10 +118,7 @@ public class PointServiceImpl implements PointService {
     @Override
     public BigDecimal getTotalPoints(Member member) {
         // 회원의 모든 포인트 내역을 조회하여 총합 계산
-        BigDecimal totalPoints = pointRepository.findByMember(member)
-                .stream()
-                .map(Point::getEarnPoint)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalPoints = pointRepository.getTotalPoint(member);
 
         return totalPoints;
     }
