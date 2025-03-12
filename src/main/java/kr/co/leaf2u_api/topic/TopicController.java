@@ -48,7 +48,7 @@ public class TopicController {
      * 미세먼지
      * @return
      */
-    @GetMapping("/fine/dust")
+    @GetMapping("/finedust")
     public ResponseEntity<Map<String, Object>> getFineDust() {
         Map<String, Object> dustInfo = topicService.getFineDustInfo();
 
