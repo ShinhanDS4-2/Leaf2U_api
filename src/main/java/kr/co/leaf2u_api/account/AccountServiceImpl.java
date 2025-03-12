@@ -466,6 +466,16 @@ public class AccountServiceImpl implements AccountService {
                     .build();
             donationHistoryRepository.save(donationHistory);
 
+            // 포인트 차감
+            if (point.compareTo(BigDecimal.ZERO) != 0) {
+                Point pointEntity = Point.builder()
+                        .member(Member.builder().idx(memberIdx).build())
+                        .usePoint(point)
+                        .useDate(LocalDateTime.now())
+                        .build();
+                pointRepository.save(pointEntity);
+            }
+
         } catch (Exception e) {
             result = false;
         }
