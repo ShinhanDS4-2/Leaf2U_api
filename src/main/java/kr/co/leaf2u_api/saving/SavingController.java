@@ -41,6 +41,16 @@ public class SavingController {
     }
 
     /**
+     * 비밀번호 검증 API
+     */
+    @PostMapping("/password")
+    public ResponseEntity<Boolean> verifyPassword(@RequestBody Map<String, String> request) {
+        String inputPassword = request.get("inputPassword");
+        boolean isMatch = savingService.verifyPassword(inputPassword);
+        return ResponseEntity.ok(isMatch);
+    }
+
+    /**
      * 적금 prime_rate
      */
     @PostMapping("/deposit")

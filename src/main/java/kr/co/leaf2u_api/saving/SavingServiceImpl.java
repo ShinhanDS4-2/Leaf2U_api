@@ -1,5 +1,7 @@
 package kr.co.leaf2u_api.saving;
 
+import kr.co.leaf2u_api.entity.Account;
+
 import kr.co.leaf2u_api.account.AccountRepository;
 import kr.co.leaf2u_api.account.AccountService;
 import kr.co.leaf2u_api.config.TokenContext;
@@ -8,10 +10,12 @@ import kr.co.leaf2u_api.entity.InterestRateHistory;
 import kr.co.leaf2u_api.notice.NoticeService;
 import kr.co.leaf2u_api.util.CommonUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -30,6 +34,8 @@ public class SavingServiceImpl implements SavingService {
     private final SavingRepository savingRepository;
 
     private final NoticeService noticeService;
+
+    private final PasswordEncoder passwordEncoder;
 
     private final double TUMBLER_CARBON = 45.84;
     private final double RECEIPT_CARBON = 3;
@@ -121,7 +127,25 @@ public class SavingServiceImpl implements SavingService {
         );
     }
 
+    /**
+     * 비밀번호 검증 API
+     */
+    @Override
+    public boolean verifyPassword(String inputPassword) {
+        Long accountIdx = TokenContext.getSavingAccountIdx();
+        Optional<Account> accountOpt = accountRepository.findByIdx(accountIdx);
 
+        if (accountOpt.isEmpty()) {
+            return false;
+        }
+
+        String storedHashedPassword = accountOpt.get().getAccountPassword();
+        return passwordEncoder.matches(inputPassword, storedHashedPassword);
+    }
+
+    /**
+     * 납입 & 우대 금리
+     */
     @Transactional
     public Map<String, Object> processSavingDeposit(Map<String, Object> param) {
         Map<String, Object> result = new HashMap<>();
