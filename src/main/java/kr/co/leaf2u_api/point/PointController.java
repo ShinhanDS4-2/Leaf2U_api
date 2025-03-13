@@ -25,10 +25,9 @@ public class PointController {
     private final TopicService topicService;
 
     @PostMapping("/checkin")
-    public ResponseEntity<Map<String, Object>> checkIn(@RequestParam("memberIdx") Long memberIdx) {
-
+    public ResponseEntity<Map<String, Object>> checkIn() {
         Member member = new Member();
-        member.setIdx(memberIdx);
+        member.setIdx(TokenContext.getMemberIdx());
 
         boolean success = pointService.checkIn(member);
         if (!success) {
@@ -37,6 +36,7 @@ public class PointController {
 
         return ResponseEntity.ok(Map.of("message", "출석체크 완료! 10P 적립"));
     }
+
 
     @PostMapping("/pedometer")
     public ResponseEntity<Map<String, Object>> pedometerCheck(@RequestParam("memberIdx") Long memberIdx, @RequestParam("file") MultipartFile file) {
