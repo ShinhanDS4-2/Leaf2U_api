@@ -146,15 +146,15 @@ public class TopicServiceImpl implements TopicService {
     }
 
     private String getPm10Status(int value) {
-        if (value <= 80) return "좋음";
-        if (value <= 150) return "보통";
-        return "나쁨";
+        if (value <= 80) return "good";
+        if (value <= 150) return "moderate";
+        return "bad";
     }
 
     private String getPm25Status(int value) {
-        if (value <= 35) return "좋음";
-        if (value <= 75) return "보통";
-        return "나쁨";
+        if (value <= 35) return "good";
+        if (value <= 75) return "moderate";
+        return "bad";
     }
 
 }
