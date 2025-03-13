@@ -33,9 +33,9 @@ public interface DonationHistoryRepository extends JpaRepository<DonationHistory
             "do.idx, " +  // 기부처 ID
             "do.name, " + // 기부처 이름
             "do.telNumber, " + // 기부처 전화번호
+            "do.description, " + // 기부처 설명
             "do.icon, " + // 기부처 icon
-            "do.url, " + // 기부처 url
-            "do.description) " + // 기부처 설명
+            "do.url) " + // 기부처 url
             "FROM DonationOrganization do " +
             "JOIN DonationHistory dh ON dh.donationOrganization.idx = do.idx " + // 기부내역과 기부처 조인
             "WHERE dh.idx = :donationHistoryIdx")  // 기부내역 idx 기준으로 조회

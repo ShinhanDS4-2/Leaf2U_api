@@ -16,9 +16,9 @@ public class TopicController {
     private final TopicService topicService;
 
     // 카테고리별 Tip 가져오기
-    @GetMapping("/{category}")
-    public List<EcoTips> getTipsByCategory(@PathVariable char category) {
-        return topicService.getEcoTips(category);
+    @GetMapping("/tips")
+    public List<EcoTips> getTipsByCategory(@RequestParam String category) {
+        return topicService.getEcoTips(category.charAt(0));
     }
 
     // 새로운 Tip 추가하기
