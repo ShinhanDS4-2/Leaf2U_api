@@ -37,10 +37,11 @@ public class AccountDTO {
     private Long savingCnt;
 
     // 메인홈 계좌 정보 조회용 생성자
-    public AccountDTO(BigDecimal balance, BigDecimal finalInterestRate, LocalDateTime maturityDate, BigDecimal paymentAmount, Long savingCnt) {
+    public AccountDTO(BigDecimal balance, BigDecimal finalInterestRate, LocalDateTime createDate, LocalDateTime maturityDate, BigDecimal paymentAmount, Long savingCnt) {
         this.balance = balance;
         this.finalInterestRate = finalInterestRate;
         this.maturityDate = maturityDate;
+        this.createDate = createDate;
         this.paymentAmount = paymentAmount;
         this.savingCnt = savingCnt;
     }

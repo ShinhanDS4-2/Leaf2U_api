@@ -28,6 +28,10 @@ public class SavingServiceImpl implements SavingService {
 
     private final SavingRepository savingRepository;
 
+    private final double TUMBLER_CARBON = 45.84;
+    private final double RECEIPT_CARBON = 3;
+    private final double BICYCLE_CARBON = 2278;
+
     /**
      * 납입 내역 리스트
      * @return
@@ -84,6 +88,12 @@ public class SavingServiceImpl implements SavingService {
         // 챌린지 별 count
         Map<String, Object> cnt = accountHistoryRepository.getChallengeCnt(accountIdx);
         result.put("challengeCnt", cnt);
+
+        Map<String, Object> carbon = new HashMap<>();
+        carbon.put("carbonT", TUMBLER_CARBON * Integer.parseInt(cnt.get("countT").toString()));
+        carbon.put("carbonC", BICYCLE_CARBON * Integer.parseInt(cnt.get("countC").toString()));
+        carbon.put("carbonR", RECEIPT_CARBON * Integer.parseInt(cnt.get("countR").toString()));
+        result.put("carbon", carbon);
 
         return result;
     }
