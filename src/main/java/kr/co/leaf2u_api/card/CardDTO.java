@@ -23,4 +23,5 @@ public class CardDTO {
     private BigDecimal balance;
     private String cardPassword;
 
+
 }

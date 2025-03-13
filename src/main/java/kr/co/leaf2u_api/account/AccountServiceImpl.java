@@ -168,7 +168,7 @@ public class AccountServiceImpl implements AccountService {
 
 /** 적금 계좌 관리 - 시온 */
     /** (1) 계좌 기본 정보 조회
-     * @return AccountDTO
+     * @return accountDTO
      */
     @Override
     public Map<String, Object> getAccountInfoById() {
@@ -186,7 +186,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     /** (2) 납입금액 변경
-     * @param accountDTO
+     * @param accountDTO (accountPassword, paymentAmount) -> 계좌 비번이랑 변경할 납입금액 입력받아야함
      * @return 1(성공), 0(실패), 401(비밀번호 불일치)
      */
     // 클라이언트로부터 납입금액, 인증 비밀번호6자리 입력받음. (비밀번호 일치 시에만 로직 수행되도록)
@@ -195,6 +195,12 @@ public class AccountServiceImpl implements AccountService {
         Long accountIdx = TokenContext.getSavingAccountIdx();  // 토큰에서 뽑은 계좌 idx
         String inputPwd = accountDTO.getAccountPassword();  // 사용자가 입력한 계좌 비밀번호
         BigDecimal inputAmount = accountDTO.getPaymentAmount();  // 사용자가 입력한 납입금액
+
+        System.out.println("========서비스 임플============");
+        System.out.println("토큰에서 뽑은 계좌 idx?? " + accountIdx);
+        System.out.println("사용자가 입력한 계좌 비밀번호?? " + inputPwd);
+        System.out.println("사용자가 입력한 납입금액?? " + inputAmount);
+        System.out.println("========서비스 임플============");
 
         // 해당 적금계좌의 현재 비밀번호를 DB에서 조회
         Account account = accountRepository.findByIdx(accountIdx)  // idx 기준으로 Account 엔티티 조회

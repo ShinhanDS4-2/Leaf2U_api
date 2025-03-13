@@ -59,8 +59,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     Object[] rateSumByType(@Param("accountIdx") Long accountIdx);
 
 
-
-
     /* 만기 해지  - 문경미 */
     @Modifying
     @Query("""
