@@ -5,11 +5,9 @@ import kr.co.leaf2u_api.account.AccountService;
 import kr.co.leaf2u_api.config.TokenContext;
 import kr.co.leaf2u_api.entity.AccountHistory;
 import kr.co.leaf2u_api.entity.InterestRateHistory;
-import kr.co.leaf2u_api.member.MemberRepository;
 import kr.co.leaf2u_api.notice.NoticeService;
 import kr.co.leaf2u_api.util.CommonUtil;
 import lombok.RequiredArgsConstructor;
-import org.json.simple.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,11 +29,11 @@ public class SavingServiceImpl implements SavingService {
 
     private final SavingRepository savingRepository;
 
+    private final NoticeService noticeService;
+
     private final double TUMBLER_CARBON = 45.84;
     private final double RECEIPT_CARBON = 3;
     private final double BICYCLE_CARBON = 2278;
-
-    private final NoticeService noticeService;
 
     /**
      * 납입 내역 리스트
@@ -123,11 +121,7 @@ public class SavingServiceImpl implements SavingService {
         );
     }
 
-    /**
-     * 납입
-     * @param param
-     * @return
-     */
+
     @Transactional
     public Map<String, Object> processSavingDeposit(Map<String, Object> param) {
         Map<String, Object> result = new HashMap<>();
