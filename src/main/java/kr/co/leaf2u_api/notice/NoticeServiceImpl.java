@@ -1,8 +1,10 @@
 package kr.co.leaf2u_api.notice;
 
+import jakarta.transaction.Transactional;
 import kr.co.leaf2u_api.config.TokenContext;
 import kr.co.leaf2u_api.entity.Member;
 import kr.co.leaf2u_api.entity.Notice;
+import kr.co.leaf2u_api.member.MemberRepository;
 import kr.co.leaf2u_api.util.CommonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 public class NoticeServiceImpl implements NoticeService {
 
     private final NoticeRepository noticeRepository;
+    private final MemberRepository memberRepository;
 
     /**
      * 사용자 별 알림 리스트
@@ -85,12 +88,20 @@ public class NoticeServiceImpl implements NoticeService {
      * @param param
      * @return
      */
+    @Transactional
     public Long registNotice(Map<String, Object> param) {
 
         Long memberIdx = TokenContext.getMemberIdx();
 
+        if (memberIdx == null) {
+            throw new IllegalArgumentException("memberIdx 가 존재하지 않습니다.");
+        }
+
+        Member member = memberRepository.findById(memberIdx)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 회원입니다."));
+
         Notice notice = Notice.builder()
-                .member(Member.builder().idx(memberIdx).build())
+                .member(member)
                 .title((String) param.get("title"))
                 .content((String) param.get("content"))
                 .category(((String) param.get("category")).charAt(0))

@@ -16,11 +16,15 @@ public class CardDTO {
     private Long memberIdx;
     private Long savingAccountIdx;
     private char cardType;
-    private String cardName;  // 카드명
-    private String cardNumber;  // 카드번호
-    private String expirationDate;  // 유효기간
+    private String cardName;
+    private String cardNumber;
+    private String expirationDate;
     private String accountNumber;
     private BigDecimal balance;
     private String cardPassword;
 
+    public CardDTO(String cardName, String accountNumber) {
+        this.cardName = cardName;
+        this.accountNumber = accountNumber;
+    }
 }

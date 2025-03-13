@@ -4,5 +4,6 @@ public interface CardService {
 
     CardDTO createLeafCard(CardDTO cardDTO);
     CardDTO registerExistingCard(CardDTO cardDTO);
+    CardDTO getCardInfo(Long memberIdx);
 
 }

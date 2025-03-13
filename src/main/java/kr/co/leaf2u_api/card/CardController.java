@@ -1,12 +1,11 @@
 package kr.co.leaf2u_api.card;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/card")
 @RequiredArgsConstructor
@@ -22,6 +21,10 @@ public class CardController {
     @PostMapping("/new")
     public ResponseEntity<CardDTO> createLeafCard(@RequestBody CardDTO cardDTO) {
 
+        log.info("전송받은 memberIdx: {}", cardDTO.getMemberIdx());
+        log.info("전송받은 비밀번호: {}", cardDTO.getCardPassword());
+        log.info("전송받은 계좌번호: {}", cardDTO.getAccountNumber());
+
         CardDTO createdCard=cardService.createLeafCard(cardDTO);
         return ResponseEntity.ok(createdCard);
     }
@@ -36,6 +39,19 @@ public class CardController {
 
         CardDTO existingCard=cardService.registerExistingCard(cardDTO);
         return ResponseEntity.ok(existingCard);
+
+    }
+
+    @PostMapping("/card-info")
+    public ResponseEntity<CardDTO> getCardInfo(@RequestBody CardDTO cardDTO) {
+
+        Long memberIdx=cardDTO.getMemberIdx();
+        log.info("멤버 idx: {}", memberIdx);
+
+        CardDTO cardInfo=cardService.getCardInfo(memberIdx);
+
+        log.info("카드 info:",cardInfo);
+        return ResponseEntity.ok(cardInfo);
 
     }
 

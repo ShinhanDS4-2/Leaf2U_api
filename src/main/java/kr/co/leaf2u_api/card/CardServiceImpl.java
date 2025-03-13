@@ -9,14 +9,14 @@ import kr.co.leaf2u_api.entity.Notice;
 import kr.co.leaf2u_api.member.MemberRepository;
 import kr.co.leaf2u_api.notice.NoticeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +27,9 @@ public class CardServiceImpl implements CardService {
 
     private final NoticeService noticeService;
 
+    //BCryptPasswordEncoder 인스턴스 생성
+    private final PasswordEncoder passwordEncoder=new BCryptPasswordEncoder();
+
     @Transactional
     @Override
     public CardDTO createLeafCard(CardDTO cardDTO) {
@@ -34,17 +37,23 @@ public class CardServiceImpl implements CardService {
         Member member=memberRepository.findById(cardDTO.getMemberIdx())
                 .orElseThrow(()-> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
+        String hashedPassword = passwordEncoder.encode(cardDTO.getCardPassword());        //비밀번호 암호화
+
         Card card= Card.builder()
                 .member(member)
-                .cardType(cardDTO.getCardType())
+                .cardType('L')
                 .cardName(cardDTO.getCardName())
                 .cardNumber(generateCardNumber())
-                .cardPassword(cardDTO.getCardPassword())
+                .accountNumber(cardDTO.getAccountNumber())
+                .cardPassword(hashedPassword)
                 .expirationDate(String.valueOf(LocalDateTime.now().plusYears(3)))
                 .balance(BigDecimal.ZERO)
                 .build();
         
         cardRepository.save(card);
+
+        member.setCardYn('Y');
+        memberRepository.save(member);
 
         /* 카드 발급 알림 insert - 문경미 */
         Map<String, Object> noticeParam = new HashMap<>();
@@ -94,6 +103,15 @@ public class CardServiceImpl implements CardService {
         return entityToDTO(card);
     }
 
+    @Override
+    public CardDTO getCardInfo(Long memberIdx) {
+
+        Card cardInfo =cardRepository.findFirstByMemberIdxOrderByCreateDateDesc(memberIdx).orElse(null);
+
+        return entityToDTO(cardInfo);
+    }
+
+
     private CardDTO entityToDTO(Card card) {
 
         CardDTO dto=new CardDTO();
@@ -101,6 +119,7 @@ public class CardServiceImpl implements CardService {
         dto.setCardType(card.getCardType());
         dto.setCardName(card.getCardName());
         dto.setCardNumber(card.getCardNumber());
+        dto.setAccountNumber(card.getAccountNumber());
         dto.setExpirationDate(card.getExpirationDate());
         dto.setBalance(card.getBalance());
 
