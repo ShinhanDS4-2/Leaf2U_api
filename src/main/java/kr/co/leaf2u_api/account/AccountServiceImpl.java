@@ -275,6 +275,11 @@ public class AccountServiceImpl implements AccountService {
         result.put("accountDTO", dto);  // 계좌 DTO
         result.put("rateSumMap", rateSumMap);  // rate_type 별 금리 합계
 
+        /** 포인트 조회 */
+        Member member = new Member();
+        member.setIdx(TokenContext.getMemberIdx());
+        result.put("point", pointRepository.getTotalPoint(member));
+
         return result;
     }
 
