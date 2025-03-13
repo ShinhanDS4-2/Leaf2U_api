@@ -73,6 +73,21 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     """)
     void updateMaturity(@Param("accountIdx") Long accountIdx, @Param("afterTaxInterest")BigDecimal interestAmount);
 
+    // 납입 계좌 정보
+    @Query("""
+    SELECT m.name,
+           sa.paymentAmount,
+           SUBSTRING(sa.accountNumber, LENGTH(sa.accountNumber) - 3, 4),
+           SUBSTRING(c.accountNumber, LENGTH(c.accountNumber) - 3, 4)
+    FROM Account sa
+    JOIN sa.member m
+    JOIN AccountCard ac ON ac.account.idx = sa.idx
+    JOIN ac.card c
+    WHERE sa.idx = :accountIdx
+    AND sa.accountStatus = 'N'
+""")
+    List<Object[]> findAccountInfo(@Param("accountIdx") Long accountIdx);
+
 
 
 }

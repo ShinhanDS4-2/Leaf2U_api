@@ -1,6 +1,7 @@
 package kr.co.leaf2u_api.card;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/card")
 @RequiredArgsConstructor
+@Log4j2
 public class CardController {
 
     private final CardService cardService;
@@ -39,5 +41,16 @@ public class CardController {
 
     }
 
+    @PostMapping("/card-info")
+    public ResponseEntity<CardDTO> getCardInfo(@RequestBody CardDTO cardDTO) {
 
+        Long memberIdx=cardDTO.getMemberIdx();
+        log.info("멤버 idx: {}", memberIdx);
+
+        CardDTO cardInfo=cardService.getCardInfo(memberIdx);
+
+        log.info("카드 info:",cardInfo);
+        return ResponseEntity.ok(cardInfo);
+
+    }
 }

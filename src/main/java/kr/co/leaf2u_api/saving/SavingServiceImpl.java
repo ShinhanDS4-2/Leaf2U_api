@@ -5,6 +5,7 @@ import kr.co.leaf2u_api.account.AccountService;
 import kr.co.leaf2u_api.config.TokenContext;
 import kr.co.leaf2u_api.entity.AccountHistory;
 import kr.co.leaf2u_api.entity.InterestRateHistory;
+import kr.co.leaf2u_api.notice.NoticeService;
 import kr.co.leaf2u_api.util.CommonUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,8 @@ public class SavingServiceImpl implements SavingService {
     private final AccountService accountService;
 
     private final SavingRepository savingRepository;
+
+    private final NoticeService noticeService;
 
     private final double TUMBLER_CARBON = 45.84;
     private final double RECEIPT_CARBON = 3;
@@ -165,6 +168,19 @@ public class SavingServiceImpl implements SavingService {
         result.put("message", "적금 납입이 완료되었습니다.");
         result.put("saving_cnt", savingCount);
         result.put("todayInterestRate", todayInterestRate);
+
+        // 납입 알림 insert
+        List<Object[]> obj = accountRepository.findAccountInfo(accountIdx);
+        Map<String, Object> noticeParam = new HashMap<>();
+
+        for (Object[] info : obj) {
+            noticeParam.put("memberIdx", memberIdx);
+            noticeParam.put("title", info[0] + "의 통장 (" + info[3] + ")");
+            noticeParam.put("content", "출금 (" + info[1] + ") | 한달적금 (" + info[2] + ")");
+            noticeParam.put("category", "S");
+        }
+
+        noticeService.registNotice(noticeParam);
 
         return result;
     }
