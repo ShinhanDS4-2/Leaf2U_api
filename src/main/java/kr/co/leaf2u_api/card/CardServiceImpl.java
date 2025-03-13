@@ -1,8 +1,12 @@
 package kr.co.leaf2u_api.card;
 
 import jakarta.transaction.Transactional;
+import kr.co.leaf2u_api.account.AccountDTO;
+import kr.co.leaf2u_api.account.AccountRepository;
+import kr.co.leaf2u_api.config.TokenContext;
 import kr.co.leaf2u_api.donation.DonationHistoryDTO;
 import kr.co.leaf2u_api.donation.DonationOrganizationDTO;
+import kr.co.leaf2u_api.entity.Account;
 import kr.co.leaf2u_api.entity.Card;
 import kr.co.leaf2u_api.entity.Member;
 import kr.co.leaf2u_api.entity.Notice;
@@ -24,7 +28,7 @@ public class CardServiceImpl implements CardService {
 
     private final CardRepository cardRepository;
     private final MemberRepository memberRepository;
-
+    private final AccountRepository accountRepository;
     private final NoticeService noticeService;
 
     //BCryptPasswordEncoder 인스턴스 생성
@@ -125,5 +129,6 @@ public class CardServiceImpl implements CardService {
 
         return dto;
     }
+
 
 }

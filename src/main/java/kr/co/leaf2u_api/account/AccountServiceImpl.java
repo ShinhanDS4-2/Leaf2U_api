@@ -366,7 +366,7 @@ public class AccountServiceImpl implements AccountService {
 //      if(!passwordEncoder.matches(inputPwd, account.getAccountPassword())){  // 해당 적금계좌의 현재 비밀번호를 DB에서 조회 -> 암호화된 비번 조회
         if(!inputPwd.equals(account.getAccountPassword())){  // API테스트용 임시 코드(위에거로 변경해야함)
                 // ㄴ 사용자가 입력한 비밀번호가 DB에 저장된 비밀번호와 일치하는지 확인
-            return 401;  // 비밀번호 불일치시 401반환
+            return 401;  // 비밀번호 불일치시 401반환 
         }
         // 비밀번호가 일치하면 적금계좌 해지 ↓
 

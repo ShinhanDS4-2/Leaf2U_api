@@ -13,4 +13,5 @@ public interface CardRepository extends JpaRepository<Card, Long> {
 
 
 
+    // 사용중인 적금계좌에 연결된 카드(1개) 조회
 }
