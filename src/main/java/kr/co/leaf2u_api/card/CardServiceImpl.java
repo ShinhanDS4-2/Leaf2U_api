@@ -118,7 +118,7 @@ public class CardServiceImpl implements CardService {
 
     private CardDTO entityToDTO(Card card) {
 
-        CardDTO dto=new CardDTO();
+        CardDTO dto = new CardDTO();
         dto.setMemberIdx(card.getMember().getIdx());
         dto.setCardType(card.getCardType());
         dto.setCardName(card.getCardName());

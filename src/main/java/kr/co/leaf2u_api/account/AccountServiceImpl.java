@@ -100,6 +100,7 @@ public class AccountServiceImpl implements AccountService {
         if (card.getCardType()=='L'){
 
             primeRate=primeRate.add(new BigDecimal("2.0"));
+            insertInterestRateHistory(savedAccount,'C',new BigDecimal("1.0"));
         }
 
         //기후 동행 카드를 만들기를 선택한다면 1% 추가
@@ -113,8 +114,9 @@ public class AccountServiceImpl implements AccountService {
         else if (card.getCardType()=='C'){
 
             primeRate=primeRate.add(new BigDecimal("0.0"));                                  //발급받았으므로 'Y' 로 변경
-            insertInterestRateHistory(savedAccount,'B',new BigDecimal("0.0"));
         }
+
+        insertInterestRateHistory(savedAccount,'B',new BigDecimal("1.0"));           //기본 금리 1%
 
         savedAccount.setPrimeRate(primeRate);
         savedAccount.setFinalInterestRate(baseInterestRate.add(primeRate));
