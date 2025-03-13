@@ -1,15 +1,15 @@
 package kr.co.leaf2u_api.account;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import javax.security.auth.login.AccountNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+
+
 
 @RestController
 @RequestMapping("/api/account")
@@ -100,6 +100,7 @@ public class AccountController {
         return ResponseEntity.ok(accountService.getCustomDateInterest(endDateTime));
     }
 
+
     /** (4) 계좌 해지 (중도해지이므로 우대금리 X)
      * @param accountDTO(계좌 비밀번호)
      * @return 1(성공), 0(실패), 401(비밀번호 불일치)
@@ -109,7 +110,7 @@ public class AccountController {
         System.out.println("받은 비밀번호: " + accountDTO.getAccountPassword());
         int result = accountService.terminateAccount(accountDTO.getAccountPassword());  // 1 or 0 or 401
         System.out.println("해지 결과값??" + result);
-            return ResponseEntity.ok(result);
+        return ResponseEntity.ok(result);
     }
 
     /* 메인화면에 필요한 api - 문경미 */
