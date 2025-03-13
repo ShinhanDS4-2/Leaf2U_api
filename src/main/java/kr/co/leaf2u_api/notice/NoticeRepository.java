@@ -34,6 +34,7 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
         WHERE n.member.idx = :memberIdx 
         AND FUNCTION('DATE', n.createDate) != CURRENT_DATE
         ORDER BY n.createDate DESC
+        LIMIT 5
     """)
     List<Notice> getNoticeListWithPrev(@Param("memberIdx") Long memberIdx);
 

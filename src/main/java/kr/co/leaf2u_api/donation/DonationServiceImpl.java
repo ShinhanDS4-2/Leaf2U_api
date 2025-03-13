@@ -41,6 +41,8 @@ public class DonationServiceImpl implements DonationService {
                         .name(donationOrganization.getName())
                         .telNumber(donationOrganization.getTelNumber())
                         .description(donationOrganization.getDescription())
+                        .icon(donationOrganization.getIcon())
+                        .url(donationOrganization.getUrl())
                         .build())  // 빌더로 객체 생성
                 .collect(Collectors.toList());  // 변환된 DTO 목록을 리스트로 모아 반환
     }
@@ -59,16 +61,18 @@ public class DonationServiceImpl implements DonationService {
                 .name(donationOrganization.getName())
                 .telNumber(donationOrganization.getTelNumber())
                 .description(donationOrganization.getDescription())
+                .icon(donationOrganization.getIcon())
+                .url(donationOrganization.getUrl())
                 .build())  // 빌더로 객체 생성
                 .orElse(null);  // .map -> Optional에서 값 꺼내서 반환 (값 있으면 그대로 반환, 값 없으면 null반환)
     }  // => 리스트는 Optional을 반환할 필요가 없음
 
     /** (1) 후원내역 리스트 조회
-     * @param memberIdx
      * @return List, Count
      */
     @Override
-    public Map<String, Object> getDonationHistoryList(Long memberIdx) {
+    public Map<String, Object> getDonationHistoryList() {
+        Long memberIdx = TokenContext.getMemberIdx();  // 토큰에서 뽑은 사용자 idx
         // 후원내역 리스트
         List<DonationHistoryDTO> donationHistoryList = donationHistoryRepository.getDonationHistoryList(memberIdx);
         // 후원내역 리스트 개수

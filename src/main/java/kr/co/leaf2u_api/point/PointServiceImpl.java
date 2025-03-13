@@ -114,5 +114,12 @@ public class PointServiceImpl implements PointService {
         // OX 정답 체크 로직 (임시)
         return "O".equalsIgnoreCase(answer); // "O"이면 정답, "X"이면 오답
     }
+    @Transactional
+    @Override
+    public BigDecimal getTotalPoints(Member member) {
+        // 회원의 모든 포인트 내역을 조회하여 총합 계산
+        BigDecimal totalPoints = pointRepository.getTotalPoint(member);
 
+        return totalPoints;
+    }
 }

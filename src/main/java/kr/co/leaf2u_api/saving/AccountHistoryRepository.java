@@ -49,4 +49,12 @@ public interface AccountHistoryRepository extends JpaRepository<AccountHistory, 
         WHERE sah.account.idx = :accountIdx
     """)
     List<String> getFormatPaymentDate(@Param("accountIdx") Long accountIdx);
+
+    @Query("""
+        SELECT COUNT(*)
+        FROM AccountHistory sah
+        WHERE sah.account.idx = :accountIdx
+        AND FUNCTION('DATE', sah.paymentDate) = FUNCTION('CURRENT_DATE')
+    """)
+    int checkSavingToday(@Param("accountIdx") Long accountIdx);
 }

@@ -18,6 +18,7 @@ public interface InterestRateHistoryRepository extends JpaRepository<InterestRat
         SELECT irh
         FROM InterestRateHistory irh
         WHERE irh.accountHistory.idx = :accountHistoryIdx
+        AND irh.rateType IN ('D', 'W')
         ORDER BY irh.createDate DESC
     """)
     List<InterestRateHistory> findInterestRateHistoryListByAccountHistoryIdx(@Param("accountHistoryIdx") Long accountHistoryIdx);

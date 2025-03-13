@@ -37,12 +37,17 @@ public class FeedbackService {
         this.feedbackRepository = feedbackRepository;
     }
 
-    // 특정 사용자의 챌린지 수행 횟수 조회
+    // 1. 사용자의 챌린지 수행 횟수 업데이트
+    public void updateUserChallenge(Long accountIdx) {
+        feedbackRepository.updateUserChallenge(accountIdx);
+    }
+
+    // 2. 특정 사용자의 챌린지 수행 횟수 조회
     public int getUserChallengeCount(Long accountIdx) {
         return feedbackRepository.getUserChallengeCount(accountIdx);
     }
 
-    // 전체 평균 챌린지 수행 횟수 조회
+    // 3. 전체 평균 챌린지 수행 횟수 조회
     public int getAverageChallengeCount() {
         int avg = feedbackRepository.getAverageChallengeCount();
         return avg;
@@ -74,7 +79,7 @@ public class FeedbackService {
             // requestBody에 messages 추가
             requestBody.put("messages", messages);
 
-            // 🟢 HTTP 헤더 설정
+            // HTTP 헤더 설정
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(API_KEY);
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -82,10 +87,10 @@ public class FeedbackService {
 
             HttpEntity<String> requestEntity = new HttpEntity<>(requestBody.toJSONString(), headers);
 
-            // 🟢 OpenAI API 요청 보내기
+            // OpenAI API 요청 보내기
             ResponseEntity<Map> response = restTemplate.exchange(API_URL, HttpMethod.POST, requestEntity, Map.class);
 
-            // 🟢 응답 파싱
+            // 응답 파싱
             List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
             Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
             return (String) message.get("content");
