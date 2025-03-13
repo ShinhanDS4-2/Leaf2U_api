@@ -16,5 +16,7 @@ public class DonationOrganizationDTO {
     private String name;  // 단체명
     private String telNumber;  // 연락처
     private String description;  // 단체 설명
+    private String icon; // 단체 아이콘
+    private String url; // 홈페이지 url
 }
 

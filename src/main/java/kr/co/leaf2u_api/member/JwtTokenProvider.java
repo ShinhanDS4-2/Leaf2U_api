@@ -4,6 +4,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,8 @@ public class JwtTokenProvider {
 
     /**
      * JWT 토큰 생성
+     * @param email
+     * @return
      */
     public String createToken(String email) {
 
@@ -47,7 +50,26 @@ public class JwtTokenProvider {
     }
 
     /**
+     * request에서 토큰 추출
+     * @param request
+     * @return
+     */
+    public String resolveToken(HttpServletRequest request) {
+
+        String bearerToken = request.getHeader("Authorization");
+
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+
+        return null;
+    }
+
+
+    /**
      * 토큰에서 이메일 추출
+     * @param token
+     * @return
      */
     public String getEmailFromToken(String token) {
 
@@ -60,11 +82,11 @@ public class JwtTokenProvider {
                     .getBody()
                     .getSubject();
         } catch (ExpiredJwtException e) {
-            log.error("🚨 만료된 토큰: {}", e.getClaims().getExpiration());
-            log.error("🚨 현재 서버 시간: {}", new Date());
+            log.error("만료된 토큰: {}", e.getClaims().getExpiration());
+            log.error("현재 서버 시간: {}", new Date());
             return null;
         } catch (Exception e) {
-            log.error("🚨 토큰 검증 실패: {}", e.getMessage());
+            log.error("토큰 검증 실패: {}", e.getMessage());
             return null;
         }
     }
@@ -72,6 +94,8 @@ public class JwtTokenProvider {
 
     /**
      * JWT 토큰 유효성 검사
+     * @param token
+     * @return
      */
     public boolean validateToken(String token) {
         try {

@@ -18,26 +18,24 @@ public class SavingController {
 
     /**
      * 납입내역 리스트
-     * @param param (memberIdx, accountIdx)
      * @return
      */
     @PostMapping("/history/list")
-    public ResponseEntity<Map<String, Object>> getSavingHistoryList(@RequestBody Map<String, Object> param) {
+    public ResponseEntity<Map<String, Object>> getSavingHistoryList() {
 
-        Map<String, Object> result = savingService.getSavingHistoryList(param);
+        Map<String, Object> result = savingService.getSavingHistoryList();
 
         return ResponseEntity.ok(result);
     }
 
     /**
      * 챌린지 현황
-     * @param param (memberIdx, accountIdx)
      * @return
      */
     @PostMapping("/challenge/list")
-    public ResponseEntity<Map<String, Object>> getChallengeList(@RequestBody Map<String, Object> param) {
+    public ResponseEntity<Map<String, Object>> getChallengeList() {
 
-        Map<String, Object> result = savingService.getChallengeList(param);
+        Map<String, Object> result = savingService.getChallengeList();
 
         return ResponseEntity.ok(result);
     }

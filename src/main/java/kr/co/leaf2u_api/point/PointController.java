@@ -1,13 +1,19 @@
 package kr.co.leaf2u_api.point;
 
+import kr.co.leaf2u_api.config.TokenContext;
 import kr.co.leaf2u_api.entity.Member;
 import kr.co.leaf2u_api.openai.OpenAIService;
+import kr.co.leaf2u_api.topic.TopicService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.Map;
+import java.util.List;
+import java.util.Random;
+
 
 @RestController
 @RequestMapping("/api/point")
@@ -16,6 +22,7 @@ public class PointController {
 
     private final PointService pointService;
     private final OpenAIService openAIService;
+    private final TopicService topicService;
 
     @PostMapping("/checkin")
     public ResponseEntity<Map<String, Object>> checkIn(@RequestParam("memberIdx") Long memberIdx) {
@@ -64,5 +71,69 @@ public class PointController {
             e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of("error", "이미지를 처리할 수 없습니다."));
         }
+    }
+    @GetMapping("/quiz")
+    public ResponseEntity<Map<String, Object>> getQuiz() {
+        List<Map<String, Object>> newsList = topicService.getNews();
+
+        if (newsList.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "퀴즈를 생성할 뉴스가 없습니다."));
+        }
+
+        // 뉴스 3개 중 랜덤으로 하나 선택
+        Map<String, Object> selectedNews = newsList.get(new Random().nextInt(newsList.size()));
+
+        // 퀴즈 생성
+        String quizQuestion = topicService.createQuiz(
+                (String) selectedNews.get("title"),
+                (String) selectedNews.get("description")
+        );
+
+        return ResponseEntity.ok(Map.of(
+                "question", quizQuestion,
+                "newsId", selectedNews.get("url") // 기사 URL을 ID로 활용
+        ));
+    }
+    @PostMapping("/quiz/hint")
+    public ResponseEntity<Map<String, Object>> getQuizHint(@RequestParam("memberIdx") Long memberIdx, @RequestParam("newsId") String newsId) {
+        Member member = new Member();
+        member.setIdx(memberIdx);
+
+        // 포인트 적립
+        pointService.addQuizHintPoint(member);
+
+        return ResponseEntity.ok(Map.of(
+                "message", "힌트 제공! 5P 적립",
+                "newsUrl", newsId // 뉴스 원문 링크 제공
+        ));
+    } @PostMapping("/quiz/answer")
+    public ResponseEntity<Map<String, Object>> submitQuizAnswer(
+            @RequestParam("memberIdx") Long memberIdx,
+            @RequestParam("answer") String answer) {
+
+        boolean isCorrect = pointService.checkQuizAnswer(answer);
+
+        if (!isCorrect) {
+            return ResponseEntity.ok(Map.of("message", "오답입니다!"));
+        }
+
+        // 정답 시 포인트 적립
+        Member member = new Member();
+        member.setIdx(memberIdx);
+        pointService.addQuizCorrectPoint(member);
+
+        return ResponseEntity.ok(Map.of("message", "정답! 10P 적립"));
+    }
+    @GetMapping("/total")
+    public ResponseEntity<Map<String, Object>> getTotalPoints() {
+        Member member = new Member();
+        member.setIdx(TokenContext.getMemberIdx());
+
+        // 포인트 총합 계산
+        BigDecimal totalPoints = pointService.getTotalPoints(member);
+
+        return ResponseEntity.ok(Map.of(
+                "totalPoints", totalPoints
+        ));
     }
 }

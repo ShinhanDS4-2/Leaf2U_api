@@ -4,24 +4,27 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 @Getter
 @Setter
-public class AccountCard {
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "account_card")
+public class AccountCard extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, name="card_idx")
+    @JoinColumn(name = "saving_account_idx", nullable = false)
+    private Account account;
+
+    @ManyToOne
+    @JoinColumn(name = "card_idx",nullable = false)
     private Card card;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, name="saving_account_idx")
-    private Account account;
 }

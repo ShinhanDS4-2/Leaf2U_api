@@ -2,10 +2,16 @@ package kr.co.leaf2u_api.account;
 
 import jakarta.transaction.Transactional;
 import kr.co.leaf2u_api.card.CardRepository;
+import kr.co.leaf2u_api.config.TokenContext;
 import kr.co.leaf2u_api.donation.DonationHistoryRepository;
 import kr.co.leaf2u_api.entity.*;
 import kr.co.leaf2u_api.member.MemberRepository;
 import kr.co.leaf2u_api.notice.NoticeService;
+import kr.co.leaf2u_api.point.PointRepository;
+import kr.co.leaf2u_api.point.PointService;
+import kr.co.leaf2u_api.saving.AccountCardRepository;
+import kr.co.leaf2u_api.saving.AccountHistoryRepository;
+import kr.co.leaf2u_api.saving.InterestRateHistoryRepository;
 import kr.co.leaf2u_api.util.CommonUtil;
 import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.resizers.BicubicResizer;
@@ -15,6 +21,7 @@ import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.security.auth.login.AccountNotFoundException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -34,9 +41,13 @@ public class AccountServiceImpl implements AccountService {
     private final MemberRepository memberRepository;
     private final CardRepository cardRepository;
     private final DonationHistoryRepository donationHistoryRepository;
+    private final AccountHistoryRepository accountHistoryRepository;
+    private final PointRepository pointRepository;
     private final PasswordEncoder passwordEncoder; // 비밀번호 암호화 및 검증을 위한 인코더
 
     private final NoticeService noticeService;
+    private final AccountCardRepository accountCardRepository;
+    private final InterestRateHistoryRepository interestRateHistoryRepository;
 
     /**
      * 적금 계좌 생성
@@ -50,18 +61,39 @@ public class AccountServiceImpl implements AccountService {
         Member member = memberRepository.findById(accountDTO.getMemberIdx())
                 .orElseThrow(()-> new IllegalArgumentException("회원이 존재하지 않습니다."));
 
-        Card card=cardRepository.findById(accountDTO.getMemberIdx())
-                .orElseThrow(() -> new IllegalArgumentException("카드가 존재하지 않습니다."));
+        Card card=cardRepository.findFirstByMemberIdxOrderByCreateDateDesc(accountDTO.getMemberIdx())
+                .orElseThrow(()->new IllegalArgumentException("카드가 존재하지 않습니다."));
 
         List <Account> existAccounts=accountRepository.findByMemberIdx(member.getIdx());
+
+        String hashedPassword = passwordEncoder.encode(accountDTO.getAccountPassword());
 
         //기본 금리 설정
         BigDecimal baseInterestRate = new BigDecimal("1.0");
         BigDecimal primeRate = BigDecimal.ZERO;
 
+        Account account=new Account();
+
+        account.setMember(member);
+        account.setAccountStatus('N');
+        account.setAccountNumber(generateAccountNumber());
+        account.setAccountPassword(hashedPassword);
+        account.setPaymentAmount(accountDTO.getPaymentAmount());
+        account.setBalance(BigDecimal.ZERO);
+        account.setInterestRate(baseInterestRate);
+        account.setPrimeRate(primeRate);
+        account.setFinalInterestRate(baseInterestRate);
+        account.setTaxationYn('Y');
+        account.setDutyRate(new BigDecimal("0.154"));
+        account.setSavingCnt(0L);
+        account.setMaturityDate(LocalDateTime.now().plusMonths(1));
+
+        Account savedAccount=accountRepository.save(account);
+
         //최초 가입 시 1% 추가
         if(existAccounts.isEmpty()){
             primeRate=primeRate.add(new BigDecimal("1.0"));
+            insertInterestRateHistory(savedAccount,'F',new BigDecimal("1.0"));
         }
 
         //리프 카드 만들기를 선택한다면 2% 추가
@@ -74,41 +106,25 @@ public class AccountServiceImpl implements AccountService {
         else if (card.getCardType()=='E'){
 
             primeRate=primeRate.add(new BigDecimal("1.0"));             //발급받았으므로 'Y' 로 변경
+            insertInterestRateHistory(savedAccount,'E',new BigDecimal("1.0"));
         }
 
         //사용자 본인 카드를 선택한다면 0% 추가
         else if (card.getCardType()=='C'){
 
             primeRate=primeRate.add(new BigDecimal("0.0"));                                  //발급받았으므로 'Y' 로 변경
+            insertInterestRateHistory(savedAccount,'B',new BigDecimal("0.0"));
         }
 
-        member.setCardYn('Y');
-        memberRepository.save(member);
+        savedAccount.setPrimeRate(primeRate);
+        savedAccount.setFinalInterestRate(baseInterestRate.add(primeRate));
 
-        Account account=new Account();
+        accountRepository.save(savedAccount);
 
-        account.setMember(member);
-        account.setAccountStatus('N');
-        account.setAccountNumber(generateAccountNumber());
-        account.setAccountPassword(accountDTO.getAccountPassword());
-        account.setBalance(BigDecimal.ZERO);
-        account.setInterestRate(baseInterestRate);
-        account.setPrimeRate(primeRate);
-        account.setTaxationYn('Y');
-        account.setMaturityDate(LocalDateTime.now().plusMonths(1));
-        account.setInterestAmount(primeRate);
-
-        account.setDutyRate(new BigDecimal("15.4"));
-        account.setFinalInterestRate(baseInterestRate.add(primeRate));
-        account.setPaymentAmount(accountDTO.getPaymentAmount());
-        account.setSavingCnt(0L);
-
-        Account savedAccount=accountRepository.save(account);
-
-        /**
-         * TODO account_card, interest_rate_history insert
-         */
-
+        AccountCard accountCard=new AccountCard();
+        accountCard.setAccount(savedAccount);
+        accountCard.setCard(card);
+        accountCardRepository.save(accountCard);
 
         /* 적급 가입 알림 insert - 문경미 */
         Map<String, Object> noticeParam = new HashMap<>();
@@ -120,6 +136,18 @@ public class AccountServiceImpl implements AccountService {
         noticeService.registNotice(noticeParam);
 
         return EntityToDTO(savedAccount);
+    }
+
+    private void insertInterestRateHistory(Account savedAccount, char rateType, BigDecimal rate) {
+
+        InterestRateHistory interestRateHistory=InterestRateHistory.builder()
+                .account(savedAccount)
+                .rateType(rateType)
+                .rate(rate)
+                .createDate(LocalDateTime.now())
+                .build();
+
+        interestRateHistoryRepository.save(interestRateHistory);
     }
 
     private AccountDTO EntityToDTO(Account account) {
@@ -164,11 +192,11 @@ public class AccountServiceImpl implements AccountService {
 
 /** 적금 계좌 관리 - 시온 */
     /** (1) 계좌 기본 정보 조회
-     * @param memberIdx
      * @return AccountDTO
      */
     @Override
-    public Map<String, Object> getAccountInfoById(Long memberIdx) {
+    public Map<String, Object> getAccountInfoById() {
+        Long memberIdx = TokenContext.getMemberIdx(); // 토큰에서 뽑은 사용자 idx
         Account account = accountRepository.getAccountInfoByIdx(memberIdx).orElse(null);
 
         System.out.println(account);
@@ -188,12 +216,12 @@ public class AccountServiceImpl implements AccountService {
     // 클라이언트로부터 납입금액, 인증 비밀번호6자리 입력받음. (비밀번호 일치 시에만 로직 수행되도록)
     @Override
     public int updatePaymentAmount(AccountDTO accountDTO) {
-        Long idx = accountDTO.getIdx();  // 계좌 idx
+        Long accountIdx = TokenContext.getSavingAccountIdx();  // 토큰에서 뽑은 계좌 idx
         String inputPwd = accountDTO.getAccountPassword();  // 사용자가 입력한 계좌 비밀번호
         BigDecimal inputAmount = accountDTO.getPaymentAmount();  // 사용자가 입력한 납입금액
 
         // 해당 적금계좌의 현재 비밀번호를 DB에서 조회
-        Account account = accountRepository.findByIdx(idx)  // idx 기준으로 Account 엔티티 조회
+        Account account = accountRepository.findByIdx(accountIdx)  // idx 기준으로 Account 엔티티 조회
                 .orElseThrow(() -> new IllegalArgumentException("계좌정보가 존재하지 않음"));
 
         // 비밀번호 일치하는지 확인
@@ -220,45 +248,57 @@ public class AccountServiceImpl implements AccountService {
     }
 
     /** (3-1) 예상이자조회 - 만기일해지
-     * @param accountIdx
-     * @return accountDTO(적금계좌), interestRateHistory(금리내역)
+     * @return accountDTO(적금계좌), rateSumMap(금리타입별 금리합계)
      */
     @Override
-    public Map<String, Object> getMaturityInterest(Long accountIdx) {
-        // 계좌 idx 기준으로 List<InterestRateHistory금리내역> 엔티티 반환
-        List<InterestRateHistory> interestRateHistory= accountRepository.getInterestRateHistory(accountIdx);  // 금리내역
+    public Map<String, Object> getMaturityInterest() throws AccountNotFoundException {
+        Long accountIdx = TokenContext.getSavingAccountIdx();  // 토큰에서 뽑은 계좌 idx
+
+        System.out.println("토큰에서 뽑은 계좌 idx???" + accountIdx);
+
+        // 금리타입별 금리합계 추출 메서드 getRateSumByType(accountIdx)
+        Map<String, BigDecimal> rateSumMap = getRateSumByType(accountIdx);
+
         Account account = accountRepository.findByIdx(accountIdx).orElse(null);
-
+        if(account == null){
+            throw new AccountNotFoundException("사용자에 대한 계좌 없음 null 오류"+accountIdx);
+        }
         LocalDateTime maturityDate = account.getMaturityDate();  // account엔티티에서 적금만기일 가져오기
-        BigDecimal finalInterestRate = account.getFinalInterestRate().multiply(new BigDecimal("0.01"));  // 최종금리 2.7% 형식으로 저장되어 있어서 * 0.01 으로 0.027로 변환해야함
+        BigDecimal finalInterestRate = account.getFinalInterestRate().multiply(new BigDecimal("0.01"));  // 최종금리 2.7% 형식으로 저장되어 있어서 * 0.01 으로 0.027로 변환
 
-        /** 이자 계산(만기일 해지) START */
-        // 이자 계산 공통 메서드(idx, 적용금리:최종금리, 해지일:만기일)
+        /** 이자 계산 공통 메서드(idx, 적용금리:최종금리, 해지일:만기일) */
         AccountDTO dto = calculateInterest(accountIdx, finalInterestRate, maturityDate);
-        /** 이자 계산(만기일 해지) END */
 
         Map<String, Object> result = new HashMap<>();
         result.put("accountDTO", dto);  // 계좌 DTO
-        result.put("interestRateHistory", interestRateHistory);  // 금리내역
+        result.put("rateSumMap", rateSumMap);  // rate_type 별 금리 합계
+
+        /** 포인트 조회 */
+        Member member = new Member();
+        member.setIdx(TokenContext.getMemberIdx());
+        result.put("point", pointRepository.getTotalPoint(member));
 
         return result;
     }
 
     /** (3-2) 예상이자조회 - 오늘해지 (우대금리X)
-     * @param accountIdx
      * @return accountDTO(적금계좌)
      */
     @Override
-    public Map<String, Object> getTodayInterest(Long accountIdx) {
-        Account account = accountRepository.findByIdx(accountIdx).orElse(null);
+    public Map<String, Object> getTodayInterest() throws AccountNotFoundException {
+        Long accountIdx = TokenContext.getSavingAccountIdx();  // 토큰에서 뽑은 계좌 idx
 
+        Account account = accountRepository.findByIdx(accountIdx).orElse(null);
+        if(account == null){
+            throw new AccountNotFoundException("사용자에 대한 계좌 없음 null 오류"+accountIdx);
+        }
         LocalDateTime today = LocalDateTime.now();  // 오늘날짜
         LocalDateTime maturityDate = account.getMaturityDate();  // 적금만기일
         BigDecimal interestRate = account.getInterestRate().multiply(new BigDecimal("0.01"));;  // 기본금리 1.0%로 저장되어 있음. 0.01로 변환
 
         if(today.toLocalDate().equals(maturityDate.toLocalDate())) {  // 오늘날짜가 적금만기일이면 getMaturityInterest() -> 만기일이자조회 메서드 실행
             // .toLocalDate() 이용해서 날짜만 비교(시간X)
-            return getMaturityInterest(accountIdx);
+            return getMaturityInterest();
         }
 
         /** 이자 계산(만기일 해지) START */
@@ -273,21 +313,24 @@ public class AccountServiceImpl implements AccountService {
     }
 
     /** (3-3) 예상이자조회 - 선택일자 해지 (우대금리X)
-     * @param accountDTO idx, endDate(이자 계산기간 종료일 - 선택일자 해지에 필요)
+     * @param endDate(이자 계산기간 종료일 - 선택일자 해지에 필요)
      * @return accountDTO(적금계좌)
      */
     @Override
-    public Map<String, Object> getCustomDateInterest(AccountDTO accountDTO) {
-        Long accountIdx = accountDTO.getIdx();  // 계좌 Idx
-        LocalDateTime endDate = accountDTO.getEndDate();  // 종료일(사용자로부터 입력받은)
-        // ㄴ endData 사용자한테 입력받아서 DB에 "2025-03-05T15:45:10.385338200" 이런 형태로 들어가야함
+    public Map<String, Object> getCustomDateInterest(LocalDateTime endDate) throws AccountNotFoundException {
+        Long accountIdx = TokenContext.getSavingAccountIdx();  // 토큰에서 뽑은 계좌 idx
+        // -> endData 사용자한테 입력받아서 DB에 "2025-03-05T15:45:10.385338200" 이런 형태로 들어가야함
 
         Account account = accountRepository.findByIdx(accountIdx).orElse(null);
+        if(account == null){
+            throw new AccountNotFoundException("사용자에 대한 계좌 없음 null 오류"+accountIdx);
+        }
         LocalDateTime maturityDate = account.getMaturityDate();  // 적금만기일
         BigDecimal interestRate = account.getInterestRate().multiply(new BigDecimal("0.01"));;  // 기본금리
 
-        if(endDate.toLocalDate().equals(maturityDate.toLocalDate())) {  // 사용자로부터 입력받은 날짜가 적금만기일이면 getMaturityInterest() -> 만기일이자조회 메서드 실행
-            return getMaturityInterest(accountIdx);
+        if(endDate.toLocalDate().equals(maturityDate.toLocalDate())) {  // 오늘날짜가 적금만기일이면 getMaturityInterest() -> 만기일이자조회 메서드 실행
+            // .toLocalDate() 이용해서 날짜만 비교(시간X)
+            return getMaturityInterest();
         }
 
         /** 이자 계산(만기일 해지) START */
@@ -301,25 +344,29 @@ public class AccountServiceImpl implements AccountService {
     }
 
     /** (4) 계좌 해지 (중도해지이므로 우대금리 X)  =>  만약 해지하는 날짜가 만기일이라면? 만기 해지 화면으로 이동시켜야하나? ? ? ?
-     * @param accountDTO idx, accountPassword(계좌 비밀번호)
+     * @param accountPassword(계좌 비밀번호)
      * @return 1(성공), 0(실패), 401(비밀번호 불일치)
      */
     // 클라이언트로부터 인증 비밀번호6자리 입력받음. (비밀번호 일치 시에만 로직 수행되도록)
     @Override
-    public int terminateAccount(AccountDTO accountDTO) {
-        Long idx = accountDTO.getIdx();  // 계좌 idx
-        String inputPwd = accountDTO.getAccountPassword();  // 사용자가 입력한 계좌 비밀번호
+    public int terminateAccount(String accountPassword) throws AccountNotFoundException {
+        Long accountIdx = TokenContext.getSavingAccountIdx();  // 토큰에서 뽑은 계좌 idx
+        String inputPwd = accountPassword;  // 사용자가 입력한 계좌 비밀번호
 
-        Account account = accountRepository.findByIdx(idx).orElse(null);  // 계좌 idx 기준으로 Account 엔티티 조회
+        Account account = accountRepository.findByIdx(accountIdx).orElse(null);  // 계좌 idx 기준으로 Account 엔티티 조회
+        if(account == null){
+            throw new AccountNotFoundException("사용자에 대한 계좌 없음 null 오류");
+        }
         BigDecimal interestRate = account.getInterestRate().multiply(new BigDecimal("0.01"));;  // 기본금리
         LocalDateTime endDate = LocalDateTime.now();  // 종료일 (=해지일)
 
+        System.out.println(account.getAccountPassword() + "이건 계좌 엔티티에서 꺼낸 비번값");
+        System.out.println(inputPwd + "이건 사용자한테 입력받은 비번값");
         // 비밀번호 일치하는지 확인
-//      if(!passwordEncoder.matches(inputPwd, account.getAccountPassword())){  // 해당 적금계좌의 현재 비밀번호를 DB에서 조회
+//      if(!passwordEncoder.matches(inputPwd, account.getAccountPassword())){  // 해당 적금계좌의 현재 비밀번호를 DB에서 조회 -> 암호화된 비번 조회
         if(!inputPwd.equals(account.getAccountPassword())){  // API테스트용 임시 코드(위에거로 변경해야함)
-
                 // ㄴ 사용자가 입력한 비밀번호가 DB에 저장된 비밀번호와 일치하는지 확인
-            return 401;  // 비밀번호 불일치시 401반환
+            return 401;  // 비밀번호 불일치시 401반환 
         }
         // 비밀번호가 일치하면 적금계좌 해지 ↓
 
@@ -327,39 +374,41 @@ public class AccountServiceImpl implements AccountService {
         *  1. accountStatus(계좌상태) 컬럼 값 C(해지)로 업데이트
         *  2. interestAmount(세후이자) 컬럼 값 계산 후 업데이트
         *  3. endDate(종료일=해지일) 컬럼 값 업데이트
+        *  4. 최종 금리 finalInterestRate 값을 기본금리로 업데이트 (중도해지는 우대금리 적용X)
         * */
 
         // 2. 세후이자 계산 => 이자계산하는 공통 메서드 사용 calculateInterest(계좌idx, 적용금리(=기본금리), 해지일(=오늘))
-        AccountDTO dto = calculateInterest(idx, interestRate, endDate);
+        AccountDTO dto = calculateInterest(accountIdx, interestRate, endDate);
         BigDecimal interestAmount = dto.getInterestAmount();  // 세후이자
 
         account.setAccountStatus('C');  // 1
         account.setInterestAmount(interestAmount);  // 2
         account.setEndDate(endDate);  // 3
+        account.setFinalInterestRate(interestRate);  // 4
 
         Account updatedAccount = accountRepository.save(account);  // 업데이트 된 account엔티티를 DB에 저장
         // DB 업데이트 되면서 수정일 컬럼도 자동으로 업데이트 됨. 따로 설정 필요없음
 
         // save() 메서드는 반환 값으로 저장된(업데이트된) 엔티티를 반환함 => 반환된 엔티티가 null이 아니면 업데이트 성공
         if(updatedAccount != null){
-            return 1;  // 성공 시 1 반환
+            return 1;  // 적금 해지 성공 시 1 반환
         } else {
-            return 0;  // 실패 시 0 반환
+            return 0;  // 적금 해지 실패 시 0 반환
         }
     }
 
     /* 메인화면에 필요한 api - 문경미 */
     /**
      * 적금 계좌의 잔액, 총금리 정보
-     * @param param (memberIdx)
      * @return balanse, final_interest_rate 포함 DTO
      */
     @Override
-    public Map<String, Object> getSavingInfo(Map<String, Object> param) {
+    public Map<String, Object> getSavingInfo() {
 
         Map<String, Object> result = new HashMap<>();
 
-        Long memberIdx = Long.parseLong(String.valueOf(param.get("memberIdx")));
+        Long memberIdx = TokenContext.getMemberIdx();
+        Long accountIdx = TokenContext.getSavingAccountIdx();
         Optional<AccountDTO> accountDTO = entityToDTOWithSaving(accountRepository.findAccountByMember(memberIdx));
 
         if (accountDTO.isPresent()) {
@@ -371,33 +420,9 @@ public class AccountServiceImpl implements AccountService {
             LocalDate today = LocalDate.now();
             LocalDate maturityDate = dto.getMaturityDate().toLocalDate();
             long diff = ChronoUnit.DAYS.between(today, maturityDate);
-
             result.put("diff", diff);
-        }
-
-        return result;
-    }
-
-    /**
-     * 적금 계좌 현재 상태 (단계 및 만기 확인)
-     * @param param (memberIdx)
-     * @return
-     */
-    @Override
-    public Map<String, Object> getAccountCurrent(Map<String, Object> param) {
-
-        Map<String, Object> result = new HashMap<>();
-
-        Long memberIdx = Long.parseLong(String.valueOf(param.get("memberIdx")));
-        Optional<AccountDTO> accountDTO = entityToDTOWithCurrent(accountRepository.findAccountByMember(memberIdx));
-
-        if (accountDTO.isPresent()) {
-            AccountDTO dto = accountDTO.get();
 
             // 만기일 확인
-            LocalDate today = LocalDate.now();
-            LocalDate maturityDate = dto.getMaturityDate().toLocalDate();
-
             if (maturityDate.isEqual(today)) {
                 result.put("maturity_yn", "Y");
             } else {
@@ -416,6 +441,10 @@ public class AccountServiceImpl implements AccountService {
                 step = 2;
             }
             result.put("account_step", step);
+
+            // 오늘 납입 유무
+            result.put("saving_yn", accountHistoryRepository.checkSavingToday(accountIdx));
+
         }
 
         return result;
@@ -434,12 +463,12 @@ public class AccountServiceImpl implements AccountService {
 
         try {
             // saving_account update
-            Long accountIdx = Long.parseLong(String.valueOf(param.get("accountIdx")));
+            Long accountIdx = TokenContext.getSavingAccountIdx();
             BigDecimal interestAmount = new BigDecimal(String.valueOf(param.get("afterTaxInterest")));
             accountRepository.updateMaturity(accountIdx, interestAmount);
 
             // donation_history insert
-            Long memberIdx = Long.parseLong(String.valueOf(param.get("memberIdx")));
+            Long memberIdx = TokenContext.getMemberIdx();
             Long organisationIdx = Long.parseLong(String.valueOf(param.get("organisationIdx")));
             BigDecimal interest = new BigDecimal(String.valueOf(param.get("interest")));
             BigDecimal principal = new BigDecimal(String.valueOf(param.get("principal")));
@@ -457,6 +486,16 @@ public class AccountServiceImpl implements AccountService {
                     .donationDate(LocalDateTime.now())
                     .build();
             donationHistoryRepository.save(donationHistory);
+
+            // 포인트 차감
+            if (point.compareTo(BigDecimal.ZERO) != 0) {
+                Point pointEntity = Point.builder()
+                        .member(Member.builder().idx(memberIdx).build())
+                        .usePoint(point)
+                        .useDate(LocalDateTime.now())
+                        .build();
+                pointRepository.save(pointEntity);
+            }
 
         } catch (Exception e) {
             result = false;
@@ -492,6 +531,38 @@ public class AccountServiceImpl implements AccountService {
     }
 
     /**
+     * 금리타입별 금리합계 뽑아서 Map으로 반환
+     * @param accountIdx
+     * @return rateSumMap
+     */
+    private Map<String, BigDecimal> getRateSumByType(Long accountIdx) {
+        Object[] rateSumByType = accountRepository.rateSumByType(accountIdx); // rate_type 별 금리 합계
+        System.out.println("rateSumByType은???????????????????????????" + Arrays.deepToString(rateSumByType));
+        // rateSumByType은 2차원 배열 [[1.00, 0.10, 0.00, 0.00, 1.70, 0.60]] 형태로 되어있어서 첫번째 배열을 꺼내줘야함
+        Object[] firstElement = (Object[]) rateSumByType[0]; // 첫 번째 배열을 가져오기
+        System.out.println("rateSumByType의 첫 번째 요소: " + Arrays.toString(firstElement));
+        Map<String, BigDecimal> rateSumMap = new HashMap<>();
+
+        // null 또는 값이 없는 경우 처리
+        if (firstElement == null || firstElement.length < 6) {
+            rateSumMap.put("rateB", BigDecimal.ZERO);
+            rateSumMap.put("rateC", BigDecimal.ZERO);
+            rateSumMap.put("rateE", BigDecimal.ZERO);
+            rateSumMap.put("rateF", BigDecimal.ZERO);
+            rateSumMap.put("rateD", BigDecimal.ZERO);
+            rateSumMap.put("rateW", BigDecimal.ZERO);
+        } else {
+            rateSumMap.put("rateB", firstElement[0] != null ? new BigDecimal(firstElement[0].toString()) : BigDecimal.ZERO);
+            rateSumMap.put("rateC", firstElement[1] != null ? new BigDecimal(firstElement[1].toString()) : BigDecimal.ZERO);
+            rateSumMap.put("rateE", firstElement[2] != null ? new BigDecimal(firstElement[2].toString()) : BigDecimal.ZERO);
+            rateSumMap.put("rateF", firstElement[3] != null ? new BigDecimal(firstElement[3].toString()) : BigDecimal.ZERO);
+            rateSumMap.put("rateD", firstElement[4] != null ? new BigDecimal(firstElement[4].toString()) : BigDecimal.ZERO);
+            rateSumMap.put("rateW", firstElement[5] != null ? new BigDecimal(firstElement[5].toString()) : BigDecimal.ZERO);
+        }
+        return rateSumMap;
+    }
+
+    /**
      * 적금 계좌 납입 정보 엔티티 -> DTO
      * @param account
      * @return
@@ -500,19 +571,10 @@ public class AccountServiceImpl implements AccountService {
         return account.map(entity -> new AccountDTO(
                 entity.getBalance(),
                 entity.getFinalInterestRate(),
-                entity.getMaturityDate()
-        ));
-    }
-
-    /**
-     * 적금 단계, 만기일 엔티티 -> DTO
-     * @param account
-     * @return
-     */
-    private Optional<AccountDTO> entityToDTOWithCurrent(Optional<Account> account) {
-        return account.map(entity -> new AccountDTO(
-                entity.getSavingCnt(),
-                entity.getMaturityDate()
+                entity.getCreateDate(),
+                entity.getMaturityDate(),
+                entity.getPaymentAmount(),
+                entity.getSavingCnt()
         ));
     }
 
@@ -548,7 +610,6 @@ public class AccountServiceImpl implements AccountService {
         dto.setPreTaxInterestAmount(totalPreTaxInterestAmount.setScale(0, RoundingMode.DOWN));  // 총이자(세전)
         dto.setTaxAmount(taxAmount.setScale(0, RoundingMode.DOWN));  // 세금액
         dto.setInterestAmount(interestAmount.setScale(0, RoundingMode.DOWN));  // 총이자(세후)
-
         return dto;
     }
 }

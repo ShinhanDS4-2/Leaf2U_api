@@ -5,6 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.security.auth.login.AccountNotFoundException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -43,12 +45,11 @@ public class AccountController {
 
     /* 적금 계좌 관리 API - 시온 */
     /** (1) 계좌 기본정보 조회
-     * @param memberIdx
      * @return AccountDTO
      */
-    @GetMapping("/info/{memberIdx}")
-    public ResponseEntity<Map<String, Object>> getAccountInfo(@PathVariable Long memberIdx) {
-        return ResponseEntity.ok(accountService.getAccountInfoById(memberIdx));
+    @GetMapping("/info/")
+    public ResponseEntity<Map<String, Object>> getAccountInfo() {
+        return ResponseEntity.ok(accountService.getAccountInfoById());
     }
 
     /** (2) 납입금액 변경
@@ -70,72 +71,54 @@ public class AccountController {
     }
 // ResponseEntity는 컨트롤러 계층에서 사용하는 것이 좋다 (서비스계층은 비즈니스 로직에 집중하고, HTTP 관련 로직은 컨트롤러에서 처리하도록)
 
+
     /** (3-1) 예상이자조회 - 만기일해지
-     * @param accountIdx
-     * @return account(적금계좌), interestRateHistory(금리내역)
+     * @return accountDTO(적금계좌), rateSumMap(금리타입별 금리합계)
      */
-    @GetMapping("/interest/maturity/{accountIdx}")
-    public ResponseEntity<Map<String, Object>> getMaturityInterest(@PathVariable Long accountIdx) {
-        return ResponseEntity.ok(accountService.getMaturityInterest(accountIdx));
+    @GetMapping("/interest/maturity")
+    public ResponseEntity<Map<String, Object>> getMaturityInterest() throws AccountNotFoundException {
+        return ResponseEntity.ok(accountService.getMaturityInterest());
     }
 
     /** (3-2) 예상이자조회 - 오늘해지
-     * @param accountIdx
      * @return Account(적금계좌)
      */
-    @GetMapping("/interest/today/{accountIdx}")  // 단밀 필드만 수정되는 경우에는 Patch 사용
-    public ResponseEntity<Map<String, Object>> getTodayInterest(@PathVariable Long accountIdx) {
-        return ResponseEntity.ok(accountService.getTodayInterest(accountIdx));
+    @GetMapping("/interest/today")  // 단밀 필드만 수정되는 경우에는 Patch 사용
+    public ResponseEntity<Map<String, Object>> getTodayInterest() throws AccountNotFoundException {
+        return ResponseEntity.ok(accountService.getTodayInterest());
     }
 
     /** (3-3) 예상이자조회 - 선택일자 해지
-     * @param accountDTO idx, endDate(이자 계산기간 종료일 - 선택일자 해지에 필요)
+     * @param endDate(이자 계산기간 종료일 - 선택일자 해지에 필요)
      * @return Account(적금계좌)
      */
     @GetMapping("/interest/customDate")  // 단밀 필드만 수정되는 경우에는 Patch 사용
-    public ResponseEntity<Map<String, Object>> getCustomDateInterest(@RequestBody AccountDTO accountDTO) {
-        return ResponseEntity.ok(accountService.getCustomDateInterest(accountDTO));
+    public ResponseEntity<Map<String, Object>> getCustomDateInterest(@RequestParam("endDate") LocalDateTime endDate) throws AccountNotFoundException {
+        System.out.println("받은 종료일: " + endDate);
+        return ResponseEntity.ok(accountService.getCustomDateInterest(endDate));
     }
 
     /** (4) 계좌 해지 (중도해지이므로 우대금리 X)
-     * @param accountDTO idx, accountPassword(계좌 비밀번호)
+     * @param accountDTO(계좌 비밀번호)
      * @return 1(성공), 0(실패), 401(비밀번호 불일치)
      */
     @PatchMapping("/termination")
-    public ResponseEntity<String> terminateAccount(@RequestBody AccountDTO accountDTO) {
-        int result = accountService.terminateAccount(accountDTO);  // 1 or 0 or 401
-        if (result == 1) {
-            return ResponseEntity.ok("적금 해지가 완료되었습니다. ");
-        } else if (result == 401) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("비밀번호가 일치하지 않습니다.");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("적금 해지가 실패하였습니다. 다시 시도해주세요.");
-        }
+    public ResponseEntity<Integer> terminateAccount(@RequestBody AccountDTO accountDTO) throws AccountNotFoundException {
+        System.out.println("받은 비밀번호: " + accountDTO.getAccountPassword());
+        int result = accountService.terminateAccount(accountDTO.getAccountPassword());  // 1 or 0 or 401
+        System.out.println("해지 결과값??" + result);
+            return ResponseEntity.ok(result);
     }
 
     /* 메인화면에 필요한 api - 문경미 */
     /**
-     * 적금 계좌의 잔액, 총금리 정보
-     * @param param (memberIdx)
-     * @return balance, final_interest_rate
+     * 메인홈 적금 계좌 정보
+     * @return 단계, 오늘 납입 유무, 납입금액, 만기 확인, 총금리, 총잔액
      */
     @PostMapping("/saving/info")
-    public ResponseEntity<Map<String, Object>> getSavingInfo(@RequestBody Map<String, Object> param) {
+    public ResponseEntity<Map<String, Object>> getSavingInfo() {
 
-        Map<String, Object> result = accountService.getSavingInfo(param);
-
-        return ResponseEntity.ok(result);
-    }
-
-    /**
-     * 적금 계좌 현재 상태 (단계 및 만기 확인)
-     * @param param (memberIdx)
-     * @return
-     */
-    @PostMapping("/current")
-    public ResponseEntity<Map<String, Object>> getAccountCurrent(@RequestBody Map<String, Object> param) {
-
-        Map<String, Object> result = accountService.getAccountCurrent(param);
+        Map<String, Object> result = accountService.getSavingInfo();
 
         return ResponseEntity.ok(result);
     }
@@ -144,7 +127,7 @@ public class AccountController {
 
     /**
      * 만기 해지 프로세스
-     * @param param (memberIdx, accountIdx, organizationIdx, afterTaxInterest(세후이자), interest(이자 후원금), principal(원금 후원금), point(포인트 후원금)
+     * @param param (organizationIdx, afterTaxInterest(세후이자), interest(이자 후원금), principal(원금 후원금), point(포인트 후원금)
      * @return
      */
     @PostMapping("/maturity")

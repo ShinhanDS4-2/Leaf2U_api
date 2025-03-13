@@ -25,7 +25,7 @@ public class DonationController {
         return ResponseEntity.ok(donationOrganizationList);
     }
 
-    /** (2)후원단체 상세정보 조회
+    /** (2)후원단체 상세정보 조회  ==>  리액트 뿌려놓고 보니 필요없을듯 ??
      * @param donationOrganizationIdx
      * @return DonationOrganizationDTO
      */
@@ -36,12 +36,11 @@ public class DonationController {
     }
 
     /** (1) 후원내역 리스트 조회
-     * @param memberIdx
      * @return List, Count
      */
-    @GetMapping("historyList/{memberIdx}")  // 사용자 idx값을 경로 변수로 받을 수 있도록 하는게 맞나..?
-    public ResponseEntity<Map<String, Object>> getDonationHistoryList(@PathVariable Long memberIdx) {
-        Map<String, Object> donationHistoryList = donationService.getDonationHistoryList(memberIdx);
+    @GetMapping("historyList")
+    public ResponseEntity<Map<String, Object>> getDonationHistoryList() {
+        Map<String, Object> donationHistoryList = donationService.getDonationHistoryList();
         return ResponseEntity.ok(donationHistoryList);  // 응답 반환 (상태 코드 200과 함께 Map 반환)ㅇ
     }
 
@@ -49,7 +48,7 @@ public class DonationController {
      * @param donationHistoryIdx
      * @return donationHistory(기부내역), donationOrganization(기부처)
      */
-    @GetMapping("historyDetail/{donationHistoryIdx}")  // 사용자 idx값을 경로 변수로 받을 수 있도록 하는게 맞나..?
+    @GetMapping("historyDetail/{donationHistoryIdx}")
     public ResponseEntity<Map<String, Object>> getDonationHistoryDetail(@PathVariable Long donationHistoryIdx) {
         Map<String, Object> donationHistoryDetail = donationService.getDonationHistoryDetail(donationHistoryIdx);
         return ResponseEntity.ok(donationHistoryDetail);
@@ -66,13 +65,12 @@ public class DonationController {
 
     /**
      * 후원 기여도
-     * @param param
      * @return
      */
     @PostMapping("/statistics")
-    public ResponseEntity<Map<String, Object>> getDonationStatistics(@RequestBody Map<String, Object> param) {
+    public ResponseEntity<Map<String, Object>> getDonationStatistics() {
 
-        Map<String, Object> result = donationService.getDonationStatistics(param);
+        Map<String, Object> result = donationService.getDonationStatistics();
 
         return ResponseEntity.ok(result);
     }

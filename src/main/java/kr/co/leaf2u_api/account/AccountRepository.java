@@ -21,27 +21,44 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     @Query("SELECT a FROM Account a WHERE a.member.idx=:memberIdx AND a.accountStatus='N'")
     Optional<Account> findAccountByMember(Long memberIdx);
 
-
     /** 적금 계좌 관리 - 시온 */
-    // (1) 기본 정보 조회 (param 사용자idx) => 현재 계좌상태가 N(정상)인 것만
-    @Query("SELECT a FROM Account a WHERE a.member.idx=:memberIdx AND a.accountStatus='N'")  // 계좌 상태가 정상N인 것만 조회
+    /** 계좌 기본 정보 (현재 계좌상태가 '정상N'인 것만)
+     * @param memberIdx
+     */
+    @Query("SELECT a FROM Account a WHERE a.member.idx=:memberIdx AND a.accountStatus='N'")
     Optional<Account> getAccountInfoByIdx(@Param("memberIdx") Long memberIdx);
 
-    Optional<Account> findByIdx(Long idx);  // 계좌idx를 기준으로 Account엔티티 조회
+    // 계좌idx를 기준으로 Account엔티티 조회
+    Optional<Account> findByIdx(Long idx);
 
-    // (2) 납입금액 변경 (findByIdx사용)
+    /** 금리내역 조회
+     * @param accountIdx
+     */
+    @Query("SELECT i FROM InterestRateHistory i WHERE i.account.idx=:accountIdx")
+    List<InterestRateHistory> getInterestRateHistory(@Param("accountIdx") Long accountIdx);
 
-    // (3) 예상 이자 조회
-    //      ㄴ적금계좌 조회 (findByIdx사용)
-    //      ㄴ금리내역 조회 -> InterestRateHistory의 account.idx(saving_account_idx)를 기준으로 조회
-    @Query("SELECT i FROM InterestRateHistory i WHERE i.account.idx=:savingAccountIdx")
-    List<InterestRateHistory> getInterestRateHistory(@Param("savingAccountIdx") Long savingAccountIdx);
+    /** 납입내역 조회
+     * @param accountIdx
+     */
+    @Query("SELECT ah FROM AccountHistory ah WHERE ah.account.idx=:accountIdx")
+    List<AccountHistory> getAccountHistory(@Param("accountIdx") Long accountIdx);
 
-    //      ㄴ납입내역 조회 -> AccountHistory의 account.idx(saving_account_idx)를 기준으로 조회
-    @Query("SELECT ah FROM AccountHistory ah WHERE ah.account.idx=:savingAccountIdx")
-    List<AccountHistory> getAccountHistory(@Param("savingAccountIdx") Long savingAccountIdx);
+    /** 금리타입rate_type 별 금리 합계 조회
+     * @param accountIdx
+     */
+    @Query(value = "SELECT " +
+            "SUM(CASE WHEN irh.rate_type = 'B' THEN irh.rate ELSE 0 END) as B, " +
+            "SUM(CASE WHEN irh.rate_type = 'C' THEN irh.rate ELSE 0 END) as C, " +
+            "SUM(CASE WHEN irh.rate_type = 'E' THEN irh.rate ELSE 0 END) as E, " +
+            "SUM(CASE WHEN irh.rate_type = 'F' THEN irh.rate ELSE 0 END) as F, " +
+            "SUM(CASE WHEN irh.rate_type = 'D' THEN irh.rate ELSE 0 END) as D, " +
+            "SUM(CASE WHEN irh.rate_type = 'W' THEN irh.rate ELSE 0 END) as W " +
+            "FROM interest_rate_history irh " +
+            "JOIN saving_account sa ON irh.saving_account_idx = sa.idx " +
+            "WHERE sa.idx = :accountIdx", nativeQuery = true)
+    Object[] rateSumByType(@Param("accountIdx") Long accountIdx);
 
-    // (4) 계좌 해지 (findByIdx사용)
+
 
 
     /* 만기 해지  - 문경미 */

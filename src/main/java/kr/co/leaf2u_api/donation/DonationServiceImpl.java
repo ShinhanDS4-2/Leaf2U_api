@@ -1,5 +1,6 @@
 package kr.co.leaf2u_api.donation;
 
+import kr.co.leaf2u_api.config.TokenContext;
 import kr.co.leaf2u_api.entity.DonationOrganization;
 import kr.co.leaf2u_api.saving.AccountHistoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,8 @@ public class DonationServiceImpl implements DonationService {
                         .name(donationOrganization.getName())
                         .telNumber(donationOrganization.getTelNumber())
                         .description(donationOrganization.getDescription())
+                        .icon(donationOrganization.getIcon())
+                        .url(donationOrganization.getUrl())
                         .build())  // 빌더로 객체 생성
                 .collect(Collectors.toList());  // 변환된 DTO 목록을 리스트로 모아 반환
     }
@@ -58,16 +61,18 @@ public class DonationServiceImpl implements DonationService {
                 .name(donationOrganization.getName())
                 .telNumber(donationOrganization.getTelNumber())
                 .description(donationOrganization.getDescription())
+                .icon(donationOrganization.getIcon())
+                .url(donationOrganization.getUrl())
                 .build())  // 빌더로 객체 생성
                 .orElse(null);  // .map -> Optional에서 값 꺼내서 반환 (값 있으면 그대로 반환, 값 없으면 null반환)
     }  // => 리스트는 Optional을 반환할 필요가 없음
 
     /** (1) 후원내역 리스트 조회
-     * @param memberIdx
      * @return List, Count
      */
     @Override
-    public Map<String, Object> getDonationHistoryList(Long memberIdx) {
+    public Map<String, Object> getDonationHistoryList() {
+        Long memberIdx = TokenContext.getMemberIdx();  // 토큰에서 뽑은 사용자 idx
         // 후원내역 리스트
         List<DonationHistoryDTO> donationHistoryList = donationHistoryRepository.getDonationHistoryList(memberIdx);
         // 후원내역 리스트 개수
@@ -115,11 +120,10 @@ public class DonationServiceImpl implements DonationService {
 
     /**
      * 후원 기여도
-     * @param param
      * @return
      */
     @Override
-    public Map<String, Object> getDonationStatistics(Map<String, Object> param) {
+    public Map<String, Object> getDonationStatistics() {
 
         Map<String, Object> result = new HashMap<>();
 
@@ -128,7 +132,7 @@ public class DonationServiceImpl implements DonationService {
         result.put("ranking", ranking);
 
         // 후원 퍼센테이지
-        Long memberIdx = Long.parseLong(String.valueOf(param.get("memberIdx")));
+        Long memberIdx = TokenContext.getMemberIdx();
         Map<String, Object> map = donationHistoryRepository.findDonationSums(memberIdx);
         result.putAll(map);
 
@@ -143,7 +147,7 @@ public class DonationServiceImpl implements DonationService {
         result.put("age_ratio", ageRatio);
 
         // 탄소발자국 계산
-        Long accountIdx = Long.parseLong(String.valueOf(param.get("accountIdx")));
+        Long accountIdx = TokenContext.getSavingAccountIdx();
         Map<String, Object> challengeCnt = accountHistoryRepository.getChallengeCnt(accountIdx);
 
         long tumbler = (long) challengeCnt.get("countT");
