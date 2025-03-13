@@ -1,5 +1,6 @@
 package kr.co.leaf2u_api.point;
 
+import kr.co.leaf2u_api.config.TokenContext;
 import kr.co.leaf2u_api.entity.Member;
 import kr.co.leaf2u_api.openai.OpenAIService;
 import kr.co.leaf2u_api.topic.TopicService;
@@ -124,9 +125,9 @@ public class PointController {
         return ResponseEntity.ok(Map.of("message", "정답! 10P 적립"));
     }
     @GetMapping("/total")
-    public ResponseEntity<Map<String, Object>> getTotalPoints(@RequestParam("memberIdx") Long memberIdx) {
+    public ResponseEntity<Map<String, Object>> getTotalPoints() {
         Member member = new Member();
-        member.setIdx(memberIdx);
+        member.setIdx(TokenContext.getMemberIdx());
 
         // 포인트 총합 계산
         BigDecimal totalPoints = pointService.getTotalPoints(member);

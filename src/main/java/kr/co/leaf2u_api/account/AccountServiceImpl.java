@@ -7,6 +7,8 @@ import kr.co.leaf2u_api.donation.DonationHistoryRepository;
 import kr.co.leaf2u_api.entity.*;
 import kr.co.leaf2u_api.member.MemberRepository;
 import kr.co.leaf2u_api.notice.NoticeService;
+import kr.co.leaf2u_api.point.PointRepository;
+import kr.co.leaf2u_api.point.PointService;
 import kr.co.leaf2u_api.saving.AccountHistoryRepository;
 import kr.co.leaf2u_api.util.CommonUtil;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,7 @@ public class AccountServiceImpl implements AccountService {
     private final CardRepository cardRepository;
     private final DonationHistoryRepository donationHistoryRepository;
     private final AccountHistoryRepository accountHistoryRepository;
+    private final PointRepository pointRepository;
     private final PasswordEncoder passwordEncoder; // 비밀번호 암호화 및 검증을 위한 인코더
 
     private final NoticeService noticeService;
@@ -255,6 +258,11 @@ public class AccountServiceImpl implements AccountService {
         result.put("accountDTO", dto);  // 계좌 DTO
         result.put("rateSumMap", rateSumMap);  // rate_type 별 금리 합계
 
+        /** 포인트 조회 */
+        Member member = new Member();
+        member.setIdx(TokenContext.getMemberIdx());
+        result.put("point", pointRepository.getTotalPoint(member));
+
         return result;
     }
 
@@ -464,6 +472,16 @@ public class AccountServiceImpl implements AccountService {
                     .build();
             donationHistoryRepository.save(donationHistory);
 
+            // 포인트 차감
+            if (point.compareTo(BigDecimal.ZERO) != 0) {
+                Point pointEntity = Point.builder()
+                        .member(Member.builder().idx(memberIdx).build())
+                        .usePoint(point)
+                        .useDate(LocalDateTime.now())
+                        .build();
+                pointRepository.save(pointEntity);
+            }
+
         } catch (Exception e) {
             result = false;
         }
@@ -538,6 +556,7 @@ public class AccountServiceImpl implements AccountService {
         return account.map(entity -> new AccountDTO(
                 entity.getBalance(),
                 entity.getFinalInterestRate(),
+                entity.getCreateDate(),
                 entity.getMaturityDate(),
                 entity.getPaymentAmount(),
                 entity.getSavingCnt()

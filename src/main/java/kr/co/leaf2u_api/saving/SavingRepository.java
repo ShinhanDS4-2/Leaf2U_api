@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 public interface SavingRepository extends JpaRepository<AccountHistory, Long> {
 
     /**
-     * 🔹 1️⃣ 카드 잔액 차감 (Native Query로 변경)
+     * 1. 카드 잔액 차감 (Native Query로 변경)
      */
     @Modifying
     @Transactional
@@ -29,7 +29,7 @@ public interface SavingRepository extends JpaRepository<AccountHistory, Long> {
 
 
     /**
-     * 🔹 2️⃣ 적금 납입 내역 추가
+     *  2. 적금 납입 내역 추가
      */
     @Modifying
     @Transactional
@@ -49,7 +49,7 @@ public interface SavingRepository extends JpaRepository<AccountHistory, Long> {
 
 
     /**
-     * 🔹 3️⃣ 매일 금리 (D) 추가
+     * 3. 매일 금리 (D) 추가
      */
     @Modifying
     @Transactional
@@ -72,7 +72,7 @@ public interface SavingRepository extends JpaRepository<AccountHistory, Long> {
 
 
     /**
-     * 🔹 4️⃣ 7번째 납입 시 연속 금리 (W) 추가
+     *  4. 7번째 납입 시 연속 금리 (W) 추가
      */
     @Modifying
     @Transactional
@@ -104,7 +104,7 @@ public interface SavingRepository extends JpaRepository<AccountHistory, Long> {
 
 
     /**
-     * 🔹 5️⃣ prime_rate 업데이트
+     * 5. prime_rate 업데이트
      */
     @Modifying
     @Transactional
@@ -122,7 +122,7 @@ public interface SavingRepository extends JpaRepository<AccountHistory, Long> {
 
 
     /**
-     * 🔹 6️⃣ 최종 금리 업데이트
+     * 6. 최종 금리 업데이트
      */
     @Modifying
     @Transactional
@@ -135,7 +135,7 @@ public interface SavingRepository extends JpaRepository<AccountHistory, Long> {
 
 
     /**
-     * 🔹 7️⃣ 적금 계좌 잔액(balance) 업데이트
+     * 7. 적금 계좌 잔액(balance) 업데이트
      */
     @Modifying
     @Transactional
@@ -153,7 +153,7 @@ public interface SavingRepository extends JpaRepository<AccountHistory, Long> {
     void updateSavingAccountBalance(@Param("accountIdx") Long accountIdx);
 
     /**
-     * 🔹 8️⃣ 적금 납입 횟수(saving_cnt) 업데이트
+     * 8. 적금 납입 횟수(saving_cnt) 업데이트
      */
     @Modifying
     @Transactional
@@ -168,5 +168,27 @@ public interface SavingRepository extends JpaRepository<AccountHistory, Long> {
     WHERE sa.idx = :accountIdx
 """, nativeQuery = true)
     void updateSavingCount(@Param("accountIdx") Long accountIdx);
+
+    /**
+     * 9. 업데이트된 saving_cnt 값을 조회하여 반환
+     */
+    @Query(value = """
+    SELECT sa.saving_cnt
+    FROM saving_account sa
+    WHERE sa.idx = :accountIdx
+""", nativeQuery = true)
+    Integer getSavingCount(@Param("accountIdx") Long accountIdx);
+
+    /**
+     * 10. 오늘 하루 받을 금리 조회 반환(D+W // interest_rate_history 테이블)
+     */
+    @Query(value = """
+    SELECT SUM(irh.rate)
+    FROM interest_rate_history irh
+    WHERE irh.saving_account_idx = :accountIdx
+    AND DATE(irh.create_date) = CURDATE()
+""", nativeQuery = true)
+    Double getTodayInterestRate(@Param("accountIdx") Long accountIdx);
+
 
 }
