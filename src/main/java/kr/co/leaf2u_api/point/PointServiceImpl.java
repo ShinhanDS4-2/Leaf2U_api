@@ -24,14 +24,21 @@ public class PointServiceImpl implements PointService {
     @Transactional
     @Override
     public boolean checkIn(Member member) {
-        // 오늘 날짜의 시작과 끝
+        if (member == null || member.getIdx() == null) {
+            System.out.println("❌ [출석 체크 오류] member가 null이거나 memberIdx가 없습니다.");
+            throw new IllegalArgumentException("멤버 정보가 올바르지 않습니다.");
+        }
+
+        System.out.println("🔎 [출석 체크 로직] memberIdx: " + member.getIdx());
+
+        // 기존 출석체크 여부 확인
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
 
-        // 기존 출석체크 여부 확인
         Optional<Point> existingCheckIn = pointRepository.findFirstByMemberAndEarnDateBetween(member, startOfDay, endOfDay);
 
         if (existingCheckIn.isPresent()) {
+            System.out.println("⚠️ 이미 출석 체크 완료된 사용자입니다.");
             return false; // 이미 출석체크 완료
         }
 
@@ -47,7 +54,7 @@ public class PointServiceImpl implements PointService {
 
         pointRepository.save(point);
 
-        // 출석체크 포인트 알림 insert
+        // 알림 추가
         Map<String, Object> noticeParam = new HashMap<>();
         noticeParam.put("memberIdx", member.getIdx());
         noticeParam.put("title", "포인트 획득");
@@ -58,6 +65,7 @@ public class PointServiceImpl implements PointService {
 
         return true;
     }
+
     @Transactional
     @Override
     public void addPedometerPoints(Member member, int points) {
@@ -117,9 +125,17 @@ public class PointServiceImpl implements PointService {
     @Transactional
     @Override
     public BigDecimal getTotalPoints(Member member) {
-        // 회원의 모든 포인트 내역을 조회하여 총합 계산
-        BigDecimal totalPoints = pointRepository.getTotalPoint(member);
-
-        return totalPoints;
+        try {
+            BigDecimal totalPoints = pointRepository.getTotalPoint(member);
+            return totalPoints;
+        } catch (Exception e) {
+            // 예외 발생 시 로그로 확인
+            System.out.println("Error calculating total points: " + e.getMessage());
+            throw new RuntimeException("포인트 계산 중 오류가 발생했습니다.");
+        }
     }
+
+
+
+
 }
