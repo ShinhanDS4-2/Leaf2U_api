@@ -1,5 +1,7 @@
 package kr.co.leaf2u_api.feedback;
 
+import kr.co.leaf2u_api.config.TokenContext;  // TokenContext import
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +16,15 @@ public class FeedbackController {
     private final FeedbackService feedbackService;
 
     @PostMapping("/feedback")
-    public ResponseEntity<Map<String, Object>> getFeedback(@RequestBody FeedbackDTO request) {
+    public ResponseEntity<Map<String, Object>> getFeedback() {
         try {
+            Long accountIdx = TokenContext.getSavingAccountIdx();
+
+            // 사용자의 챌린지 수행 횟수 업데이트
+            feedbackService.updateUserChallenge(accountIdx);
+
             // 사용자의 챌린지 수행 횟수 및 평균 횟수 조회
-            int userChallengeCount = feedbackService.getUserChallengeCount(request.getAccountIdx());
+            int userChallengeCount = feedbackService.getUserChallengeCount(accountIdx);
             int averageChallengeCount = feedbackService.getAverageChallengeCount();
 
             System.out.println("사용자 챌린지 횟수=" + userChallengeCount + ", 평균 챌린지 횟수=" + averageChallengeCount);

@@ -9,7 +9,9 @@ import kr.co.leaf2u_api.member.MemberRepository;
 import kr.co.leaf2u_api.notice.NoticeService;
 import kr.co.leaf2u_api.point.PointRepository;
 import kr.co.leaf2u_api.point.PointService;
+import kr.co.leaf2u_api.saving.AccountCardRepository;
 import kr.co.leaf2u_api.saving.AccountHistoryRepository;
+import kr.co.leaf2u_api.saving.InterestRateHistoryRepository;
 import kr.co.leaf2u_api.util.CommonUtil;
 import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.resizers.BicubicResizer;
@@ -44,6 +46,8 @@ public class AccountServiceImpl implements AccountService {
     private final PasswordEncoder passwordEncoder; // 비밀번호 암호화 및 검증을 위한 인코더
 
     private final NoticeService noticeService;
+    private final AccountCardRepository accountCardRepository;
+    private final InterestRateHistoryRepository interestRateHistoryRepository;
 
     /**
      * 적금 계좌 생성
@@ -57,30 +61,53 @@ public class AccountServiceImpl implements AccountService {
         Member member = memberRepository.findById(accountDTO.getMemberIdx())
                 .orElseThrow(()-> new IllegalArgumentException("회원이 존재하지 않습니다."));
 
-        Card card=cardRepository.findById(accountDTO.getMemberIdx())
-                .orElseThrow(() -> new IllegalArgumentException("카드가 존재하지 않습니다."));
+        Card card=cardRepository.findFirstByMemberIdxOrderByCreateDateDesc(accountDTO.getMemberIdx())
+                .orElseThrow(()->new IllegalArgumentException("카드가 존재하지 않습니다."));
 
         List <Account> existAccounts=accountRepository.findByMemberIdx(member.getIdx());
+
+        String hashedPassword = passwordEncoder.encode(accountDTO.getAccountPassword());
 
         //기본 금리 설정
         BigDecimal baseInterestRate = new BigDecimal("1.0");
         BigDecimal primeRate = BigDecimal.ZERO;
 
+        Account account=new Account();
+
+        account.setMember(member);
+        account.setAccountStatus('N');
+        account.setAccountNumber(generateAccountNumber());
+        account.setAccountPassword(hashedPassword);
+        account.setPaymentAmount(accountDTO.getPaymentAmount());
+        account.setBalance(BigDecimal.ZERO);
+        account.setInterestRate(baseInterestRate);
+        account.setPrimeRate(primeRate);
+        account.setFinalInterestRate(baseInterestRate);
+        account.setTaxationYn('Y');
+        account.setDutyRate(new BigDecimal("0.154"));
+        account.setSavingCnt(0L);
+        account.setMaturityDate(LocalDateTime.now().plusMonths(1));
+
+        Account savedAccount=accountRepository.save(account);
+
         //최초 가입 시 1% 추가
         if(existAccounts.isEmpty()){
             primeRate=primeRate.add(new BigDecimal("1.0"));
+            insertInterestRateHistory(savedAccount,'F',new BigDecimal("1.0"));
         }
 
         //리프 카드 만들기를 선택한다면 2% 추가
         if (card.getCardType()=='L'){
 
             primeRate=primeRate.add(new BigDecimal("2.0"));
+            insertInterestRateHistory(savedAccount,'C',new BigDecimal("1.0"));
         }
 
         //기후 동행 카드를 만들기를 선택한다면 1% 추가
         else if (card.getCardType()=='E'){
 
             primeRate=primeRate.add(new BigDecimal("1.0"));             //발급받았으므로 'Y' 로 변경
+            insertInterestRateHistory(savedAccount,'E',new BigDecimal("1.0"));
         }
 
         //사용자 본인 카드를 선택한다면 0% 추가
@@ -89,33 +116,17 @@ public class AccountServiceImpl implements AccountService {
             primeRate=primeRate.add(new BigDecimal("0.0"));                                  //발급받았으므로 'Y' 로 변경
         }
 
-        member.setCardYn('Y');
-        memberRepository.save(member);
+        insertInterestRateHistory(savedAccount,'B',new BigDecimal("1.0"));           //기본 금리 1%
 
-        Account account=new Account();
+        savedAccount.setPrimeRate(primeRate);
+        savedAccount.setFinalInterestRate(baseInterestRate.add(primeRate));
 
-        account.setMember(member);
-        account.setAccountStatus('N');
-        account.setAccountNumber(generateAccountNumber());
-        account.setAccountPassword(accountDTO.getAccountPassword());
-        account.setBalance(BigDecimal.ZERO);
-        account.setInterestRate(baseInterestRate);
-        account.setPrimeRate(primeRate);
-        account.setTaxationYn('Y');
-        account.setMaturityDate(LocalDateTime.now().plusMonths(1));
-        account.setInterestAmount(primeRate);
+        accountRepository.save(savedAccount);
 
-        account.setDutyRate(new BigDecimal("15.4"));
-        account.setFinalInterestRate(baseInterestRate.add(primeRate));
-        account.setPaymentAmount(accountDTO.getPaymentAmount());
-        account.setSavingCnt(0L);
-
-        Account savedAccount=accountRepository.save(account);
-
-        /**
-         * TODO account_card, interest_rate_history insert
-         */
-
+        AccountCard accountCard=new AccountCard();
+        accountCard.setAccount(savedAccount);
+        accountCard.setCard(card);
+        accountCardRepository.save(accountCard);
 
         /* 적급 가입 알림 insert - 문경미 */
         Map<String, Object> noticeParam = new HashMap<>();
@@ -127,6 +138,18 @@ public class AccountServiceImpl implements AccountService {
         noticeService.registNotice(noticeParam);
 
         return EntityToDTO(savedAccount);
+    }
+
+    private void insertInterestRateHistory(Account savedAccount, char rateType, BigDecimal rate) {
+
+        InterestRateHistory interestRateHistory=InterestRateHistory.builder()
+                .account(savedAccount)
+                .rateType(rateType)
+                .rate(rate)
+                .createDate(LocalDateTime.now())
+                .build();
+
+        interestRateHistoryRepository.save(interestRateHistory);
     }
 
     private AccountDTO EntityToDTO(Account account) {
@@ -351,7 +374,7 @@ public class AccountServiceImpl implements AccountService {
 //      if(!passwordEncoder.matches(inputPwd, account.getAccountPassword())){  // 해당 적금계좌의 현재 비밀번호를 DB에서 조회 -> 암호화된 비번 조회
         if(!inputPwd.equals(account.getAccountPassword())){  // API테스트용 임시 코드(위에거로 변경해야함)
                 // ㄴ 사용자가 입력한 비밀번호가 DB에 저장된 비밀번호와 일치하는지 확인
-            return 401;  // 비밀번호 불일치시 401반환
+            return 401;  // 비밀번호 불일치시 401반환 
         }
         // 비밀번호가 일치하면 적금계좌 해지 ↓
 

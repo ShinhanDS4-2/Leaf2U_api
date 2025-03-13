@@ -37,12 +37,17 @@ public class FeedbackService {
         this.feedbackRepository = feedbackRepository;
     }
 
-    // 특정 사용자의 챌린지 수행 횟수 조회
+    // 1. 사용자의 챌린지 수행 횟수 업데이트
+    public void updateUserChallenge(Long accountIdx) {
+        feedbackRepository.updateUserChallenge(accountIdx);
+    }
+
+    // 2. 특정 사용자의 챌린지 수행 횟수 조회
     public int getUserChallengeCount(Long accountIdx) {
         return feedbackRepository.getUserChallengeCount(accountIdx);
     }
 
-    // 전체 평균 챌린지 수행 횟수 조회
+    // 3. 전체 평균 챌린지 수행 횟수 조회
     public int getAverageChallengeCount() {
         int avg = feedbackRepository.getAverageChallengeCount();
         return avg;
