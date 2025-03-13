@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 public interface FeedbackRepository extends JpaRepository<Account, Long> {
 
     /**
-     * 🔹 1️⃣ 특정 사용자의 챌린지 수행 횟수
+     * 1. 특정 사용자의 챌린지 수행 횟수
      * - 사용자의 saving_cnt 값을 가져온다.
      */
     @Query(value = """
@@ -19,7 +19,7 @@ public interface FeedbackRepository extends JpaRepository<Account, Long> {
     int getUserChallengeCount(@Param("accountIdx") Long accountIdx);
 
     /**
-     * 🔹 2️⃣ 전체 평균 챌린지 수행 횟수
+     * 2. 전체 평균 챌린지 수행 횟수
      * - 모든 사용자의 saving_cnt 값을 평균 내고, 소수점 첫째 자리에서 반올림한다.
      */
     @Query(value = """

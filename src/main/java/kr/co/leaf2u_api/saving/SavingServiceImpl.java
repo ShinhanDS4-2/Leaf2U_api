@@ -113,35 +113,49 @@ public class SavingServiceImpl implements SavingService {
     public Map<String, Object> processSavingDeposit(Map<String, Object> param) {
         Map<String, Object> result = new HashMap<>();
 
-        Long memberIdx = Long.parseLong(String.valueOf(param.get("memberIdx")));
-        Long accountIdx = Long.parseLong(String.valueOf(param.get("accountIdx")));
+        Long memberIdx = TokenContext.getMemberIdx();
+        Long accountIdx = TokenContext.getSavingAccountIdx();
+
+        // React에서 변환된 challengeType 사용
         String challengeType = param.get("challengeType").toString();
 
-        // 🔹 1️⃣ 카드 잔액 차감
+        System.out.println(" Token에서 가져온 memberIdx: " + memberIdx);
+        System.out.println(" Token에서 가져온 accountIdx: " + accountIdx);
+
+        // 1. 카드 잔액 차감
         savingRepository.updateCardBalance(accountIdx);
 
-        // 🔹 2️⃣ 적금 납입 내역 추가
+        // 2. 적금 납입 내역 추가
         savingRepository.insertSavingHistory(memberIdx, challengeType);
 
-        // 🔹 3️⃣ 매일 금리 (D) 추가
+        // 3. 매일 금리 (D) 추가
         savingRepository.insertDailyInterest(accountIdx);
 
-        // 🔹 4️⃣ 7번째 납입 시 연속 금리 (W) 추가
+        // 4. 7번째 납입 시 연속 금리 (W) 추가
         savingRepository.insertWeeklyInterest(accountIdx);
 
-        // 🔹 5️⃣ prime_rate 업데이트
+        // 5. prime_rate 업데이트
         savingRepository.updatePrimeRate(accountIdx);
 
-        // 🔹 6️⃣ 최종 금리 업데이트
+        // 6. 최종 금리 업데이트
         savingRepository.updateFinalInterestRate(accountIdx);
 
-        // 🔹 7️⃣ 적금 계좌 잔액(balance) 업데이트
+        // 7. 적금 계좌 잔액(balance) 업데이트
         savingRepository.updateSavingAccountBalance(accountIdx);
 
-        // 🔹 8️⃣적금 납입 횟수(saving_cnt) 업데이트
+        // 8. 적금 납입 횟수(saving_cnt) 업데이트
         savingRepository.updateSavingCount(accountIdx);
 
+        // 9. 업데이트된 saving_cnt 값을 조회하여 반환
+        Integer savingCount = savingRepository.getSavingCount(accountIdx);
+
+        // 10. 오늘 하루 받을 금리 조회 반환(D+W // interest_rate_history 테이블)
+        Double todayInterestRate = savingRepository.getTodayInterestRate(accountIdx);
+
         result.put("message", "적금 납입이 완료되었습니다.");
+        result.put("saving_cnt", savingCount);
+        result.put("todayInterestRate", todayInterestRate);
+
         return result;
     }
 
