@@ -31,11 +31,12 @@ public class PointController {
 
         boolean success = pointService.checkIn(member);
         if (!success) {
-            return ResponseEntity.badRequest().body(Map.of("message", "이미 출석체크 완료"));
+            return ResponseEntity.ok(Map.of("success", false, "message", "이미 출석체크 완료"));
         }
 
-        return ResponseEntity.ok(Map.of("message", "출석체크 완료! 10P 적립"));
+        return ResponseEntity.ok(Map.of("success", true, "message", "출석체크 완료! 10P 적립"));
     }
+
 
 
     @PostMapping("/pedometer")
