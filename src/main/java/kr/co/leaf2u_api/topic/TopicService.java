@@ -11,7 +11,7 @@ public interface TopicService {
     EcoTips saveEcoTips(EcoTips  ecoTips);
 
     List<Map<String, Object>> getNews();
-    String createQuiz(String title, String content);
+    Map<String, Object> createQuiz(String title, String content);
 
     Map<String, Object> getFineDustInfo();
 }

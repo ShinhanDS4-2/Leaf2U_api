@@ -123,11 +123,11 @@ public class PointServiceImpl implements PointService {
         pointRepository.save(point);
     }
 
-    @Override
-    public boolean checkQuizAnswer(String answer) {
-        // OX 정답 체크 로직 (임시)
-        return "O".equalsIgnoreCase(answer); // "O"이면 정답, "X"이면 오답
-    }
+    /**
+     * 총 포인트
+     * @param member
+     * @return
+     */
     @Transactional
     @Override
     public BigDecimal getTotalPoints(Member member) {

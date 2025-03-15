@@ -107,7 +107,7 @@ public class TopicServiceImpl implements TopicService {
      * @param content
      * @return
      */
-    public String createQuiz(String title, String content) {
+    public Map<String, Object> createQuiz(String title, String content) {
         return openaiService.createQuiz(title, content);
     }
 
