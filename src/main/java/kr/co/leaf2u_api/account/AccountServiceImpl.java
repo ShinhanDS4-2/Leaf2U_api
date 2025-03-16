@@ -280,6 +280,10 @@ public class AccountServiceImpl implements AccountService {
         member.setIdx(TokenContext.getMemberIdx());
         result.put("point", pointRepository.getTotalPoint(member));
 
+        /** 카드 계좌 조회 */
+        Optional<Card> card = cardRepository.findCardInfoByAccountIdx(accountIdx);
+        result.put("cardAccountNumber", card.get().getAccountNumber());
+
         return result;
     }
 
@@ -487,6 +491,11 @@ public class AccountServiceImpl implements AccountService {
                     .donationDate(LocalDateTime.now())
                     .build();
             donationHistoryRepository.save(donationHistory);
+
+            // 최종 잔액 card 업데이트
+            Optional<Card> cardOptional = cardRepository.findCardInfoByAccountIdx(accountIdx);
+            Card card = cardOptional.get();
+            cardRepository.updateBalance(card.getIdx(), card.getBalance().add(new BigDecimal(param.get("finalAmount").toString())));
 
             // 포인트 차감
             if (point.compareTo(BigDecimal.ZERO) != 0) {
