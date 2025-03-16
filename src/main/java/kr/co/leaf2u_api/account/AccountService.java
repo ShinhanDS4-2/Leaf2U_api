@@ -1,4 +1,6 @@
 package kr.co.leaf2u_api.account;
+import kr.co.leaf2u_api.entity.Account;
+
 import javax.security.auth.login.AccountNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -6,9 +8,10 @@ import java.util.Map;
 
 public interface AccountService {
 
+    Boolean checkAccount(); // 현재 활성화 적금 계좌 확인
+
     AccountDTO createAccount(AccountDTO accountDTO);                                  //적금 생성
     List<AccountDTO> getAccountsByMember(Long memberId);                              //적금 조회
-
 
     /* 적금 계좌 관리 - 시온 */
     Map<String, Object> getAccountInfoById();  // (1) 계좌 기본정보 조회

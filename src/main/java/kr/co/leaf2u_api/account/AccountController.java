@@ -1,5 +1,6 @@
 package kr.co.leaf2u_api.account;
 
+import kr.co.leaf2u_api.entity.Account;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,18 @@ import java.util.Map;
 public class AccountController {
 
     private final AccountService accountService;
+
+    /**
+     * 현재 활성화 적금 계좌 확인
+     * @return
+     */
+    @PostMapping("/check")
+    public ResponseEntity<Boolean> checkAccount() {
+
+        Boolean result = accountService.checkAccount();
+
+        return ResponseEntity.ok(result);
+    }
 
     /**
      * 적금 가입

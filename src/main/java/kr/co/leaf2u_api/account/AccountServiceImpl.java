@@ -44,6 +44,24 @@ public class AccountServiceImpl implements AccountService {
     private final InterestRateHistoryRepository interestRateHistoryRepository;
 
     /**
+     * 현재 활성화 적금 계좌 확인
+     * @return
+     */
+    @Override
+    public Boolean checkAccount() {
+        Boolean result = false;
+
+        Long memberIdx = TokenContext.getMemberIdx();
+        Optional<Account> account = accountRepository.findAccountByMember(memberIdx);
+
+        if (account.isPresent()) {
+            result = true;
+        }
+
+        return result;
+    }
+
+    /**
      * 적금 계좌 생성
      * @param accountDTO
      * @return
