@@ -121,7 +121,11 @@ public class SavingServiceImpl implements SavingService {
         );
     }
 
-
+    /**
+     * 납입 프로세스
+     * @param param
+     * @return
+     */
     @Transactional
     public Map<String, Object> processSavingDeposit(Map<String, Object> param) {
         Map<String, Object> result = new HashMap<>();
