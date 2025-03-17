@@ -131,7 +131,7 @@ public class CardServiceImpl implements CardService {
         CardDTO cardDTO = entityToDTO(card);
 
         Map<String, Object> result = new HashMap<>();
-        result.put("cardInfo", cardDTO);  // 계좌 DTO
+        result.put("cardDTO", cardDTO);  // 계좌 DTO
         return result;
     }
 
