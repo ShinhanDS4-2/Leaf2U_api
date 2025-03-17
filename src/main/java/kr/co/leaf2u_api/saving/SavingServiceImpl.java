@@ -200,7 +200,7 @@ public class SavingServiceImpl implements SavingService {
         for (Object[] info : obj) {
             noticeParam.put("memberIdx", memberIdx);
             noticeParam.put("title", info[0] + "의 통장 (" + info[3] + ")");
-            noticeParam.put("content", "출금 (" + info[1] + ") | 한달적금 (" + info[2] + ")");
+            noticeParam.put("content", "출금 (" + info[1] + "원) | 한달적금 (" + info[2] + ")");
             noticeParam.put("category", "S");
         }
 
