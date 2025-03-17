@@ -83,6 +83,7 @@ public class KakaoOAuthController {
 
             Map<String, Object> response = new HashMap<>();
             response.put("cardYn", member.getCardYn());
+            response.put("firstYn", member.getSavingAccountYn());
             response.put("memberIdx",member.getIdx());
 
             log.info("member: {}", member);

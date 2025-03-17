@@ -111,7 +111,7 @@ public interface DonationHistoryRepository extends JpaRepository<DonationHistory
         JOIN member m
         ON m.idx = t.member_idx
         WHERE ranking <= 3
-        ;
+        ORDER BY t.ranking DESC
     """, nativeQuery = true)
     List<Map<String, Object>> findDonationRanking();
 
