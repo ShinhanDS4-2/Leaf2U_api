@@ -36,6 +36,8 @@ public class CardController {
     @PostMapping("/exist")
     public ResponseEntity<CardDTO> existCard(@RequestBody CardDTO cardDTO) {
 
+        log.info("기존 카드 등록 카드 타입:{}", cardDTO.getCardType());
+
         CardDTO existingCard=cardService.registerExistingCard(cardDTO);
         return ResponseEntity.ok(existingCard);
 
