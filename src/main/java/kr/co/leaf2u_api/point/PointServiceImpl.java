@@ -25,7 +25,7 @@ public class PointServiceImpl implements PointService {
     @Transactional
     @Override
     public boolean checkIn(Member member) {
-        if (checkTodayActivity(member, 'A')) return false; // ✅ 출석체크 1회 제한
+        if (checkTodayActivity(member, 'A')) return false; // 출석체크 1회 제한
 
         Point point = Point.builder()
                 .member(member)
