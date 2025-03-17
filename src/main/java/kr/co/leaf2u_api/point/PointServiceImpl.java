@@ -94,7 +94,7 @@ public class PointServiceImpl implements PointService {
     @Transactional
     @Override
     public void QuizCorrect(Member member) {
-        if (checkTodayActivity(member, 'Q')) return; // ✅ 퀴즈 정답 1회 제한
+        if (checkTodayActivity(member, 'Q')) return; // 퀴즈 정답 1회 제한
 
         Point point = Point.builder()
                 .member(member)
