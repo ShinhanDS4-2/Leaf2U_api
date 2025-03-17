@@ -298,10 +298,8 @@ public class AccountServiceImpl implements AccountService {
             return getMaturityInterest();
         }
 
-        /** 이자 계산(만기일 해지) START */
-        // 이자 계산 공통 메서드(idx, 적용금리:기본금리, 해지일:오늘)
+        /** 이자 계산 공통 메서드(idx, 적용금리:기본금리, 해지일:오늘) */
         AccountDTO dto = calculateInterest(accountIdx, interestRate, today);
-        /** 이자 계산(만기일 해지) END */
 
         Map<String, Object> result = new HashMap<>();
         result.put("accountDTO", dto);  // 계좌 DTO
@@ -317,23 +315,23 @@ public class AccountServiceImpl implements AccountService {
     public Map<String, Object> getCustomDateInterest(LocalDateTime endDate) throws AccountNotFoundException {
         Long accountIdx = TokenContext.getSavingAccountIdx();  // 토큰에서 뽑은 계좌 idx
         // -> endData 사용자한테 입력받아서 DB에 "2025-03-05T15:45:10.385338200" 이런 형태로 들어가야함
-
         Account account = accountRepository.findByIdx(accountIdx).orElse(null);
         if(account == null){
             throw new AccountNotFoundException("사용자에 대한 계좌 없음 null 오류"+accountIdx);
         }
+
+        LocalDateTime today = LocalDateTime.now();  // 오늘날짜
         LocalDateTime maturityDate = account.getMaturityDate();  // 적금만기일
         BigDecimal interestRate = account.getInterestRate().multiply(new BigDecimal("0.01"));;  // 기본금리
 
-        if(endDate.toLocalDate().equals(maturityDate.toLocalDate())) {  // 오늘날짜가 적금만기일이면 getMaturityInterest() -> 만기일이자조회 메서드 실행
+        // 만약 선택일자=적금만기일 이면? getMaturityInterest() -> 만기일이자조회 메서드 실행
+        if(endDate.toLocalDate().equals(maturityDate.toLocalDate())) {
             // .toLocalDate() 이용해서 날짜만 비교(시간X)
             return getMaturityInterest();
         }
 
-        /** 이자 계산(만기일 해지) START */
-        // 이자 계산 공통 메서드(idx, 적용금리:기본금리, 해지일:선택일자)
+        /** 이자 계산 공통 메서드(idx, 적용금리:기본금리, 해지일:선택일자) */
         AccountDTO dto = calculateInterest(accountIdx, interestRate, endDate);
-        /** 이자 계산(만기일 해지) END */
 
         Map<String, Object> result = new HashMap<>();
         result.put("accountDTO", dto);  // 계좌 DTO
@@ -511,6 +509,7 @@ public class AccountServiceImpl implements AccountService {
         // 엔티티의 값을 DTO의 필드에 설정
         dto.setIdx(account.getIdx());  // 계좌 Idx
         dto.setMemberIdx(account.getMember().getIdx());  // 사용자 Idx
+        dto.setAccountNumber(account.getAccountNumber());
         dto.setPaymentAmount(account.getPaymentAmount());  // 납입금액
         dto.setBalance(account.getBalance());  // 잔액
         dto.setInterestRate(account.getInterestRate());  // 기본 금리
