@@ -51,7 +51,7 @@ public class CardServiceImpl implements CardService {
                 .accountNumber(cardDTO.getAccountNumber())
                 .cardPassword(hashedPassword)
                 .expirationDate(String.valueOf(LocalDateTime.now().plusYears(3)))
-                .balance(BigDecimal.ZERO)
+                .balance(new BigDecimal(1000000))
                 .build();
         
         cardRepository.save(card);
