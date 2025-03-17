@@ -89,17 +89,21 @@ public class CardServiceImpl implements CardService {
         Member member=memberRepository.findById(cardDTO.getMemberIdx())
                 .orElseThrow(()-> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
+        String hashedPassword = passwordEncoder.encode(cardDTO.getCardPassword());
 
-        Card card=Card.builder()
+        Card card= Card.builder()
                 .member(member)
                 .cardType(cardDTO.getCardType())
                 .cardName(cardDTO.getCardName())
-                .cardNumber(cardDTO.getCardNumber())
-                .expirationDate(cardDTO.getExpirationDate())
-                .balance(cardDTO.getBalance())
+                .cardNumber(generateCardNumber())
+                .accountNumber(cardDTO.getAccountNumber())
+                .cardPassword(hashedPassword)
+                .expirationDate(String.valueOf(LocalDateTime.now().plusYears(3)))
+                .balance(BigDecimal.ZERO)
                 .build();
 
         cardRepository.save(card);
+
         return entityToDTO(card);
     }
 
