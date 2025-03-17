@@ -137,7 +137,6 @@ public class PointServiceImpl implements PointService {
 
     /**
      * 퀴즈 힌트
-     * @param member
      */
     @Transactional
     @Override
@@ -163,8 +162,6 @@ public class PointServiceImpl implements PointService {
     }
     /**
      * 총 포인트
-     * @param member
-     * @return
      */
     @Transactional
     @Override

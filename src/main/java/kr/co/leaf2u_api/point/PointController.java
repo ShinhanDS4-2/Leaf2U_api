@@ -25,7 +25,6 @@ public class PointController {
 
     /**
      * 출석체크
-     * @return
      */
     @PostMapping("/checkin")
     public ResponseEntity<Map<String, Object>> checkIn() {
@@ -76,7 +75,6 @@ public class PointController {
     }
     /**
      * 퀴즈
-     * @return
      */
     @GetMapping("/quiz")
     public ResponseEntity<Map<String, Object>> getQuiz() {
@@ -103,7 +101,6 @@ public class PointController {
 
     /**
      * 퀴즈 힌트
-     * @return
      */
     @PostMapping("/quiz/hint")
     public ResponseEntity<Map<String, Object>> getQuizHint() {
@@ -138,7 +135,6 @@ public class PointController {
     }
     /**
      * 포인트 총합
-     * @return
      */
     @GetMapping("/total")
     public ResponseEntity<Map<String, Object>> getTotalPoints() {
