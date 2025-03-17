@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -30,4 +31,13 @@ public interface CardRepository extends JpaRepository<Card, Long> {
     @Transactional
     @Query("UPDATE Card c SET c.balance = :balance WHERE c.idx = :idx")
     int updateBalance(Long idx, BigDecimal balance);
+
+    @Query("""
+        SELECT COUNT(c)
+        FROM Card c
+        WHERE c.cardNumber = :cardNum
+        AND c.cardType = 'L'
+        AND c.member.idx = :memberIdx
+    """)
+    int findPrevCard(@Param("memberIdx") Long memberIdx, @Param("cardNum") String cardNum);
 }

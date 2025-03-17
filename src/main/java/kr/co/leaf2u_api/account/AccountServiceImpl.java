@@ -99,13 +99,14 @@ public class AccountServiceImpl implements AccountService {
         account.setDutyRate(new BigDecimal("0.154"));
         account.setSavingCnt(0L);
         account.setMaturityDate(LocalDateTime.now().plusMonths(1));
+        account.setSavingAccountYN('Y');
 
         Account savedAccount=accountRepository.save(account);
 
-        //최초 가입 시 1% 추가
+        //최초 가입 시 2% 추가
         if(existAccounts.isEmpty()){
-            primeRate=primeRate.add(new BigDecimal("1.0"));
-            insertInterestRateHistory(savedAccount,'F',new BigDecimal("1.0"));
+            primeRate = primeRate.add(new BigDecimal("2.0"));
+            insertInterestRateHistory(savedAccount,'F',new BigDecimal("2.0"));
         }
 
         //리프 카드 만들기를 선택한다면 2% 추가

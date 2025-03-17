@@ -46,7 +46,7 @@ public class CardServiceImpl implements CardService {
         Card card= Card.builder()
                 .member(member)
                 .cardType('L')
-                .cardName(cardDTO.getCardName())
+                .cardName("신한 Leaf2U 카드")
                 .cardNumber(generateCardNumber())
                 .accountNumber(cardDTO.getAccountNumber())
                 .cardPassword(hashedPassword)
@@ -151,5 +151,22 @@ public class CardServiceImpl implements CardService {
         return dto;
     }
 
+    /**
+     * 기존 가입 전용카드 확인
+     * @return
+     */
+    @Override
+    public Boolean checkPrevCard(Map<String, Object> param) {
+        Boolean result = false;
+
+        String cardNum = String.valueOf(param.get("cardNum"));
+        Long memberIdx = TokenContext.getMemberIdx();
+
+        if (cardRepository.findPrevCard(memberIdx, cardNum) > 0) {
+            result = true;
+        }
+
+        return result;
+    }
 
 }

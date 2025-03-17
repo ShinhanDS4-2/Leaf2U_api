@@ -61,4 +61,13 @@ public class CardController {
     public ResponseEntity<Map<String, Object>> CardInfo() throws AccountNotFoundException {
         return ResponseEntity.ok(cardService.CardInfo());
     }
+
+    /**
+     * 기존 가입 전용카드 확인
+     * @return
+     */
+    @PostMapping("/check/prev")
+    public ResponseEntity<Boolean> checkPrevCard(@RequestBody Map<String, Object> param) {
+        return ResponseEntity.ok(cardService.checkPrevCard(param));
+    }
 }
