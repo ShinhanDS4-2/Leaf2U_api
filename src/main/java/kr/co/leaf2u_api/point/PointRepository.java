@@ -8,13 +8,18 @@ import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 public interface PointRepository extends JpaRepository<Point, Long> {
 
-    Optional<Point> findFirstByMemberAndEarnDateBetween(Member member, LocalDateTime start, LocalDateTime end);
-    List<Point> findByMember(Member member);
+    Optional<Point> findFirstByMemberAndEarnTypeAndEarnDateBetween(
+            @Param("member") Member member,
+            @Param("activityType") char activityType,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
+
+
 
     @Query("""
         SELECT COALESCE(SUM(p.earnPoint), 0) - COALESCE(SUM(p.usePoint), 0)
