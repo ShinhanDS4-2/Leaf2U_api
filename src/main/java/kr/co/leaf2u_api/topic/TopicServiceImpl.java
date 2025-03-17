@@ -39,14 +39,22 @@ public class TopicServiceImpl implements TopicService {
     @Autowired
     private OpenAIService openaiService;
 
-    public List<EcoTips> getEcoTips(char category) {
-        return  topicRepository.findByCategory(category);
+    /**
+     * 환경 tip 3개 가져오기
+     * @return
+     */
+    public List<EcoTips> getEcoTips() {
+        return topicRepository.findRandomTips();
     }
 
     public EcoTips saveEcoTips(EcoTips ecoTips) {
         return topicRepository.save(ecoTips);
     }
 
+    /**
+     * 뉴스 리스트
+     * @return
+     */
     public List<Map<String, Object>> getNews() {
         String url = "https://newsapi.org/v2/everything?q=기후&language=ko&sortBy=sim&apiKey=" + NEWS_API_KEY;
 
@@ -62,6 +70,7 @@ public class TopicServiceImpl implements TopicService {
         for (Map<String, Object> article : articles) {
             String title = (String) article.get("title");
             String description = (String) article.get("description");
+            String image  = (String) article.get("urlToImage");
 
             boolean isEcoRelated = ecoKeywords.stream().anyMatch(keyword ->
                     (title != null && title.contains(keyword)) || (description != null && description.contains(keyword))
@@ -75,7 +84,9 @@ public class TopicServiceImpl implements TopicService {
                         "title", title,
                         "description", description,
                         "url", article.get("url"),
-                        "date", formattedDate
+                        "date", formattedDate,
+                        "urlToImage", image
+
                 ));
             }
 
@@ -96,7 +107,7 @@ public class TopicServiceImpl implements TopicService {
      * @param content
      * @return
      */
-    public String createQuiz(String title, String content) {
+    public Map<String, Object> createQuiz(String title, String content) {
         return openaiService.createQuiz(title, content);
     }
 
@@ -146,15 +157,15 @@ public class TopicServiceImpl implements TopicService {
     }
 
     private String getPm10Status(int value) {
-        if (value <= 80) return "좋음";
-        if (value <= 150) return "보통";
-        return "나쁨";
+        if (value <= 80) return "good";
+        if (value <= 150) return "moderate";
+        return "bad";
     }
 
     private String getPm25Status(int value) {
-        if (value <= 35) return "좋음";
-        if (value <= 75) return "보통";
-        return "나쁨";
+        if (value <= 35) return "good";
+        if (value <= 75) return "moderate";
+        return "bad";
     }
 
 }

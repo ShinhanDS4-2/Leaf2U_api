@@ -22,11 +22,12 @@ public class Point {
     @Column
     private char earnType;
 
-    @Column(precision =6)
+    @Column(precision = 10, scale = 2) // 정수 8자리 + 소수점 2자리
     private BigDecimal earnPoint;
 
-    @Column(precision =6)
+    @Column(precision = 10, scale = 2)
     private BigDecimal usePoint;
+
 
     @Column
     private LocalDateTime earnDate;
@@ -34,7 +35,8 @@ public class Point {
     @Column
     private LocalDateTime useDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER) // 즉시 로드로 변경
     @JoinColumn(name = "member_idx", nullable = false)
     private Member member;
+
 }

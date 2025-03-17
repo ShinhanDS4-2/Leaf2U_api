@@ -3,10 +3,9 @@ package kr.co.leaf2u_api.card;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import javax.security.auth.login.AccountNotFoundException;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/card")
@@ -54,5 +53,23 @@ public class CardController {
         log.info("카드 info:",cardInfo);
         return ResponseEntity.ok(cardInfo);
 
+    }
+
+    /** 03/13추가 - 시온 */
+    /** 계좌에 연결 된 카드정보 조회 (1개)
+     * @return cardDTO (카드정보)
+     */
+    @GetMapping("/info")
+    public ResponseEntity<Map<String, Object>> CardInfo() throws AccountNotFoundException {
+        return ResponseEntity.ok(cardService.CardInfo());
+    }
+
+    /**
+     * 기존 가입 전용카드 확인
+     * @return
+     */
+    @PostMapping("/check/prev")
+    public ResponseEntity<Boolean> checkPrevCard(@RequestBody Map<String, Object> param) {
+        return ResponseEntity.ok(cardService.checkPrevCard(param));
     }
 }

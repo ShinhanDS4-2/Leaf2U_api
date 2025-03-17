@@ -6,10 +6,9 @@ import java.math.BigDecimal;
 
 public interface PointService {
     boolean checkIn(Member member);
-    void addPedometerPoints(Member member, int points);
-
-    void addQuizHintPoint(Member member);
-    boolean checkQuizAnswer(String answer);
-    void addQuizCorrectPoint(Member member);
+    void Pedometer(Member member, int points);
+    void QuizHint(Member member);
+    void QuizCorrect(Member member);
     BigDecimal getTotalPoints(Member member);
+    boolean checkTodayActivity(Member member, char activityType);
 }

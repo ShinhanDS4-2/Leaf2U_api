@@ -27,4 +27,6 @@ public class CardDTO {
         this.cardName = cardName;
         this.accountNumber = accountNumber;
     }
+
+
 }

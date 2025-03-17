@@ -46,12 +46,12 @@ public class CardServiceImpl implements CardService {
         Card card= Card.builder()
                 .member(member)
                 .cardType('L')
-                .cardName(cardDTO.getCardName())
+                .cardName("신한 Leaf2U 카드")
                 .cardNumber(generateCardNumber())
                 .accountNumber(cardDTO.getAccountNumber())
                 .cardPassword(hashedPassword)
                 .expirationDate(String.valueOf(LocalDateTime.now().plusYears(3)))
-                .balance(BigDecimal.ZERO)
+                .balance(new BigDecimal(1000000))
                 .build();
         
         cardRepository.save(card);
@@ -119,8 +119,29 @@ public class CardServiceImpl implements CardService {
         return entityToDTO(cardInfo);
     }
 
+    /** 03/13추가 - 시온 */
+    /** 계좌에 연결 된 카드정보 조회 (1개)
+     * @return cardDTO (카드정보)
+     * */
+    @Override
+    public Map<String, Object> CardInfo() {
+        Long accountIdx = TokenContext.getSavingAccountIdx();  // 토큰에서 뽑은 계좌 idx (N정상계좌인것만 1개 조회됨)
+        System.out.println("토큰에서 뽑은 계좌 idx ??????" + accountIdx);
 
-    private CardDTO entityToDTO(Card card) {
+        Card card = cardRepository.findCardInfoByAccountIdx(accountIdx).orElse(null);  // 사용중인 적금계좌에 연결된 카드(1개) 조회
+        System.out.println("뽑은 card 정보????" + card);
+
+// Card 엔티티 -> DTO 변환
+        CardDTO cardDTO = entityToDTO(card);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("cardDTO", cardDTO);  // 계좌 DTO
+        return result;
+    }
+
+
+
+        private CardDTO entityToDTO(Card card) {
 
         CardDTO dto = new CardDTO();
         dto.setMemberIdx(card.getMember().getIdx());
@@ -134,5 +155,22 @@ public class CardServiceImpl implements CardService {
         return dto;
     }
 
+    /**
+     * 기존 가입 전용카드 확인
+     * @return
+     */
+    @Override
+    public Boolean checkPrevCard(Map<String, Object> param) {
+        Boolean result = false;
+
+        String cardNum = String.valueOf(param.get("cardNum"));
+        Long memberIdx = TokenContext.getMemberIdx();
+
+        if (cardRepository.findPrevCard(memberIdx, cardNum) > 0) {
+            result = true;
+        }
+
+        return result;
+    }
 
 }

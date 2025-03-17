@@ -8,16 +8,10 @@ import kr.co.leaf2u_api.entity.*;
 import kr.co.leaf2u_api.member.MemberRepository;
 import kr.co.leaf2u_api.notice.NoticeService;
 import kr.co.leaf2u_api.point.PointRepository;
-import kr.co.leaf2u_api.point.PointService;
 import kr.co.leaf2u_api.saving.AccountCardRepository;
 import kr.co.leaf2u_api.saving.AccountHistoryRepository;
 import kr.co.leaf2u_api.saving.InterestRateHistoryRepository;
-import kr.co.leaf2u_api.util.CommonUtil;
 import lombok.RequiredArgsConstructor;
-import net.coobird.thumbnailator.resizers.BicubicResizer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +42,24 @@ public class AccountServiceImpl implements AccountService {
     private final NoticeService noticeService;
     private final AccountCardRepository accountCardRepository;
     private final InterestRateHistoryRepository interestRateHistoryRepository;
+
+    /**
+     * 현재 활성화 적금 계좌 확인
+     * @return
+     */
+    @Override
+    public Boolean checkAccount() {
+        Boolean result = false;
+
+        Long memberIdx = TokenContext.getMemberIdx();
+        Optional<Account> account = accountRepository.findAccountByMember(memberIdx);
+
+        if (account.isPresent()) {
+            result = true;
+        }
+
+        return result;
+    }
 
     /**
      * 적금 계좌 생성
@@ -87,13 +99,14 @@ public class AccountServiceImpl implements AccountService {
         account.setDutyRate(new BigDecimal("0.154"));
         account.setSavingCnt(0L);
         account.setMaturityDate(LocalDateTime.now().plusMonths(1));
+        account.setSavingAccountYN('Y');
 
         Account savedAccount=accountRepository.save(account);
 
-        //최초 가입 시 1% 추가
+        //최초 가입 시 2% 추가
         if(existAccounts.isEmpty()){
-            primeRate=primeRate.add(new BigDecimal("1.0"));
-            insertInterestRateHistory(savedAccount,'F',new BigDecimal("1.0"));
+            primeRate = primeRate.add(new BigDecimal("2.0"));
+            insertInterestRateHistory(savedAccount,'F',new BigDecimal("2.0"));
         }
 
         //리프 카드 만들기를 선택한다면 2% 추가
@@ -194,7 +207,7 @@ public class AccountServiceImpl implements AccountService {
 
 /** 적금 계좌 관리 - 시온 */
     /** (1) 계좌 기본 정보 조회
-     * @return AccountDTO
+     * @return accountDTO
      */
     @Override
     public Map<String, Object> getAccountInfoById() {
@@ -212,7 +225,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     /** (2) 납입금액 변경
-     * @param accountDTO
+     * @param accountDTO (accountPassword, paymentAmount) -> 계좌 비번이랑 변경할 납입금액 입력받아야함
      * @return 1(성공), 0(실패), 401(비밀번호 불일치)
      */
     // 클라이언트로부터 납입금액, 인증 비밀번호6자리 입력받음. (비밀번호 일치 시에만 로직 수행되도록)
@@ -221,6 +234,12 @@ public class AccountServiceImpl implements AccountService {
         Long accountIdx = TokenContext.getSavingAccountIdx();  // 토큰에서 뽑은 계좌 idx
         String inputPwd = accountDTO.getAccountPassword();  // 사용자가 입력한 계좌 비밀번호
         BigDecimal inputAmount = accountDTO.getPaymentAmount();  // 사용자가 입력한 납입금액
+
+        System.out.println("========서비스 임플============");
+        System.out.println("토큰에서 뽑은 계좌 idx?? " + accountIdx);
+        System.out.println("사용자가 입력한 계좌 비밀번호?? " + inputPwd);
+        System.out.println("사용자가 입력한 납입금액?? " + inputAmount);
+        System.out.println("========서비스 임플============");
 
         // 해당 적금계좌의 현재 비밀번호를 DB에서 조회
         Account account = accountRepository.findByIdx(accountIdx)  // idx 기준으로 Account 엔티티 조회
@@ -280,6 +299,10 @@ public class AccountServiceImpl implements AccountService {
         member.setIdx(TokenContext.getMemberIdx());
         result.put("point", pointRepository.getTotalPoint(member));
 
+        /** 카드 계좌 조회 */
+        Optional<Card> card = cardRepository.findCardInfoByAccountIdx(accountIdx);
+        result.put("cardAccountNumber", card.get().getAccountNumber());
+
         return result;
     }
 
@@ -303,10 +326,8 @@ public class AccountServiceImpl implements AccountService {
             return getMaturityInterest();
         }
 
-        /** 이자 계산(만기일 해지) START */
-        // 이자 계산 공통 메서드(idx, 적용금리:기본금리, 해지일:오늘)
+        /** 이자 계산 공통 메서드(idx, 적용금리:기본금리, 해지일:오늘) */
         AccountDTO dto = calculateInterest(accountIdx, interestRate, today);
-        /** 이자 계산(만기일 해지) END */
 
         Map<String, Object> result = new HashMap<>();
         result.put("accountDTO", dto);  // 계좌 DTO
@@ -322,23 +343,23 @@ public class AccountServiceImpl implements AccountService {
     public Map<String, Object> getCustomDateInterest(LocalDateTime endDate) throws AccountNotFoundException {
         Long accountIdx = TokenContext.getSavingAccountIdx();  // 토큰에서 뽑은 계좌 idx
         // -> endData 사용자한테 입력받아서 DB에 "2025-03-05T15:45:10.385338200" 이런 형태로 들어가야함
-
         Account account = accountRepository.findByIdx(accountIdx).orElse(null);
         if(account == null){
             throw new AccountNotFoundException("사용자에 대한 계좌 없음 null 오류"+accountIdx);
         }
+
+        LocalDateTime today = LocalDateTime.now();  // 오늘날짜
         LocalDateTime maturityDate = account.getMaturityDate();  // 적금만기일
         BigDecimal interestRate = account.getInterestRate().multiply(new BigDecimal("0.01"));;  // 기본금리
 
-        if(endDate.toLocalDate().equals(maturityDate.toLocalDate())) {  // 오늘날짜가 적금만기일이면 getMaturityInterest() -> 만기일이자조회 메서드 실행
+        // 만약 선택일자=적금만기일 이면? getMaturityInterest() -> 만기일이자조회 메서드 실행
+        if(endDate.toLocalDate().equals(maturityDate.toLocalDate())) {
             // .toLocalDate() 이용해서 날짜만 비교(시간X)
             return getMaturityInterest();
         }
 
-        /** 이자 계산(만기일 해지) START */
-        // 이자 계산 공통 메서드(idx, 적용금리:기본금리, 해지일:선택일자)
+        /** 이자 계산 공통 메서드(idx, 적용금리:기본금리, 해지일:선택일자) */
         AccountDTO dto = calculateInterest(accountIdx, interestRate, endDate);
-        /** 이자 계산(만기일 해지) END */
 
         Map<String, Object> result = new HashMap<>();
         result.put("accountDTO", dto);  // 계좌 DTO
@@ -367,17 +388,17 @@ public class AccountServiceImpl implements AccountService {
         // 비밀번호 일치하는지 확인
 //      if(!passwordEncoder.matches(inputPwd, account.getAccountPassword())){  // 해당 적금계좌의 현재 비밀번호를 DB에서 조회 -> 암호화된 비번 조회
         if(!inputPwd.equals(account.getAccountPassword())){  // API테스트용 임시 코드(위에거로 변경해야함)
-                // ㄴ 사용자가 입력한 비밀번호가 DB에 저장된 비밀번호와 일치하는지 확인
-            return 401;  // 비밀번호 불일치시 401반환 
+            // ㄴ 사용자가 입력한 비밀번호가 DB에 저장된 비밀번호와 일치하는지 확인
+            return 401;  // 비밀번호 불일치시 401반환
         }
         // 비밀번호가 일치하면 적금계좌 해지 ↓
 
         /* [적금계좌 해지 프로세스]
-        *  1. accountStatus(계좌상태) 컬럼 값 C(해지)로 업데이트
-        *  2. interestAmount(세후이자) 컬럼 값 계산 후 업데이트
-        *  3. endDate(종료일=해지일) 컬럼 값 업데이트
-        *  4. 최종 금리 finalInterestRate 값을 기본금리로 업데이트 (중도해지는 우대금리 적용X)
-        * */
+         *  1. accountStatus(계좌상태) 컬럼 값 C(해지)로 업데이트
+         *  2. interestAmount(세후이자) 컬럼 값 계산 후 업데이트
+         *  3. endDate(종료일=해지일) 컬럼 값 업데이트
+         *  4. 최종 금리 finalInterestRate 값을 기본금리로 업데이트 (중도해지는 우대금리 적용X)
+         * */
 
         // 2. 세후이자 계산 => 이자계산하는 공통 메서드 사용 calculateInterest(계좌idx, 적용금리(=기본금리), 해지일(=오늘))
         AccountDTO dto = calculateInterest(accountIdx, interestRate, endDate);
@@ -398,7 +419,6 @@ public class AccountServiceImpl implements AccountService {
             return 0;  // 적금 해지 실패 시 0 반환
         }
     }
-
     /* 메인화면에 필요한 api - 문경미 */
     /**
      * 적금 계좌의 잔액, 총금리 정보
@@ -480,7 +500,7 @@ public class AccountServiceImpl implements AccountService {
                     .account(Account.builder().idx(accountIdx).build())
                     .donationOrganization(new DonationOrganization() {{
                         setIdx(organisationIdx);
-                     }})
+                    }})
                     .interest(interest)
                     .principal(principal)
                     .point(point)
@@ -488,6 +508,11 @@ public class AccountServiceImpl implements AccountService {
                     .donationDate(LocalDateTime.now())
                     .build();
             donationHistoryRepository.save(donationHistory);
+
+            // 최종 잔액 card 업데이트
+            Optional<Card> cardOptional = cardRepository.findCardInfoByAccountIdx(accountIdx);
+            Card card = cardOptional.get();
+            cardRepository.updateBalance(card.getIdx(), card.getBalance().add(new BigDecimal(param.get("finalAmount").toString())));
 
             // 포인트 차감
             if (point.compareTo(BigDecimal.ZERO) != 0) {
@@ -517,6 +542,7 @@ public class AccountServiceImpl implements AccountService {
         // 엔티티의 값을 DTO의 필드에 설정
         dto.setIdx(account.getIdx());  // 계좌 Idx
         dto.setMemberIdx(account.getMember().getIdx());  // 사용자 Idx
+        dto.setAccountNumber(account.getAccountNumber());
         dto.setPaymentAmount(account.getPaymentAmount());  // 납입금액
         dto.setBalance(account.getBalance());  // 잔액
         dto.setInterestRate(account.getInterestRate());  // 기본 금리
@@ -598,7 +624,7 @@ public class AccountServiceImpl implements AccountService {
             BigDecimal paymentAmount = accountHistory.getPaymentAmount();  // 납입 금액
             LocalDateTime paymentDate = accountHistory.getPaymentDate();  // 납입일
             BigDecimal depositDate = new BigDecimal(ChronoUnit.DAYS.between(paymentDate, terminationDate) + 1);  // 예치일수 = 해지일-납입일
-                                     // ChronoUnit.DAYS.between() => 두 날짜 사이의 차이를 일(day) 단위로 계산하여 반환
+            // ChronoUnit.DAYS.between() => 두 날짜 사이의 차이를 일(day) 단위로 계산하여 반환
             BigDecimal interestPeriod = depositDate.divide(daysInYear, 7, BigDecimal.ROUND_HALF_UP);  // 이자계산기간 = 예치일수/365
             BigDecimal preTaxInterestAmount = paymentAmount.multiply(AppliedInterestRate).multiply(interestPeriod);  // 이자금액(세전) = 납입금액*적용금리*이자계산기간
             totalPreTaxInterestAmount = totalPreTaxInterestAmount.add(preTaxInterestAmount);  // 총이자금액(세전) += 이자금액(세전)

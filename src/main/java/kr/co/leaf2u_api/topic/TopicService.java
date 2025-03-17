@@ -7,11 +7,11 @@ import java.util.Map;
 
 public interface TopicService {
 
-    List<EcoTips> getEcoTips(char category);
+    List<EcoTips> getEcoTips();
     EcoTips saveEcoTips(EcoTips  ecoTips);
 
     List<Map<String, Object>> getNews();
-    String createQuiz(String title, String content);
+    Map<String, Object> createQuiz(String title, String content);
 
     Map<String, Object> getFineDustInfo();
 }

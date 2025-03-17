@@ -21,7 +21,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     @Query("SELECT a FROM Account a WHERE a.member.idx=:memberIdx AND a.accountStatus='N'")
     Optional<Account> findAccountByMember(Long memberIdx);
 
-    /** 적금 계좌 관리 - 시온 */
+/** 적금 계좌 관리 - 시온 */
     /** 계좌 기본 정보 (현재 계좌상태가 '정상N'인 것만)
      * @param memberIdx
      */
@@ -57,8 +57,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
             "JOIN saving_account sa ON irh.saving_account_idx = sa.idx " +
             "WHERE sa.idx = :accountIdx", nativeQuery = true)
     Object[] rateSumByType(@Param("accountIdx") Long accountIdx);
-
-
 
 
     /* 만기 해지  - 문경미 */
