@@ -66,15 +66,21 @@ public class PointServiceImpl implements PointService {
 
         return true;
     }
-
-    /**
-     * 만보기
-     * @param member
-     * @param points
-     */
     @Transactional
     @Override
     public void addPedometerPoints(Member member, int points) {
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
+
+        Optional<Point> existingPedometerCheck = pointRepository.findFirstByMemberAndEarnDateBetween(
+                member, startOfDay, endOfDay
+        );
+
+        if (existingPedometerCheck.isPresent()) {
+            System.out.println("⚠️ 이미 오늘 만보기 포인트 적립 완료");
+            throw new IllegalStateException("이미 오늘 만보기 포인트 적립이 완료되었습니다.");
+        }
+
         Point point = Point.builder()
                 .member(member)
                 .earnType('S')
@@ -86,7 +92,6 @@ public class PointServiceImpl implements PointService {
 
         pointRepository.save(point);
 
-        // 포인트 적립 알림
         Map<String, Object> noticeParam = new HashMap<>();
         noticeParam.put("memberIdx", member.getIdx());
         noticeParam.put("title", "포인트 적립");
@@ -96,9 +101,42 @@ public class PointServiceImpl implements PointService {
         noticeService.registNotice(noticeParam);
     }
 
+    @Transactional
+    @Override
+    public void addQuizCorrectPoint(Member member) {
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
+
+        Optional<Point> existingQuizCheck = pointRepository.findFirstByMemberAndEarnDateBetween(
+                member, startOfDay, endOfDay
+        );
+
+        if (existingQuizCheck.isPresent()) {
+            System.out.println("⚠️ 이미 오늘 퀴즈 포인트 적립 완료");
+            throw new IllegalStateException("이미 오늘 퀴즈 포인트 적립이 완료되었습니다.");
+        }
+
+        Point point = Point.builder()
+                .member(member)
+                .earnType('Q')
+                .earnPoint(BigDecimal.valueOf(10))
+                .usePoint(BigDecimal.ZERO)
+                .earnDate(LocalDateTime.now())
+                .build();
+
+        pointRepository.save(point);
+
+        Map<String, Object> noticeParam = new HashMap<>();
+        noticeParam.put("memberIdx", member.getIdx());
+        noticeParam.put("title", "포인트 적립");
+        noticeParam.put("content", "퀴즈 정답 10P 적립!");
+        noticeParam.put("category", "P");
+
+        noticeService.registNotice(noticeParam);
+    }
+
     /**
      * 퀴즈 힌트
-     * @param member
      */
     @Transactional
     @Override
@@ -122,38 +160,8 @@ public class PointServiceImpl implements PointService {
 
         pointRepository.save(point);
     }
-
-    /**
-     * 퀴즈 정답
-     * @param member
-     */
-    @Transactional
-    @Override
-    public void addQuizCorrectPoint(Member member) {
-        Point point = Point.builder()
-                .member(member)
-                .earnType('Q') // 퀴즈 정답 포인트
-                .earnPoint(BigDecimal.valueOf(10))
-                .usePoint(BigDecimal.ZERO)
-                .earnDate(LocalDateTime.now())
-                .build();
-
-        // 포인트 적립 알림
-        Map<String, Object> noticeParam = new HashMap<>();
-        noticeParam.put("memberIdx", member.getIdx());
-        noticeParam.put("title", "포인트 적립");
-        noticeParam.put("content", "퀴즈 정답 10P 적립!");
-        noticeParam.put("category", "P");
-
-        noticeService.registNotice(noticeParam);
-
-        pointRepository.save(point);
-    }
-
     /**
      * 총 포인트
-     * @param member
-     * @return
      */
     @Transactional
     @Override
