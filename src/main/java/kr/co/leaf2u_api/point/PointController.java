@@ -20,7 +20,7 @@ public class PointController {
     private final PointService pointService;
     private final TopicService topicService;
 
-    // ✅ 출석체크 (하루 1회)
+    // 출석체크 (하루 1회)
     @PostMapping("/checkin")
     public ResponseEntity<Map<String, Object>> checkIn() {
         Member member = new Member();
@@ -34,7 +34,7 @@ public class PointController {
         return ResponseEntity.ok(Map.of("success", true, "message", "출석체크 완료! 10P 적립"));
     }
 
-    // ✅ 만보기 (하루 1회)
+    // 만보기 (하루 1회)
     @PostMapping("/pedometer")
     public ResponseEntity<Map<String, Object>> pedometerCheck() {
         Member member = new Member();
@@ -50,7 +50,7 @@ public class PointController {
         return ResponseEntity.ok(Map.of("success", true, "message", "만보기 포인트 적립 완료!"));
     }
 
-    // ✅ 퀴즈 (하루 1회)
+    // 퀴즈 (하루 1회)
     @GetMapping("/quiz")
     public ResponseEntity<Map<String, Object>> getQuiz() {
         Member member = new Member();
@@ -79,7 +79,7 @@ public class PointController {
         ));
     }
 
-    // ✅ 퀴즈 힌트 (5P 적립)
+    // 퀴즈 힌트 (5P 적립)
     @PostMapping("/quiz/hint")
     public ResponseEntity<Map<String, Object>> getQuizHint(@RequestBody Map<String, Object> request) {
         Member member = new Member();
@@ -96,7 +96,7 @@ public class PointController {
         ));
     }
 
-    // ✅ 퀴즈 정답
+    // 퀴즈 정답
     @PostMapping("/quiz/answer")
     public ResponseEntity<Map<String, Object>> submitQuizAnswer() {
         Member member = new Member();
@@ -112,7 +112,7 @@ public class PointController {
         return ResponseEntity.ok(Map.of("success", true, "message", "정답! 10P 적립"));
     }
 
-    // ✅ 포인트 총합 조회
+    // 포인트 총합 조회
     @GetMapping("/total")
     public ResponseEntity<Map<String, Object>> getTotalPoints() {
         Member member = new Member();
