@@ -59,7 +59,7 @@ public class PointServiceImpl implements PointService {
         Map<String, Object> noticeParam = new HashMap<>();
         noticeParam.put("memberIdx", member.getIdx());
         noticeParam.put("title", "포인트 획득");
-        noticeParam.put("content", "출석체크 10P 획득!");
+        noticeParam.put("content", "출석체크 10P 적립!");
         noticeParam.put("category", "P");
 
         noticeService.registNotice(noticeParam);
@@ -90,11 +90,16 @@ public class PointServiceImpl implements PointService {
         Map<String, Object> noticeParam = new HashMap<>();
         noticeParam.put("memberIdx", member.getIdx());
         noticeParam.put("title", "포인트 적립");
-        noticeParam.put("content", "만보기 포인트 " + points + "P 적립!");
+        noticeParam.put("content", "만보기 " + points + "P 적립!");
         noticeParam.put("category", "P");
 
         noticeService.registNotice(noticeParam);
     }
+
+    /**
+     * 퀴즈 힌트
+     * @param member
+     */
     @Transactional
     @Override
     public void addQuizHintPoint(Member member) {
@@ -106,9 +111,22 @@ public class PointServiceImpl implements PointService {
                 .earnDate(LocalDateTime.now())
                 .build();
 
+        // 포인트 적립 알림
+        Map<String, Object> noticeParam = new HashMap<>();
+        noticeParam.put("memberIdx", member.getIdx());
+        noticeParam.put("title", "포인트 적립");
+        noticeParam.put("content", "퀴즈 힌트 5P 적립!");
+        noticeParam.put("category", "P");
+
+        noticeService.registNotice(noticeParam);
+
         pointRepository.save(point);
     }
 
+    /**
+     * 퀴즈 정답
+     * @param member
+     */
     @Transactional
     @Override
     public void addQuizCorrectPoint(Member member) {
@@ -120,14 +138,23 @@ public class PointServiceImpl implements PointService {
                 .earnDate(LocalDateTime.now())
                 .build();
 
+        // 포인트 적립 알림
+        Map<String, Object> noticeParam = new HashMap<>();
+        noticeParam.put("memberIdx", member.getIdx());
+        noticeParam.put("title", "포인트 적립");
+        noticeParam.put("content", "퀴즈 정답 10P 적립!");
+        noticeParam.put("category", "P");
+
+        noticeService.registNotice(noticeParam);
+
         pointRepository.save(point);
     }
 
-    @Override
-    public boolean checkQuizAnswer(String answer) {
-        // OX 정답 체크 로직 (임시)
-        return "O".equalsIgnoreCase(answer); // "O"이면 정답, "X"이면 오답
-    }
+    /**
+     * 총 포인트
+     * @param member
+     * @return
+     */
     @Transactional
     @Override
     public BigDecimal getTotalPoints(Member member) {

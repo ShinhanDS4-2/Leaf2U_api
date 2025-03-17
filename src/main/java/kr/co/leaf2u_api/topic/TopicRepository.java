@@ -9,8 +9,7 @@ import java.util.List;
 
 @Repository
 public interface TopicRepository extends JpaRepository<EcoTips, Long> {
-    List<EcoTips> findByCategory(char category);
-    @Query("SELECT e FROM EcoTips e WHERE e.category = :category ORDER BY FUNCTION('RAND') LIMIT 3")
-    List<EcoTips> findRandomTips(@Param("category") String category);
 
+    @Query("SELECT e FROM EcoTips e ORDER BY FUNCTION('RAND') LIMIT 2")
+    List<EcoTips> findRandomTips();
 }

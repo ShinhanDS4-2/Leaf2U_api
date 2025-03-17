@@ -78,25 +78,23 @@ public interface SavingRepository extends JpaRepository<AccountHistory, Long> {
     @Transactional
     @Query(value = """
         INSERT INTO interest_rate_history (saving_account_idx, saving_account_history_idx, rate_type, rate, create_date)
-        SELECT\s
-            sah.saving_account_idx, \s
-            sah.idx AS saving_account_history_idx, \s
+        SELECT
+            sah.saving_account_idx,
+            sah.idx AS saving_account_history_idx,
             'W' AS rate_type,
-            0.2 AS rate,
+            0.2 * seq.num AS rate,
             NOW()
         FROM saving_account_history sah
         JOIN (
-            -- 'D' 금리가 7번째 추가된 경우만 찾음
-            SELECT saving_account_idx, COUNT(*) AS d_count
+            SELECT saving_account_idx, COUNT(*) AS d_count, COUNT(*) / 7 AS num
             FROM interest_rate_history
             WHERE rate_type = 'D'
             GROUP BY saving_account_idx
             HAVING d_count % 7 = 0
         ) seq ON sah.saving_account_idx = seq.saving_account_idx
         WHERE sah.idx = (
-            -- 가장 최근 추가된 saving_account_history의 idx만 선택
-            SELECT MAX(idx)\s
-            FROM saving_account_history\s
+            SELECT MAX(idx)
+            FROM saving_account_history
             WHERE DATE(payment_date) = CURDATE()
         )
     """, nativeQuery = true)
