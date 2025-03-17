@@ -50,7 +50,7 @@ public class PointServiceImpl implements PointService {
     @Transactional
     @Override
     public void Pedometer(Member member, int points) {
-        if (checkTodayActivity(member, 'S')) return; // ✅ 만보기 1회 제한
+        if (checkTodayActivity(member, 'S')) return; // 만보기 1회 제한
 
         Point point = Point.builder()
                 .member(member)
