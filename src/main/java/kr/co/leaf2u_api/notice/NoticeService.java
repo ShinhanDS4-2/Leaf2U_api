@@ -12,4 +12,6 @@ public interface NoticeService {
 
     // 알림 등록
     Long registNotice(Map<String, Object> param);
+
+    Long testNotice(Map<String, Object> param, Long memberIdx);
 }

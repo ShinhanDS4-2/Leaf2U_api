@@ -113,6 +113,25 @@ public class NoticeServiceImpl implements NoticeService {
         return result.getIdx();
     }
 
+    @Transactional
+    public Long testNotice(Map<String, Object> param, Long memberIdx) {
+
+        Member member = memberRepository.findById(memberIdx)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 회원입니다."));
+
+        Notice notice = Notice.builder()
+                .member(member)
+                .title((String) param.get("title"))
+                .content((String) param.get("content"))
+                .category(((String) param.get("category")).charAt(0))
+                .createDate(LocalDateTime.now())
+                .build();
+
+        Notice result = noticeRepository.save(notice);
+
+        return result.getIdx();
+    }
+
     /**
      * 알림 엔티티 -> 알림 DTO
      * @param entity

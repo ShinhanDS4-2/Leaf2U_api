@@ -209,4 +209,69 @@ public class SavingServiceImpl implements SavingService {
         return result;
     }
 
+
+    @Transactional
+    public void testProcessDeposit(Map<String, Object> param) {
+        Map<String, Object> result = new HashMap<>();
+
+        Long memberIdx = Long.valueOf(String.valueOf(param.get("memberIdx")));
+        Long accountIdx = Long.valueOf(String.valueOf(param.get("accountIdx")));
+
+        // React에서 변환된 challengeType 사용
+        String challengeType = param.get("challengeType").toString();
+
+        // 1. 카드 잔액 차감
+        savingRepository.updateCardBalance(accountIdx);
+
+        // 2. 적금 납입 내역 추가
+        savingRepository.insertSavingHistory(memberIdx, challengeType);
+
+        // 3. 매일 금리 (D) 추가
+        savingRepository.insertDailyInterest(accountIdx);
+
+        // 4. 7번째 납입 시 연속 금리 (W) 추가
+        savingRepository.insertWeeklyInterest(accountIdx);
+
+        // 5. prime_rate 업데이트
+        savingRepository.updatePrimeRate(accountIdx);
+
+        // 6. 최종 금리 업데이트
+        savingRepository.updateFinalInterestRate(accountIdx);
+
+        // 7. 적금 계좌 잔액(balance) 업데이트
+        savingRepository.updateSavingAccountBalance(accountIdx);
+
+        // 8. 적금 납입 횟수(saving_cnt) 업데이트
+        savingRepository.updateSavingCount(accountIdx);
+
+        // 9. 업데이트된 saving_cnt 값을 조회하여 반환
+        Integer savingCount = savingRepository.getSavingCount(accountIdx);
+
+        // 10. 오늘 하루 받을 금리 조회 반환(D+W // interest_rate_history 테이블)
+        Double todayInterestRate = savingRepository.getTodayInterestRate(accountIdx);
+
+        result.put("message", "적금 납입이 완료되었습니다.");
+        result.put("saving_cnt", savingCount);
+        result.put("todayInterestRate", todayInterestRate);
+
+        // 납입 알림 insert
+        List<Object[]> obj = accountRepository.findAccountInfo(accountIdx);
+        Map<String, Object> noticeParam = new HashMap<>();
+
+        for (Object[] info : obj) {
+            noticeParam.put("memberIdx", memberIdx);
+            noticeParam.put("title", info[0] + "의 통장 (" + info[3] + ")");
+            noticeParam.put("content", "출금 (" + info[1] + "원) | 한달적금 (" + info[2] + ")");
+            noticeParam.put("category", "S");
+        }
+
+        noticeService.testNotice(noticeParam, memberIdx);
+
+    }
+
+    @Override
+    public void testUpdateSavingDate(Map<String, Object> param) {
+
+    }
+
 }

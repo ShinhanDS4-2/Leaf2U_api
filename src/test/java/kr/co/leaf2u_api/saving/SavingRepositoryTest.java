@@ -11,8 +11,8 @@ import org.springframework.test.annotation.Commit;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 import java.util.stream.IntStream;
 
 @SpringBootTest
@@ -85,6 +85,44 @@ public class SavingRepositoryTest {
 
         for (AccountHistory accountHistory : list) {
             System.out.println(accountHistory);
+        }
+    }
+
+    @Autowired
+    private SavingService savingService;
+
+    @Test
+    @Commit
+    public void testSavingInsert() {
+        Random random = new Random();
+        List<String> challengeTypes = Arrays.asList("T", "T", "T", "T", "R", "C", "R");
+
+        // 28
+        for (int i = 18; i < 19; i++) {
+            Long num = Long.valueOf(i);
+            Optional<Account> account = accountRepository.findByIdx(num);
+            Account acc = account.get();
+
+            // 날짜
+            LocalDateTime start = acc.getCreateDate();
+            LocalDateTime end = acc.getMaturityDate();
+            long days = ChronoUnit.DAYS.between(start, end);
+
+            Map<String, Object> param = new HashMap<>();
+            param.put("memberIdx", acc.getMember().getIdx());
+            param.put("accountIdx", acc.getIdx());
+
+            for (int j = 0; j < days; ) {
+                param.put("challengeType", challengeTypes.get(random.nextInt(challengeTypes.size())));
+                savingService.testProcessDeposit(param);
+
+                LocalDateTime currentDate = start.plusDays(j);
+                System.out.println(currentDate);
+
+                j += random.nextBoolean() ? 1 : 2; // 50% 확률로 1 또는 2 증가
+            }
+
+
         }
     }
 }

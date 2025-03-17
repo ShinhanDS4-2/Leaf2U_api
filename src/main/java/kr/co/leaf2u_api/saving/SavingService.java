@@ -15,4 +15,8 @@ public interface SavingService {
 
     // 적금 납입 & 우대 금리
     Map<String, Object> processSavingDeposit(Map<String, Object> param);
+
+    void testProcessDeposit(Map<String, Object> param);
+
+    void testUpdateSavingDate(Map<String, Object> param);
 }
