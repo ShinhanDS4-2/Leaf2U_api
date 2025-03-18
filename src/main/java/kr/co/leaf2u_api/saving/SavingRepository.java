@@ -109,11 +109,11 @@ public interface SavingRepository extends JpaRepository<AccountHistory, Long> {
     @Transactional
     @Query(value = """
         UPDATE saving_account 
-        SET prime_rate = prime_rate + (
+        SET prime_rate = (
             SELECT SUM(irh.rate)
             FROM interest_rate_history irh
             WHERE irh.saving_account_idx = :accountIdx
-            AND irh.rate_type NOT IN ('B', 'C', 'E', 'F')
+            AND irh.rate_type NOT IN ('B')
         )
         WHERE idx = :accountIdx
     """, nativeQuery = true)
