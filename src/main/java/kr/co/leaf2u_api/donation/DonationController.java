@@ -54,15 +54,7 @@ public class DonationController {
         return ResponseEntity.ok(donationHistoryDetail);
     }
 
-    /** (3)
-     * 후원증서는 어디로 들어가야하지 ??
-     * @param
-     * @return
-     */
-
-
     /* 후원 기여도 api - 문경미 */
-
     /**
      * 후원 기여도
      * @return
@@ -74,5 +66,4 @@ public class DonationController {
 
         return ResponseEntity.ok(result);
     }
-
 }

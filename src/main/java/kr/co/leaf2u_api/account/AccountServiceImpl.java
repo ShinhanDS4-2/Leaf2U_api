@@ -62,7 +62,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     /**
-     * 적금 계좌 생성
+//     * 적금 계좌 생성
      * @param accountDTO
      * @return
      */
@@ -247,9 +247,7 @@ public class AccountServiceImpl implements AccountService {
 
         // 비밀번호 일치하는지 확인
         // PasswordEncoder : 비밀번호의 암호와 및 검증을 담당하는 Spring Security 컴포넌트
-//      if(!passwordEncoder.matches(inputPwd, account.getAccountPassword())){
-        if(!inputPwd.equals(account.getAccountPassword())){  // API테스트용 임시 코드(위에거로 변경해야함)
-            // ㄴ 사용자가 입력한 비밀번호가 DB에 저장된 비밀번호와 일치하는지 확인
+        if(!passwordEncoder.matches(inputPwd, account.getAccountPassword())){
             return 401;  // 비밀번호 불일치시 401반환
         }
         /** passwordEncoder.matches는 입력된 비밀번호를 해시하여 DB에 저장된 암호화된 비밀번호와 비교한다.
@@ -386,8 +384,8 @@ public class AccountServiceImpl implements AccountService {
         System.out.println(account.getAccountPassword() + "이건 계좌 엔티티에서 꺼낸 비번값");
         System.out.println(inputPwd + "이건 사용자한테 입력받은 비번값");
         // 비밀번호 일치하는지 확인
-//      if(!passwordEncoder.matches(inputPwd, account.getAccountPassword())){  // 해당 적금계좌의 현재 비밀번호를 DB에서 조회 -> 암호화된 비번 조회
-        if(!inputPwd.equals(account.getAccountPassword())){  // API테스트용 임시 코드(위에거로 변경해야함)
+        if(!passwordEncoder.matches(inputPwd, account.getAccountPassword())){  // 해당 적금계좌의 현재 비밀번호를 DB에서 조회 -> 암호화된 비번 조회
+//        if(!inputPwd.equals(account.getAccountPassword())){  // API테스트용 임시 코드(위에거로 변경해야함)
             // ㄴ 사용자가 입력한 비밀번호가 DB에 저장된 비밀번호와 일치하는지 확인
             return 401;  // 비밀번호 불일치시 401반환
         }
