@@ -144,7 +144,9 @@ public class SavingServiceImpl implements SavingService {
     }
 
     /**
-     * 납입 & 우대 금리
+     * 납입, 우대금리
+     * @param param
+     * @return
      */
     @Transactional
     public Map<String, Object> processSavingDeposit(Map<String, Object> param) {
@@ -163,7 +165,7 @@ public class SavingServiceImpl implements SavingService {
         savingRepository.updateCardBalance(accountIdx);
 
         // 2. 적금 납입 내역 추가
-        savingRepository.insertSavingHistory(memberIdx, challengeType);
+        savingRepository.insertSavingHistory(memberIdx, accountIdx, challengeType);
 
         // 3. 매일 금리 (D) 추가
         savingRepository.insertDailyInterest(accountIdx);

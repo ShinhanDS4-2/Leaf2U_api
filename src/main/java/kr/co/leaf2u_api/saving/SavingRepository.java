@@ -35,17 +35,18 @@ public interface SavingRepository extends JpaRepository<AccountHistory, Long> {
     @Transactional
     @Query(value = """
         INSERT INTO saving_account_history (saving_account_idx, member_idx, payment_amount, cumulative_amount, payment_date, challenge_type)
-        SELECT\s
-            sa.idx,          \s
-            sa.member_idx,   \s
-            sa.payment_amount, \s
+        SELECT
+            sa.idx,
+            sa.member_idx,
+            sa.payment_amount,
             IFNULL((SELECT SUM(payment_amount) FROM saving_account_history WHERE saving_account_idx = sa.idx), 0) + sa.payment_amount AS cumulative_amount, \s
             NOW(),
             :challengeType
         FROM saving_account sa
         WHERE sa.member_idx = :memberIdx
+        AND sa.idx = :accountIdx
     """, nativeQuery = true)
-    void insertSavingHistory(@Param("memberIdx") Long memberIdx, @Param("challengeType") String challengeType);
+    void insertSavingHistory(@Param("memberIdx") Long memberIdx, @Param("accountIdx") Long accountIdx, @Param("challengeType") String challengeType);
 
 
     /**
@@ -55,16 +56,16 @@ public interface SavingRepository extends JpaRepository<AccountHistory, Long> {
     @Transactional
     @Query(value = """
         INSERT INTO interest_rate_history (saving_account_idx, saving_account_history_idx, rate_type, rate, create_date)
-        SELECT\s
-         sah.saving_account_idx, \s
-         sah.idx AS saving_account_history_idx, \s
+        SELECT
+         sah.saving_account_idx,
+         sah.idx AS saving_account_history_idx,
          'D' AS rate_type,
          0.1 AS rate,
          NOW()
         FROM saving_account_history sah
         WHERE sah.idx = (
-         SELECT MAX(idx)\s
-         FROM saving_account_history\s
+         SELECT MAX(idx)
+         FROM saving_account_history
          WHERE DATE(payment_date) = CURDATE()
         )
     """, nativeQuery = true)
@@ -108,11 +109,11 @@ public interface SavingRepository extends JpaRepository<AccountHistory, Long> {
     @Transactional
     @Query(value = """
         UPDATE saving_account 
-        SET prime_rate = (
+        SET prime_rate = prime_rate + (
             SELECT SUM(irh.rate)
             FROM interest_rate_history irh
             WHERE irh.saving_account_idx = :accountIdx
-            AND irh.rate_type NOT IN ('B')
+            AND irh.rate_type NOT IN ('B', 'C', 'E', 'F')
         )
         WHERE idx = :accountIdx
     """, nativeQuery = true)
@@ -185,6 +186,7 @@ public interface SavingRepository extends JpaRepository<AccountHistory, Long> {
     FROM interest_rate_history irh
     WHERE irh.saving_account_idx = :accountIdx
     AND DATE(irh.create_date) = CURDATE()
+    AND irh.rate_type NOT IN ('B', 'C', 'E', 'F')
 """, nativeQuery = true)
     Double getTodayInterestRate(@Param("accountIdx") Long accountIdx);
 
