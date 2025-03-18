@@ -46,7 +46,7 @@ public class CardServiceImpl implements CardService {
         Card card= Card.builder()
                 .member(member)
                 .cardType('L')
-                .cardName("신한 Leaf2U 카드")
+                .cardName("신한 Leaf2U 카드♬")
                 .cardNumber(generateCardNumber())
                 .accountNumber(cardDTO.getAccountNumber())
                 .cardPassword(hashedPassword)
