@@ -440,7 +440,7 @@ public class AccountServiceImpl implements AccountService {
             LocalDate today = LocalDate.now();
             LocalDate maturityDate = dto.getMaturityDate().toLocalDate();
             long diff = ChronoUnit.DAYS.between(today, maturityDate);
-            result.put("diff", diff);
+            result.put("diff", diff - 1L);
 
             // 만기일 확인
             if (maturityDate.isEqual(today)) {

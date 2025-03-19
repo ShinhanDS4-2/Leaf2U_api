@@ -6,6 +6,7 @@ import kr.co.leaf2u_api.openai.OpenAIService;
 import kr.co.leaf2u_api.topic.TopicService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -69,12 +70,12 @@ public class PointController {
 
         int stepCount = Integer.parseInt(stepCountStr.replaceAll("[^0-9]", ""));
         System.out.println("=================> " + stepCount);
-
-        // 1000걸음당 10포인트 적립
-        int points = stepCount / 100;
-        if (points == 0) {
+        if (stepCount < 1000) {
             return ResponseEntity.ok(Map.of("message", "걸음 수 부족. 포인트가 적립되지 않았습니다."));
         }
+
+        // 1000걸음당 10포인트 적립
+        int points = (stepCount / 100) / 10 * 10;
 
         pointService.Pedometer(member, points);
 
@@ -107,19 +108,17 @@ public class PointController {
 
     // 퀴즈 힌트 (5P 적립)
     @PostMapping("/quiz/hint")
-    public ResponseEntity<Map<String, Object>> getQuizHint(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<Boolean> getQuizHint() {
         Member member = new Member();
         member.setIdx(TokenContext.getMemberIdx());
 
-        pointService.QuizHint(member);
-
-        String newsUrl = (String) request.get("newsId");
-
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "message", "힌트 제공! 5P 적립",
-                "newsUrl", newsUrl
-        ));
+        boolean alreadyChecked = pointService.checkTodayActivity(member, 'H');
+        if (alreadyChecked) {
+            return ResponseEntity.ok(false);
+        } else {
+            pointService.QuizHint(member);
+            return ResponseEntity.ok(true);
+        }
     }
 
     // 퀴즈 정답
