@@ -116,13 +116,14 @@ public class OpenAIService {
                 + "반드시 아래 JSON 형식으로 출력해\n"
                 + "{\"quiz\": \"OX 문제 내용\", \"answer\": \"O 또는 X\", \"section\": \"문제를 추출한 문단\"}\n"
                 + "문제의 답이 무조건 'O'가 되지 않도록 해."
-                + "추가 설명 없이 오직 JSON 형식만 반환해.";
+                + "추가 설명 없이 반드시 JSON 형식만 반환해."
+                + "```json``` 이라는 글자는 제외해.";
 
         // OpenAI API 요청 데이터
         Map<String, Object> request = Map.of(
                 "model", MODEL,
                 "messages", List.of(
-                        Map.of("role", "system", "content", "너는 OX 퀴즈를 생성하는 AI야. 주어진 뉴스 기사를 기반으로 OX 문제를 만들고, 정답을 반드시 포함해야 해. 퀴즈 내용은 기사 내용 content를 바탕으로 만들어주고, 난이도는 초등학생도 쉽게 풀 정도로 쉽게 해줘. 문제를 추출한 문단은 최소 3줄로 구성해줘."),
+                        Map.of("role", "system", "content", "너는 OX 퀴즈를 생성하는 AI야. 주어진 뉴스 기사를 기반으로 OX 문제를 만들고, 정답을 반드시 포함해야 해. 퀴즈 내용은 기사 내용 content를 바탕으로 만들어주고, 난이도는 초등학생도 쉽게 풀 정도로 쉽게 해줘. 문제를 추출한 문단은 최소 3줄로 구성해줘. 반드시 JSON 형식으로 반환해."),
                         Map.of("role", "user", "content", prompt)
                 ),
                 "max_tokens", 500
@@ -147,6 +148,7 @@ public class OpenAIService {
                 if (!choices.isEmpty()) {
                     Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
                     String responseContent = (String) message.get("content");
+                    System.out.println("=====================> " + responseContent);
 
                     // JSON 형식이 맞는지 확인 후 파싱
                     if (!responseContent.trim().startsWith("{")) {
