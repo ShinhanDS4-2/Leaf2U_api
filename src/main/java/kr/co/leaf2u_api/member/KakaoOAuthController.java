@@ -8,10 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,17 +29,13 @@ public class KakaoOAuthController {
     private String REDIRECT_URI;
 
 
-    @GetMapping("/auth/kakao/callback")
-    public ResponseEntity<Void> kakaoCallback(@RequestParam("code") String code) {
+    @PostMapping("/auth/kakao/token")
+    public ResponseEntity<Map<String, Object>> kakaoCallback(@RequestBody Map<String, Object> param) {
 
-        String jwtToken = kakaoOAuthService.kakaoLogin(code);
+        String jwtToken = kakaoOAuthService.kakaoLogin(String.valueOf(param.get("code")));
 
         if (jwtToken != null) {
-            // JWT 토큰을 쿼리 파라미터로 포함하여 리다이렉트
-            String redirectUrl = "http://localhost:3000/?token=" + jwtToken;
-            return ResponseEntity.status(302) // 302 상태 코드: Found (리다이렉트)
-                    .header("Location", redirectUrl)
-                    .build();
+            return ResponseEntity.ok(Map.of("token", jwtToken));
         } else {
             return ResponseEntity.status(400).build(); // 예: 400 Bad Request
         }
