@@ -99,7 +99,6 @@ public class AccountServiceImpl implements AccountService {
         account.setDutyRate(new BigDecimal("0.154"));
         account.setSavingCnt(0L);
         account.setMaturityDate(LocalDateTime.now().plusMonths(1));
-        account.setSavingAccountYN('Y');
 
         Account savedAccount=accountRepository.save(account);
 

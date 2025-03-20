@@ -69,6 +69,4 @@ public class Account extends BaseEntity{
     @Column(nullable = false)
     private Long savingCnt;
 
-    @Column(nullable = false)
-    private char savingAccountYN;
 }
