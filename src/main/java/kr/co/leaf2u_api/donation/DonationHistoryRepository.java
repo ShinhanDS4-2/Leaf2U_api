@@ -62,7 +62,7 @@ public interface DonationHistoryRepository extends JpaRepository<DonationHistory
             COALESCE(SUM(dh.donation_amount), 0) AS all_total,
             (
                 SELECT 
-                    COALESCE(AVG(age_donations.donation_sum), 0) AS age_total
+                    COALESCE(SUM(age_donations.donation_sum), 0) AS age_total
                 FROM (
                     SELECT dh2.member_idx, SUM(dh2.donation_amount) AS donation_sum
                     FROM donation_history dh2
