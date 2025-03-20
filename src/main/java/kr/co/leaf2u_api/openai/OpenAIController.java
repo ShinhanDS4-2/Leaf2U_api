@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 @RestController
@@ -33,9 +34,12 @@ public class OpenAIController {
 
     @PostMapping("/image/bicycle")
     public ResponseEntity<Map<String, Object>> checkBicycle(@RequestParam("file") MultipartFile file) {
+
+        LocalDate today = LocalDate.now();
+
         try {
             String systemPrompt = "당신은 서울시 공공자전거 따릉이 반납완료 스크린샷을 확인하는 AI 비서입니다. 이미지에서 반납일시 추출하는 데 중점을 둡니다.";
-            String userPrompt = "추가적인 코멘트 없이 이 이미지에서 반납일시만 추출해 주세요. 전자영수증이면 날짜를 출력하지 말아주세요. 'MM-dd' 형태로 출력해 주세요.";
+            String userPrompt = "전자영수증이라면 대답은 반드시 'No'입니다. 해당 이미지가 따릉이 반납 사진이면 'Yes', 아니면 'No'로만 답해주세요. 만약 따릉이 반납 사진일 경우 반납 일자가" + today + "와 같은 날짜라면 그대로 'Yes'를 반환하고, 같은 날짜가 아니라면 'No'로 반환해 주세요. 반드시 'Yes' 또는 'No'로 반환해주세요.";
             String result = openAIService.sendImageToGPT(file, systemPrompt, userPrompt);
 
             return ResponseEntity.ok(Map.of("result", result));
@@ -46,10 +50,15 @@ public class OpenAIController {
 
     @PostMapping("/image/receipt")
     public ResponseEntity<Map<String, Object>> checkReceipt(@RequestParam("file") MultipartFile file) {
+
+        LocalDate today = LocalDate.now();
+
         try {
             String systemPrompt = "당신은 전자 영수증 스크린샷을 확인하는 AI 비서입니다. 종이로 된 영수증 이미지를 받을 경우 대답은 절대 'No'입니다. 이미지에서 영수증 발급 날짜 추출하는 데 중점을 둡니다.";
-            String userPrompt = "따릉이 반납 사진은 무조건 'No' 입니다. 해당 이미지가 전자영수증이면 'Yes', 아니면 'No'로만 답해주고, 만약 Yes일 경우 해당 이미지에서 영수증 발급 날짜도 더해서 출력해 주세요. 날짜 형식은 yyyy-mm-dd(시간까지 있을 경우 yyyy-mm-dd HH:mm:ss)";
+            String userPrompt = "따릉이 반납 사진은 무조건 'No' 입니다. 해당 이미지가 전자영수증이면 'Yes', 아니면 'No'로만 답해주세요. 만약 전자영수증일 경우 영수증 발급 날짜가 " + today + "와 같은 날짜라면 그대로 'Yes'를 반환하고, 같은 날짜가 아니라면 'No'로 반환해 주세요. 반드시 'Yes' 또는 'No'로 반환해주세요.";
             String result = openAIService.sendImageToGPT(file, systemPrompt, userPrompt);
+
+
 
             return ResponseEntity.ok(Map.of("result", result));
         } catch (Exception e) {
