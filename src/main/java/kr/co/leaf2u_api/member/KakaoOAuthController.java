@@ -29,7 +29,7 @@ public class KakaoOAuthController {
     private String REDIRECT_URI;
 
 
-    @PostMapping("/auth/kakao/token")
+    @PostMapping("/api/auth/kakao/token")
     public ResponseEntity<Map<String, Object>> kakaoCallback(@RequestBody Map<String, Object> param) {
 
         String jwtToken = kakaoOAuthService.kakaoLogin(String.valueOf(param.get("code")));
@@ -43,7 +43,7 @@ public class KakaoOAuthController {
 
 
     // Kakao 인증 URL 제공
-    @GetMapping("/auth/kakao/login-url")
+    @GetMapping("/api/auth/kakao/login-url")
     public ResponseEntity<String> getKakaoLoginUrl() {
         String kakaoAuthUrl = String.format(
                 "https://kauth.kakao.com/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code",
